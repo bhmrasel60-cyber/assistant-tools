@@ -30,21 +30,6 @@
             animation: pageLoad 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
-        /* PDF Card Design */
-        .pdf-card {
-            background: linear-gradient(135deg, #dc2626, #9f1239);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .pdf-card:hover {
-            transform: translateY(-5px) scale(1.03);
-            background: linear-gradient(135deg, #ef4444, #be123c);
-            box-shadow: 0 12px 25px rgba(220, 38, 38, 0.4);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
         /* Section Title Style */
         .section-title {
             position: relative;
@@ -91,20 +76,21 @@
                 <p class="text-slate-300 mb-6 text-sm">Nicher table-er data gulo <span class="text-pink-400 font-bold">1.txt</span> file theke load hobe.</p>
                 
                 <div id="links-container" class="mt-4">
-                    <!-- Javascript ekhane 1.txt theke table load korbe -->
                     <div class="flex items-center justify-center p-10 bg-black/20 rounded-xl border border-white/10 backdrop-blur-sm">
                         <i class="fa-solid fa-spinner fa-spin text-3xl text-pink-500"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION 2: PDF Files (1.pdf to 10.pdf) -->
+            <!-- SECTION 2: PDF Files Table (From 2.txt) -->
             <div>
                 <h2 class="text-3xl font-bold text-white section-title">PDF Documents</h2>
-                <p class="text-slate-300 mb-6 text-sm">Aapnar folder-e <span class="text-pink-400 font-bold">1.pdf</span> theke <span class="text-pink-400 font-bold">10.pdf</span> file rakhle, nicher card gulote click korle download hobe.</p>
+                <p class="text-slate-300 mb-6 text-sm">Nicher notice gulo <span class="text-pink-400 font-bold">2.txt</span> theke load hobe ebong icon-e click korle file download hobe.</p>
                 
-                <div id="pdf-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                    <!-- Javascript ekhane 10 ti card load korbe -->
+                <div id="pdf-container">
+                    <div class="flex items-center justify-center p-10 bg-black/20 rounded-xl border border-white/10 backdrop-blur-sm mt-4">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl text-red-500"></i>
+                    </div>
                 </div>
             </div>
 
@@ -122,7 +108,7 @@
 
     <!-- Dynamic Script For Loading txt and PDF -->
     <script>
-        // Table toiri korar function (jeta data pele automatic toiri korbe)
+        // Table toiri korar function (Essential Links er jonno)
         function renderTableFromText(text) {
             const container = document.getElementById('links-container');
             const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -178,7 +164,6 @@
             const container = document.getElementById('links-container');
 
             try {
-                // Automatic fetch korbe (GitHub ba Live Server e 100% kaj korbe)
                 const response = await fetch('1.txt');
                 if (!response.ok) throw new Error('File not found');
                 const text = await response.text();
@@ -196,42 +181,79 @@
             }
         }
 
-        // PDF Grid Toiri korar logic
-        async function loadAvailablePDFs() {
+        // PDF List Table Toiri korar function (2.txt theke)
+        function renderPDFTableFromText(text) {
             const container = document.getElementById('pdf-container');
-            const isLocal = window.location.protocol === 'file:';
-
-            let htmlOutput = '';
+            const lines = text.split('\n').filter(line => line.trim() !== '');
             
-            // Browser security er karone local theke existence check kora jay na.
-            // Tai ekhane ami fix 10 ti card toiri kore dicchi. 
-            // File thakle click korle pabe, na thakle error pabe. Etai sobcheye shohoth poddhoti.
-            for (let i = 1; i <= 10; i++) {
-                const fileName = `${i}.pdf`;
-                htmlOutput += `
-                    <a href="${fileName}" download="${fileName}" class="pdf-card rounded-xl p-5 flex flex-col items-center text-center group cursor-pointer relative overflow-hidden">
-                        <!-- Download Icon Hover Effect -->
-                        <div class="absolute top-3 right-3 bg-white/20 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-                            <i class="fa-solid fa-download text-white text-sm"></i>
-                        </div>
-                        
-                        <i class="fa-regular fa-file-pdf text-5xl text-white mb-4 mt-2 group-hover:scale-110 group-hover:-translate-y-1 transition-transform duration-300"></i>
-                        <h4 class="text-white font-bold text-lg mb-1">Document ${i}</h4>
-                        
-                        <span class="text-white/80 text-xs bg-black/30 px-3 py-1.5 rounded-full mt-2 border border-white/10 flex items-center gap-1.5 font-medium">
-                            <i class="fa-solid fa-file-arrow-down"></i> ${fileName}
-                        </span>
-                    </a>
-                `;
+            if (lines.length === 0) {
+                container.innerHTML = `<div class="p-5 bg-red-500/20 border border-red-500/50 text-white text-center rounded-xl mt-4">File-e kono data nei!</div>`;
+                return;
             }
 
-            container.innerHTML = htmlOutput;
+            let tableHTML = `
+            <div class="bg-slate-900/60 rounded-xl border border-white/10 overflow-hidden backdrop-blur-sm shadow-xl mt-4">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-black/40 text-pink-300">
+                            <th class="p-4 border-b border-white/10 font-semibold w-16 text-center text-lg">নং</th>
+                            <th class="p-4 border-b border-white/10 font-semibold text-lg">শিরোনাম</th>
+                            <th class="p-4 border-b border-white/10 font-semibold text-center w-36 text-lg">পিডিএফ সংযুক্তি</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            lines.forEach((line) => {
+                let parts = line.split(',');
+                let id = parts[0].trim();
+                let description = parts.length > 1 ? parts.slice(1).join(',').trim() : "বিস্তারিত বিবরণ দেওয়া নেই";
+
+                tableHTML += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                        <td class="p-4 text-white/70 text-center text-lg font-medium">${id}</td>
+                        <td class="p-4 text-white font-medium text-base leading-relaxed">
+                            ${description}
+                        </td>
+                        <td class="p-4 text-center">
+                            <a href="${id}.pdf" target="_blank" download="${id}.pdf" class="inline-flex flex-col items-center justify-center text-red-400 hover:text-red-300 hover:scale-110 transition-all p-2 rounded-lg hover:bg-red-500/10">
+                                <i class="fa-regular fa-file-pdf text-3xl mb-1"></i>
+                                <span class="text-[10px] font-bold tracking-widest uppercase">PDF</span>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `</tbody></table></div>`;
+            container.innerHTML = tableHTML;
+        }
+
+        // 2.txt theke Data Load korar logic (Automatic)
+        async function loadPDFsFromTxt() {
+            const container = document.getElementById('pdf-container');
+
+            try {
+                const response = await fetch('2.txt');
+                if (!response.ok) throw new Error('File not found');
+                const text = await response.text();
+                renderPDFTableFromText(text);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="bg-black/30 border border-white/10 rounded-xl p-8 text-center text-white/60 backdrop-blur-sm mt-4">
+                        <i class="fa-solid fa-file-circle-exclamation text-5xl mb-4 text-white/20"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">2.txt File Paoya Jayni</h3>
+                        <p>Ekoi folder e <span class="text-pink-400 font-bold">2.txt</span> name ekti file toiri korun.</p>
+                        <p class="mt-3 text-sm text-yellow-300/80 bg-black/40 px-4 py-2 rounded-lg inline-block border border-yellow-500/20">
+                            <i class="fa-solid fa-circle-info mr-1"></i> Format: 1, ekhane notice er bistarito likhun
+                        </p>
+                    </div>`;
+            }
         }
 
         // Script gulo ekhane call kora hochhe
         window.addEventListener('DOMContentLoaded', () => {
             loadLinksFromTxt();
-            loadAvailablePDFs();
+            loadPDFsFromTxt();
         });
     </script>
 </body>
