@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Tools Suite | Professional Workspace</title>
+    <title>Web Tools Suite | Professional Real-time Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -35,11 +35,11 @@
             animation: pageLoad 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
-        /* Solid Colorful Cards */
         .solid-card {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.15);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-blur: 10px;
         }
 
         .solid-card:hover {
@@ -47,15 +47,6 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
             border-color: rgba(255, 255, 255, 0.4);
         }
-
-        .icon-box { transition: all 0.4s ease; }
-        .solid-card:hover .icon-box { transform: scale(1.15) rotate(-10deg); }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.8); }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
         @keyframes scroll {
             0% { transform: translateX(100%); }
@@ -66,338 +57,258 @@
             white-space: nowrap;
             animation: scroll 25s linear infinite;
         }
+
+        .popup-animate {
+            animation: zoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen selection:bg-pink-500/30 animate-enter">
 
-    <!-- Background Image -->
     <div class="bg-overlay"></div>
 
     <div class="relative z-10 flex flex-col min-h-screen">
         
-        <!-- Header Section -->
+        <!-- Header -->
         <header class="pt-16 pb-10 text-center px-4 flex flex-col items-center">
             
-            <!-- Developer Profile Image (Clickable for Admin) -->
-            <div class="mb-6 relative group cursor-pointer" onclick="openAdmin()">
+            <div class="mb-6 relative group cursor-pointer" onclick="openAdminModal()">
                 <div class="absolute -inset-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-full blur opacity-60 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                <img src="developer.jpg" alt="Developer Rasel" class="relative w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-white/30 shadow-2xl group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
+                <img src="developer.jpg" alt="Admin" class="relative w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-white/30 shadow-2xl group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
             </div>
 
-            <!-- Welcome Badge -->
-            <div class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold tracking-wider uppercase backdrop-blur-md shadow-lg">
-                <span class="relative flex h-2 w-2">
+            <!-- Notification Badge Status -->
+            <div id="notif-badge" onclick="requestNotifPermission()" class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold tracking-wider uppercase backdrop-blur-md shadow-lg cursor-pointer hover:bg-white/20 transition-all">
+                <span id="notif-dot" class="relative flex h-2 w-2">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
                 </span>
-                System Online
+                <span id="notif-status-text">Checking Sync...</span>
             </div>
 
             <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-pink-100 to-purple-200 drop-shadow-lg">
                 Web Tools Suite
             </h1>
             
-            <!-- Scrolling Notice -->
+            <!-- Dynamic Ticker -->
             <div class="max-w-3xl w-full mx-auto mt-6 bg-slate-900/50 border border-white/10 backdrop-blur-md rounded-full overflow-hidden flex items-center h-12 shadow-2xl">
-                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg">Update</div>
+                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg">News</div>
                 <div class="flex-grow overflow-hidden relative h-full flex items-center">
-                    <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200">
-                        Welcome to the Professional Web Tools Workspace. Stay updated with our latest news. &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.
+                    <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200 italic">
+                        Initializing real-time connection...
                     </div>
                 </div>
             </div>
 
-            <a href="notice.html" class="mt-8 group inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-gradient-to-r from-fuchsia-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 border border-white/20 text-white font-bold tracking-wide transition-all shadow-[0_8px_20px_rgba(217,70,239,0.4)] hover:shadow-[0_12px_25px_rgba(217,70,239,0.6)] hover:-translate-y-1">
+            <a href="notice.html" class="mt-8 group inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-gradient-to-r from-fuchsia-600 to-rose-600 hover:from-fuchsia-500 hover:to-rose-500 border border-white/20 text-white font-bold tracking-wide transition-all shadow-lg hover:-translate-y-1">
                 <i class="fa-regular fa-bell text-white group-hover:animate-bounce"></i>
-                View Notice Board
+                Notice Board
                 <i class="fa-solid fa-arrow-right text-sm opacity-80 group-hover:translate-x-1.5 transition-transform"></i>
             </a>
         </header>
 
-        <!-- Main Grid Section -->
+        <!-- Tools Grid -->
         <main class="flex-grow container mx-auto px-4 py-6 pb-20">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-
-                <!-- Card 1: Diary -->
-                <a href="diary.html" class="solid-card bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-6 group cursor-pointer block relative">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
-                            <i class="fa-solid fa-book-open text-lg text-white"></i>
-                        </div>
-                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Personal</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Professional Diary</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">Encrypted daily journal. Track tasks, log thoughts, and preserve records securely.</p>
-                </a>
-
-                <!-- Card 2: Docx View -->
-                <a href="docx view.html" class="solid-card bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 group cursor-pointer block relative">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
-                            <i class="fa-solid fa-file-word text-lg text-white"></i>
-                        </div>
-                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Document</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Docx Viewer</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">Native browser rendering for Microsoft Word documents. Fast and secure.</p>
-                </a>
-
-                <!-- Card 3: HTML Preview -->
-                <a href="html preview.html" class="solid-card bg-gradient-to-br from-orange-600 to-red-600 rounded-2xl p-6 group cursor-pointer block relative">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
-                            <i class="fa-brands fa-code text-lg text-white"></i>
-                        </div>
-                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Developer</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Code Workspace</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">Live IDE environment. Write, debug, and execute HTML/CSS/JS components.</p>
-                </a>
-
-                <!-- Card 4: Converter -->
-                <a href="my converter.html" class="solid-card bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-6 group cursor-pointer block relative">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
-                            <i class="fa-solid fa-arrows-rotate text-lg text-white"></i>
-                        </div>
-                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Utility</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Universal Converter</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">Precision tools for format conversion, unit calculation, and data parsing.</p>
-                </a>
-
-                <!-- Card 5: Photo Viewer -->
-                <a href="photo viewer.html" class="solid-card bg-gradient-to-br from-rose-600 to-pink-500 rounded-2xl p-6 group cursor-pointer block relative">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
-                            <i class="fa-solid fa-images text-lg text-white"></i>
-                        </div>
-                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Media</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Media Gallery</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">High-performance image viewer. Organize and inspect your visual assets.</p>
-                </a>
-
-                <!-- Card 6: Ramadan Plan -->
-                <a href="Romadan plan full book.html" class="solid-card bg-gradient-to-br from-amber-600 to-orange-500 rounded-2xl p-6 group cursor-pointer block relative">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
-                            <i class="fa-solid fa-moon text-lg text-white"></i>
-                        </div>
-                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Lifestyle</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Ramadan Plan Book</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">Complete interactive guide and daily planner for a productive Ramadan.</p>
-                </a>
-
+                <tool-card href="diary.html" icon="fa-book-open" title="Diary" tag="Personal" color="from-purple-600 to-pink-600" desc="Secure records."></tool-card>
+                <tool-card href="docx view.html" icon="fa-file-word" title="Docx Viewer" tag="Document" color="from-blue-600 to-cyan-600" desc="Fast word rendering."></tool-card>
+                <tool-card href="html preview.html" icon="fa-code" title="Code IDE" tag="Developer" color="from-orange-600 to-red-600" desc="Live code editor."></tool-card>
+                <tool-card href="my converter.html" icon="fa-arrows-rotate" title="Converter" tag="Utility" color="from-emerald-600 to-teal-600" desc="Unit conversions."></tool-card>
+                <tool-card href="photo viewer.html" icon="fa-images" title="Gallery" tag="Media" color="from-rose-600 to-pink-500" desc="Visual asset inspector."></tool-card>
+                <tool-card href="Romadan plan full book.html" icon="fa-moon" title="Ramadan" tag="Lifestyle" color="from-amber-600 to-orange-500" desc="Daily planner."></tool-card>
             </div>
         </main>
 
-        <!-- Footer Section -->
-        <footer class="py-6 mt-auto border-t border-white/10 bg-black/40 backdrop-blur-xl relative z-10">
-            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-6xl">
-                <p class="text-slate-300 text-sm font-medium">
-                    &copy; 2024 Web Tools Suite.
-                </p>
-                <div class="flex items-center gap-3">
-                    <span class="text-slate-400 text-[10px] tracking-widest uppercase font-bold">Engineered by</span>
-                    <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full pl-1 pr-3 py-1">
-                        <img src="my_image.jpg" alt="Developer" class="w-6 h-6 rounded-full object-cover border border-slate-400" onerror="this.style.display='none'">
-                        <span class="text-white font-semibold text-xs tracking-wide">Rasel Mia</span>
-                    </div>
+        <!-- Footer -->
+        <footer class="py-6 border-t border-white/10 bg-black/40 backdrop-blur-xl relative z-10">
+            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-6xl text-slate-300 text-sm">
+                <div class="flex flex-col items-start gap-1">
+                    <p>&copy; 2024 Web Tools Suite.</p>
+                    <p class="text-[9px] opacity-40 font-mono tracking-tighter" id="debug-app-id">ID: Loading...</p>
                 </div>
-                <a href="tel:01566054963" class="flex items-center gap-2 text-slate-300 hover:text-pink-400 transition-colors text-sm font-medium bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
-                    <i class="fa-solid fa-phone text-xs"></i> 01566054963
-                </a>
+                <div class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-full px-4 py-1">
+                    <img src="my_image.jpg" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
+                    <span class="text-white font-semibold text-xs">Rasel Mia</span>
+                </div>
+                <a href="tel:01566054963" class="hover:text-pink-400 transition-colors"><i class="fa-solid fa-phone mr-2"></i>01566054963</a>
             </div>
         </footer>
-
     </div>
 
-    <!-- Admin Panel (Hidden by Default) -->
-    <div id="admin-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden">
-            <div id="pass-error-line" class="absolute top-0 left-0 h-1 bg-red-500 transition-all duration-300 w-0 opacity-0"></div>
-            
-            <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
-                <i class="fa-solid fa-user-shield text-pink-500"></i> Admin Access
+    <!-- Admin Panel Modal -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div class="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-pink-500"></i> Admin Panel
             </h3>
-            
             <div class="space-y-4">
-                <div>
-                    <label class="text-xs text-slate-400 uppercase font-bold mb-1 block">Admin Password</label>
-                    <input type="password" id="admin-pass" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none transition-all text-white" placeholder="Enter secret password...">
-                </div>
-                <div>
-                    <label class="text-xs text-slate-400 uppercase font-bold mb-1 block">Update Message</label>
-                    <textarea id="admin-msg" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none h-24 text-white" placeholder="Write your notice here..."></textarea>
-                </div>
+                <input type="password" id="admin-pass" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-pink-500 transition-all" placeholder="Password (rasel123)">
+                <textarea id="admin-msg" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-white outline-none h-24 focus:border-pink-500 transition-all" placeholder="Enter broadcast message..."></textarea>
             </div>
-
             <div class="flex gap-3 mt-6">
-                <button onclick="sendNotification()" class="flex-grow bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-lg shadow-pink-600/20">Send Globally</button>
-                <button onclick="closeAdmin()" class="px-5 bg-slate-700 hover:bg-slate-600 font-bold text-white rounded-xl transition-all">Cancel</button>
+                <button id="broadcast-btn" class="flex-grow bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 rounded-xl transition-all">Send & Notify All</button>
+                <button onclick="closeAdminModal()" class="px-5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Notification Modal (Popup for visitors) -->
-    <div id="notification-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
-        <div class="bg-gradient-to-br from-slate-900 to-black border-2 border-pink-500/30 p-8 rounded-3xl w-full max-w-lg shadow-[0_20px_50px_rgba(236,72,153,0.3)] relative overflow-hidden text-center transform scale-100 transition-transform">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500"></div>
-            <div class="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 border border-pink-500/30 mx-auto">
-                <i class="fa-solid fa-bell text-3xl text-pink-500 animate-bounce"></i>
+    <!-- Real-time Popup Alert -->
+    <div id="global-popup" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/70 backdrop-blur-lg">
+        <div class="bg-slate-900 border-2 border-pink-500/50 p-8 rounded-3xl w-full max-w-lg shadow-[0_0_50px_rgba(236,72,153,0.3)] text-center popup-animate">
+            <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 mx-auto border border-pink-500/40">
+                <i class="fa-solid fa-bolt text-4xl text-pink-500 animate-pulse"></i>
             </div>
-            <h2 class="text-2xl font-black mb-2 tracking-tight text-white">NEW NOTIFICATION</h2>
-            <div class="text-pink-400 text-[10px] font-bold tracking-[0.3em] uppercase mb-6 opacity-80 italic">Recent System Update</div>
-            <div id="notif-msg" class="bg-white/5 border border-white/5 p-5 rounded-2xl text-slate-200 text-lg leading-relaxed font-medium mb-8 italic">
-                "Message goes here..."
-            </div>
-            <button onclick="markAsRead()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:scale-[1.02] active:scale-95 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-pink-600/30 tracking-widest uppercase text-sm">
-                OK, GOT IT!
-            </button>
+            <h2 class="text-2xl font-black text-white mb-2 uppercase tracking-tighter">New System Broadcast</h2>
+            <p id="popup-text" class="text-slate-300 text-lg italic leading-relaxed mb-8 bg-white/5 p-4 rounded-xl"></p>
+            <button onclick="dismissPopup()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-bold uppercase tracking-widest hover:scale-105 transition-all">Understood</button>
         </div>
     </div>
 
-    <!-- Logic Script (Vanilla JS + Firebase) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const SECRET_PASSWORD = "rasel123";
-        let lastViewedTime = localStorage.getItem('last_notif_time') || '0';
-        let currentNotification = null;
-        let currentUser = null;
+        const ADMIN_PASSWORD = "rasel123";
+        let lastSeenTimestamp = localStorage.getItem('last_notif_ts') || '0';
+        let latestUpdate = null;
 
-        const adminModal = document.getElementById('admin-modal');
-        const notifModal = document.getElementById('notification-modal');
-        const tickerText = document.getElementById('ticker-text');
-        const notifMsg = document.getElementById('notif-msg');
-        const passErrorLine = document.getElementById('pass-error-line');
-        const adminPassInput = document.getElementById('admin-pass');
-        const adminMsgInput = document.getElementById('admin-msg');
+        const fbConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'global-tools-sync';
+        
+        document.getElementById('debug-app-id').innerText = `ID: ${appId}`;
 
-        // Functions for buttons
-        window.openAdmin = () => adminModal.classList.remove('hidden');
-        window.closeAdmin = () => {
-            adminModal.classList.add('hidden');
-            adminPassInput.value = '';
-            adminMsgInput.value = '';
-            passErrorLine.classList.remove('w-full', 'opacity-100');
-            passErrorLine.classList.add('w-0', 'opacity-0');
-        };
-        window.markAsRead = () => {
-            if (currentNotification) {
-                localStorage.setItem('last_notif_time', currentNotification.timestamp);
-                lastViewedTime = currentNotification.timestamp;
+        // Notification Permission Logic
+        window.requestNotifPermission = async () => {
+            if (!("Notification" in window)) return;
+            const permission = await Notification.requestPermission();
+            updateNotifStatusUI(permission);
+            if (permission === "granted") {
+                new Notification("System Connected", { body: "Real-time sync active across all devices.", icon: "developer.jpg" });
             }
-            notifModal.classList.add('hidden');
         };
 
-        // Firebase / Local Logic setup
-        try {
-            const fbConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        function updateNotifStatusUI(permission) {
+            const statusText = document.getElementById('notif-status-text');
+            const dot = document.getElementById('notif-dot').querySelector('span:last-child');
+            if (permission === "granted") {
+                statusText.innerText = "Sync Active";
+                dot.classList.replace('bg-pink-500', 'bg-emerald-500');
+            } else {
+                statusText.innerText = "Allow Notifications";
+                dot.classList.replace('bg-emerald-500', 'bg-pink-500');
+            }
+        }
 
-            if (fbConfigStr) {
-                // RUNNING IN CLOUD (Firebase Enabled)
-                const firebaseConfig = JSON.parse(fbConfigStr);
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
+        if (fbConfig) {
+            const app = initializeApp(fbConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
+            const startAuth = async () => {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            };
+            startAuth();
 
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        const notifRef = doc(db, 'artifacts', appId, 'public', 'data', 'notifications', 'latest');
-                        onSnapshot(notifRef, (docSnap) => {
-                            if (docSnap.exists()) {
-                                const data = docSnap.data();
-                                currentNotification = data;
-                                tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
+            onAuthStateChanged(auth, (user) => {
+                if (!user) return;
+                updateNotifStatusUI(Notification.permission);
 
-                                if (data.timestamp > lastViewedTime) {
-                                    notifMsg.innerText = `"${data.message}"`;
-                                    notifModal.classList.remove('hidden');
-                                }
+                // GLOBALLY SYNCED PATH
+                const notifRef = doc(db, 'artifacts', appId, 'public', 'data', 'broadcast', 'latest');
+                
+                onSnapshot(notifRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        latestUpdate = data;
+                        
+                        // Ticker text update
+                        document.getElementById('ticker-text').innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Sync Enabled &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
+
+                        // Display logic
+                        if (data.timestamp > lastSeenTimestamp) {
+                            document.getElementById('popup-text').innerText = data.message;
+                            document.getElementById('global-popup').classList.remove('hidden');
+
+                            if (Notification.permission === "granted") {
+                                new Notification("Web Tools Update", { body: data.message, icon: "developer.jpg" });
                             }
-                        });
+                        }
+                    } else {
+                        document.getElementById('ticker-text').innerText = "Welcome! System is connected and waiting for updates.";
                     }
                 });
+            });
 
-                window.sendNotification = async () => {
-                    if (adminPassInput.value !== SECRET_PASSWORD) {
-                        passErrorLine.classList.remove('w-0', 'opacity-0');
-                        passErrorLine.classList.add('w-full', 'opacity-100');
-                        setTimeout(() => {
-                            passErrorLine.classList.add('w-0', 'opacity-0');
-                            passErrorLine.classList.remove('w-full', 'opacity-100');
-                        }, 2000);
-                        return;
-                    }
-                    const msg = adminMsgInput.value.trim();
-                    if (!msg || !currentUser) return;
+            document.getElementById('broadcast-btn').onclick = async () => {
+                const pass = document.getElementById('admin-pass').value;
+                const msg = document.getElementById('admin-msg').value.trim();
 
-                    const notifRef = doc(db, 'artifacts', appId, 'public', 'data', 'notifications', 'latest');
-                    await setDoc(notifRef, {
-                        message: msg,
-                        timestamp: Date.now().toString(),
-                        sender: "Rasel Mia"
-                    });
-                    closeAdmin();
-                };
-
-            } else {
-                // LOCAL GITHUB FALLBACK (Simulation)
-                // Github e firebase database na thakle jeno error na dey tar jonno ei byabostha
-                window.sendNotification = () => {
-                    if (adminPassInput.value !== SECRET_PASSWORD) {
-                        passErrorLine.classList.remove('w-0', 'opacity-0');
-                        passErrorLine.classList.add('w-full', 'opacity-100');
-                        setTimeout(() => {
-                            passErrorLine.classList.add('w-0', 'opacity-0');
-                            passErrorLine.classList.remove('w-full', 'opacity-100');
-                        }, 2000);
-                        return;
-                    }
-                    const msg = adminMsgInput.value.trim();
-                    if (!msg) return;
-
-                    const timestamp = Date.now().toString();
-                    currentNotification = { message: msg, timestamp: timestamp };
-                    localStorage.setItem('local_notif', JSON.stringify(currentNotification));
-                    
-                    tickerText.innerHTML = `${msg} &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
-                    notifMsg.innerText = `"${msg}"`;
-                    notifModal.classList.remove('hidden');
-                    closeAdmin();
-                };
-
-                // Check local storage on load
-                const saved = localStorage.getItem('local_notif');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    currentNotification = data;
-                    tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
-                    if (data.timestamp > lastViewedTime) {
-                        notifMsg.innerText = `"${data.message}"`;
-                        notifModal.classList.remove('hidden');
-                    }
+                if (pass !== ADMIN_PASSWORD) {
+                    alert("Incorrect Password!");
+                    return;
                 }
-            }
-        } catch(e) {
-            console.error("System Setup Error", e);
+                if (!msg) return;
+
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', 'broadcast', 'latest');
+                await setDoc(ref, {
+                    message: msg,
+                    timestamp: Date.now().toString()
+                });
+                closeAdminModal();
+                document.getElementById('admin-pass').value = '';
+                document.getElementById('admin-msg').value = '';
+            };
         }
+
+        window.openAdminModal = () => document.getElementById('admin-modal').classList.remove('hidden');
+        window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
+        window.dismissPopup = () => {
+            if (latestUpdate) {
+                localStorage.setItem('last_notif_ts', latestUpdate.timestamp);
+                lastSeenTimestamp = latestUpdate.timestamp;
+            }
+            document.getElementById('global-popup').classList.add('hidden');
+        };
+
+        window.onload = () => {
+            if (Notification.permission === "default") {
+                setTimeout(requestNotifPermission, 2000);
+            }
+        };
+    </script>
+
+    <script>
+        class ToolCard extends HTMLElement {
+            connectedCallback() {
+                const href = this.getAttribute('href');
+                const icon = this.getAttribute('icon');
+                const title = this.getAttribute('title');
+                const tag = this.getAttribute('tag');
+                const color = this.getAttribute('color');
+                const desc = this.getAttribute('desc');
+                this.innerHTML = `
+                <a href="${href}" class="solid-card bg-gradient-to-br ${color} rounded-2xl p-6 group cursor-pointer block relative transition-all">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-black/20 border border-white/10 group-hover:bg-white/10 transition-colors">
+                            <i class="fa-solid ${icon} text-lg text-white"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">${tag}</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">${title}</h3>
+                    <p class="text-white/80 text-sm">${desc}</p>
+                </a>`;
+            }
+        }
+        customElements.define('tool-card', ToolCard);
     </script>
 </body>
 </html>
