@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Chat | Web Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+        .chat-container { height: calc(100vh - 180px); }
+        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .message-bubble { max-width: 85%; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Header -->
+    <header class="p-4 glass-panel sticky top-0 z-50 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-bold text-lg">Global Chatroom</h1>
+                <p class="text-[10px] text-emerald-400 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> 
+                    Live Connection Active
+                </p>
+            </div>
+        </div>
+        <div id="user-badge" class="text-[10px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-400 font-mono">
+            Connecting...
+        </div>
+    </header>
+
+    <!-- Chat Area -->
+    <main id="chat-box" class="flex-grow overflow-y-auto p-4 space-y-4 chat-container">
+        <!-- Messages will appear here -->
+        <div id="loading" class="flex justify-center py-10">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+        </div>
+    </main>
+
+    <!-- Input Area -->
+    <footer class="p-4 glass-panel border-t border-white/10">
+        <form id="chat-form" class="max-w-4xl mx-auto flex gap-2">
+            <input type="text" id="msg-input" autocomplete="off" 
+                class="flex-grow bg-slate-800/50 border border-white/10 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-pink-500/50 transition-all" 
+                placeholder="Type your message...">
+            <button type="submit" id="send-btn" 
+                class="bg-gradient-to-r from-pink-600 to-purple-600 p-3 rounded-2xl w-12 h-12 flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-pink-600/20">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </footer>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 🔥 Aapnar Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = "rasel-mia-universal-sync"; // Same App ID used before
+
+        let currentUser = null;
+
+        // Auth Setup
+        signInAnonymously(auth).catch(console.error);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-badge').innerText = `ID: ${user.uid.substring(0, 8)}`;
+                loadMessages();
+            }
+        });
+
+        // Load Messages
+        function loadMessages() {
+            const chatBox = document.getElementById('chat-box');
+            const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
+            
+            // Note: Composite queries require indexes, so we fetch and then sort manually if needed
+            // But simple collection query is fine
+            onSnapshot(messagesRef, (snapshot) => {
+                document.getElementById('loading').style.display = 'none';
+                
+                // Fetch and sort in memory (Rule 2)
+                let messages = [];
+                snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+                messages.sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
+
+                chatBox.innerHTML = '';
+                messages.forEach(msg => {
+                    const isMe = msg.senderId === currentUser.uid;
+                    const time = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
+                    
+                    const div = document.createElement('div');
+                    div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'}`;
+                    div.innerHTML = `
+                        <div class="message-bubble px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-pink-600 text-white rounded-tr-none' : 'bg-slate-800 text-slate-100 rounded-tl-none'}">
+                            <p class="leading-relaxed">${msg.text}</p>
+                        </div>
+                        <span class="text-[9px] text-slate-500 mt-1 px-1 font-medium">${isMe ? 'You' : 'User-' + msg.senderId.substring(0,4)} &bull; ${time}</span>
+                    `;
+                    chatBox.appendChild(div);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, (error) => {
+                console.error("Chat Error:", error);
+            });
+        }
+
+        // Send Message
+        document.getElementById('chat-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            
+            if (!text || !currentUser) return;
+
+            input.value = '';
+            input.disabled = true;
+
+            try {
+                const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
+                await addDoc(messagesRef, {
+                    text: text,
+                    senderId: currentUser.uid,
+                    timestamp: serverTimestamp()
+                });
+            } catch (error) {
+                alert("Database-e likhte somossa hocche. Rules check korun.");
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
+        };
+    </script>
+</body>
+</html>
