@@ -1,0 +1,5 @@
+What is the capital of Bangladesh?|Dhaka|Paris|Sylhet|Chittagong|0
+Who is the founder of Microsoft?|Steve Jobs|Elon Musk|Bill Gates|Mark Zuckerberg|2
+2 + 2 = ?|3|4|5|6|1
+Which language is used for Web Styling?|HTML|Python|CSS|Java|2
+What is the largest planet?|Earth|Jupiter|Mars|Venus|1
