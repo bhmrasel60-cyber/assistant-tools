@@ -1,236 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Tools Suite | Global Push Sync</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; color: #f8fafc; background-color: #020617; overflow-x: hidden; }
-        .bg-overlay { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.95)), url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500'); background-size: cover; background-position: center; background-attachment: fixed; }
-        .solid-card { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); backdrop-blur: 10px; }
-        .solid-card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255, 255, 255, 0.4); }
-        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        .animate-scroll { display: inline-block; white-space: nowrap; animation: scroll 25s linear infinite; }
-        .popup-animate { animation: zoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    </style>
-</head>
-<body class="flex flex-col min-h-screen">
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    // মেসেজিং সার্ভিস ইমপোর্ট করা হলো
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js";
 
-    <div class="bg-overlay"></div>
+    const myConfig = {
+        apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+        authDomain: "mywebtools-f8d53.firebaseapp.com",
+        projectId: "mywebtools-f8d53",
+        storageBucket: "mywebtools-f8d53.firebasestorage.app",
+        messagingSenderId: "979594414301",
+        appId: "1:979594414301:web:7048c995e56e331a85f334",
+        measurementId: "G-44SNF7BWXK"
+    };
 
-    <div class="relative z-10 flex flex-col min-h-screen">
-        <!-- Header -->
-        <header class="pt-16 pb-10 text-center px-4 flex flex-col items-center">
-            <div class="mb-6 relative group cursor-pointer" onclick="openAdminModal()">
-                <div class="absolute -inset-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-full blur opacity-60 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                <img src="developer.jpg" alt="Admin" class="relative w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-white/30 shadow-2xl group-hover:scale-105 transition-transform" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
-            </div>
+    const VAPID_KEY = "BOVXtUUCRy2p5-QqB1orahGTjdc1FGVIMJBf76hArZMnoWAtTpFodxPs1FjyX1gefbKB08RTUUbqDit2XeKc0DU";
+    const SECRET_PASS = "rasel123";
+    const SYNC_APP_ID = "rasel-mia-universal-sync"; 
+    let lastSeenTs = localStorage.getItem('global_notif_ts') || '0';
+    let latestData = null;
 
-            <div id="sync-status" class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold tracking-wider uppercase backdrop-blur-md shadow-lg cursor-pointer transition-all">
-                <span id="sync-dot" class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-                </span>
-                <span id="sync-text">Checking Sync...</span>
-            </div>
+    const app = initializeApp(myConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const messaging = getMessaging(app);
 
-            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-pink-100 to-purple-200 drop-shadow-lg">Web Tools Suite</h1>
-            
-            <div class="max-w-3xl w-full mx-auto mt-6 bg-slate-900/50 border border-white/10 backdrop-blur-md rounded-full overflow-hidden flex items-center h-12 shadow-2xl">
-                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg">Global News</div>
-                <div class="flex-grow overflow-hidden relative h-full flex items-center">
-                    <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200 italic">Connecting to server...</div>
-                </div>
-            </div>
-
-            <a href="notice.html" class="mt-8 group inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-gradient-to-r from-fuchsia-600 to-rose-600 text-white font-bold tracking-wide transition-all shadow-lg hover:-translate-y-1">
-                <i class="fa-regular fa-bell"></i> Notice Board
-                <i class="fa-solid fa-arrow-right text-sm group-hover:translate-x-1.5 transition-transform"></i>
-            </a>
-        </header>
-
-        <main class="flex-grow container mx-auto px-4 py-6 pb-20">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                <tool-card href="diary.html" icon="fa-book-open" title="Diary" tag="Personal" color="from-purple-600 to-pink-600" desc="Secure journal storage."></tool-card>
-                <tool-card href="docx view.html" icon="fa-file-word" title="Docx Viewer" tag="Document" color="from-blue-600 to-cyan-600" desc="Fast Word rendering."></tool-card>
-                <tool-card href="html preview.html" icon="fa-code" title="Code IDE" tag="Developer" color="from-orange-600 to-red-600" desc="Live component editor."></tool-card>
-                <tool-card href="my converter.html" icon="fa-arrows-rotate" title="Converter" tag="Utility" color="from-emerald-600 to-teal-600" desc="Precision conversions."></tool-card>
-                <tool-card href="photo viewer.html" icon="fa-images" title="Gallery" tag="Media" color="from-rose-600 to-pink-500" desc="Visual asset viewer."></tool-card>
-                <tool-card href="Romadan plan full book.html" icon="fa-moon" title="Ramadan" tag="Lifestyle" color="from-amber-600 to-orange-500" desc="Daily interactive guide."></tool-card>
-            </div>
-        </main>
-
-        <footer class="py-6 border-t border-white/10 bg-black/40 backdrop-blur-xl relative z-10 text-slate-400 text-sm">
-            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-6xl">
-                <p>&copy; 2024 Web Tools Suite.</p>
-                <div class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-full px-4 py-1">
-                    <img src="my_image.jpg" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
-                    <span class="text-white font-semibold text-xs tracking-wide">Rasel Mia</span>
-                </div>
-                <a href="tel:01566054963" class="hover:text-pink-400 transition-colors"><i class="fa-solid fa-phone mr-2"></i>01566054963</a>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Admin Modal -->
-    <div id="admin-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
-        <div class="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold mb-4 text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-pink-500"></i> Global Admin</h3>
-            <div class="space-y-4">
-                <input type="password" id="admin-pass" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-pink-500 transition-all" placeholder="Enter Password">
-                <textarea id="admin-msg" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-white outline-none h-28 focus:border-pink-500 transition-all" placeholder="Global notification message..."></textarea>
-            </div>
-            <div class="flex gap-3 mt-6">
-                <button id="send-btn" class="flex-grow bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 rounded-xl shadow-lg shadow-pink-600/20 transition-all">Send Globally</button>
-                <button onclick="closeAdminModal()" class="px-5 bg-slate-700 text-white font-bold rounded-xl">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Global Notification Popup -->
-    <div id="global-popup" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-lg">
-        <div class="bg-slate-900 border-2 border-pink-500/40 p-8 rounded-3xl w-full max-w-lg shadow-[0_0_60px_rgba(236,72,153,0.3)] text-center popup-animate">
-            <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 mx-auto border border-pink-500/30">
-                <i class="fa-solid fa-bolt text-4xl text-pink-500 animate-pulse"></i>
-            </div>
-            <h2 class="text-2xl font-black text-white mb-2 uppercase tracking-tighter italic">Broadcasting Update</h2>
-            <p id="popup-text" class="text-slate-300 text-lg italic leading-relaxed mb-8 bg-white/5 p-4 rounded-xl border border-white/5"></p>
-            <button onclick="dismissPopup()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-bold uppercase tracking-widest hover:scale-105 transition-all">Understood</button>
-        </div>
-    </div>
-
-    <!-- Firebase SDKs & Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // 🔥 Aapnar Firebase Config Ekhane Boshano Hoyeche
-        const myConfig = {
-            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
-            authDomain: "mywebtools-f8d53.firebaseapp.com",
-            projectId: "mywebtools-f8d53",
-            storageBucket: "mywebtools-f8d53.firebasestorage.app",
-            messagingSenderId: "979594414301",
-            appId: "1:979594414301:web:7048c995e56e331a85f334",
-            measurementId: "G-44SNF7BWXK"
-        };
-
-        const SECRET_PASS = "rasel123";
-        const SYNC_APP_ID = "rasel-mia-universal-sync"; 
-        let lastSeenTs = localStorage.getItem('global_notif_ts') || '0';
-        let latestData = null;
-
-        const app = initializeApp(myConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Anonymous login for users
-        signInAnonymously(auth).catch(err => {
-            console.error("Auth Error:", err);
-            document.getElementById('sync-text').innerText = "Auth Failed (Check Firebase)";
-            document.getElementById('sync-dot').querySelector('span:last-child').classList.replace('bg-pink-500', 'bg-red-500');
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (!user) return;
-            
-            // Status Update
-            document.getElementById('sync-text').innerText = "Sync: Live";
-            document.getElementById('sync-dot').querySelector('span:last-child').classList.replace('bg-pink-500', 'bg-emerald-500');
-
-            // Real-time listener for database changes
-            const docRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
-            onSnapshot(docRef, (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    latestData = data;
-                    document.getElementById('ticker-text').innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Active.`;
-                    
-                    if (data.timestamp > lastSeenTs) {
-                        document.getElementById('popup-text').innerText = data.message;
-                        document.getElementById('global-popup').classList.remove('hidden');
-                        
-                        // Show native phone notification if allowed
-                        if (Notification.permission === "granted") {
-                            new Notification("System Alert", { body: data.message, icon: "developer.jpg" });
-                        }
-                    }
-                }
-            }, (error) => {
-                console.error("Firestore Error:", error);
-            });
-        });
-
-        // Send Button Logic
-        document.getElementById('send-btn').onclick = async () => {
-            const pass = document.getElementById('admin-pass').value;
-            const msg = document.getElementById('admin-msg').value.trim();
-            
-            if (pass !== SECRET_PASS) { 
-                alert("Wrong Password!"); 
-                return; 
-            }
-            if (!msg) return;
-
-            const docRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
+    // Push Notification Token Setup
+    async function requestPermission() {
+        console.log('Requesting permission...');
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            console.log('Notification permission granted.');
             try {
-                await setDoc(docRef, { 
-                    message: msg, 
-                    timestamp: Date.now().toString(), 
-                    sender: "Rasel Mia" 
-                });
-                closeAdminModal();
-                document.getElementById('admin-pass').value = '';
-                document.getElementById('admin-msg').value = '';
-            } catch (error) {
-                console.error("Error sending message:", error);
-                alert("Message pathate somossa hochhe. Firebase Rules check korun.");
+                const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                if (token) {
+                    console.log('Token generated:', token);
+                    // আপনি চাইলে এই টোকেনটি ডাটাবেসে সেভ করতে পারেন স্পেসিফিক ইউজারকে পাঠানোর জন্য
+                } else {
+                    console.log('No registration token available. Request permission to generate one.');
+                }
+            } catch (err) {
+                console.log('An error occurred while retrieving token. ', err);
             }
-        };
-
-        window.openAdminModal = () => document.getElementById('admin-modal').classList.remove('hidden');
-        window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
-        window.dismissPopup = () => {
-            if (latestData) {
-                localStorage.setItem('global_notif_ts', latestData.timestamp);
-                lastSeenTs = latestData.timestamp;
-            }
-            document.getElementById('global-popup').classList.add('hidden');
-        };
-
-        // Ask for notification permission on load
-        window.onload = () => {
-            if ("Notification" in window && Notification.permission === "default") {
-                setTimeout(() => Notification.requestPermission(), 2000);
-            }
-        };
-    </script>
-
-    <!-- Custom HTML Tag for Tool Cards -->
-    <script>
-        class ToolCard extends HTMLElement {
-            connectedCallback() {
-                const h = this.getAttribute('href'), i = this.getAttribute('icon'), t = this.getAttribute('title');
-                const g = this.getAttribute('tag'), c = this.getAttribute('color'), d = this.getAttribute('desc');
-                this.innerHTML = `
-                <a href="${h}" class="solid-card bg-gradient-to-br ${c} rounded-2xl p-6 group cursor-pointer block relative transition-all">
-                    <div class="flex items-center justify-between mb-5">
-                        <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-black/20 border border-white/10 group-hover:rotate-6 transition-transform">
-                            <i class="fa-solid ${i} text-lg text-white"></i>
-                        </div>
-                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">${g}</span>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 text-white">${t}</h3>
-                    <p class="text-white/80 text-sm leading-tight">${d}</p>
-                </a>`;
-            }
+        } else {
+            console.log('Unable to get permission to notify.');
         }
-        customElements.define('tool-card', ToolCard);
-    </script>
-</body>
-</html>
+    }
+
+    // Anonymous login for users
+    signInAnonymously(auth).then(() => {
+        requestPermission(); // লগইন হওয়ার পর পারমিশন চাওয়া হবে
+    }).catch(err => {
+        console.error("Auth Error:", err);
+        document.getElementById('sync-text').innerText = "Auth Failed";
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) return;
+        
+        document.getElementById('sync-text').innerText = "Sync: Live";
+        document.getElementById('sync-dot').querySelector('span:last-child').classList.replace('bg-pink-500', 'bg-emerald-500');
+
+        const docRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
+        onSnapshot(docRef, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                latestData = data;
+                document.getElementById('ticker-text').innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Active.`;
+                
+                if (data.timestamp > lastSeenTs) {
+                    showUIPopup(data.message);
+                }
+            }
+        });
+    });
+
+    // Foreground Message Handling
+    onMessage(messaging, (payload) => {
+        console.log('Message received. ', payload);
+        showUIPopup(payload.notification.body);
+    });
+
+    function showUIPopup(msg) {
+        document.getElementById('popup-text').innerText = msg;
+        document.getElementById('global-popup').classList.remove('hidden');
+        
+        if (Notification.permission === "granted") {
+            new Notification("Rasel's Broadcaster", {
+                body: msg,
+                icon: "developer.jpg"
+            });
+        }
+    }
+
+    // Admin Send Button
+    document.getElementById('send-btn').onclick = async () => {
+        const pass = document.getElementById('admin-pass').value;
+        const msg = document.getElementById('admin-msg').value.trim();
+        
+        if (pass !== SECRET_PASS) { 
+            alert("Wrong Password!"); 
+            return; 
+        }
+        if (!msg) return;
+
+        const docRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
+        try {
+            await setDoc(docRef, { 
+                message: msg, 
+                timestamp: Date.now().toString(), 
+                sender: "Rasel Mia" 
+            });
+            closeAdminModal();
+            document.getElementById('admin-pass').value = '';
+            document.getElementById('admin-msg').value = '';
+        } catch (error) {
+            alert("Error sending message.");
+        }
+    };
+
+    window.openAdminModal = () => document.getElementById('admin-modal').classList.remove('hidden');
+    window.closeAdminModal = () => document.getElementById('admin-modal').classList.add('hidden');
+    window.dismissPopup = () => {
+        if (latestData) {
+            localStorage.setItem('global_notif_ts', latestData.timestamp);
+            lastSeenTs = latestData.timestamp;
+        }
+        document.getElementById('global-popup').classList.add('hidden');
+    };
+</script>
