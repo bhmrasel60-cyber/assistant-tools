@@ -3,60 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Exam | Leaderboard & Sync</title>
+    <title>Exam Center | Professional Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .bg-overlay { position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.98)), url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500'); background-size: cover; background-position: center; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .option-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .option-btn:hover:not(:disabled) { transform: translateX(10px); background: rgba(236, 72, 153, 0.1); border-color: #ec4899; }
         .correct { background: #059669 !important; border-color: #10b981 !important; color: white; }
         .wrong { background: #dc2626 !important; border-color: #ef4444 !important; color: white; }
         .title-gradient { background: linear-gradient(to right, #ffffff, #f9a8d4, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Table Scrollbar */
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
         
         /* Rank Badge */
-        .rank-badge { width: 24px; height: 24px; display: flex; items-center; justify-content: center; border-radius: 50%; font-size: 10px; font-weight: 800; }
+        .rank-badge { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 10px; font-weight: 800; margin: 0 auto; }
         .rank-1 { background: #fbbf24; color: #78350f; box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
         .rank-2 { background: #cbd5e1; color: #334155; }
         .rank-3 { background: #d97706; color: #fff; }
+
+        /* Dashboard Cards */
+        .dash-card { transition: all 0.3s ease; }
+        .dash-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
-    <!-- Header Section -->
+    <div class="bg-overlay"></div>
+
+    <!-- Top Header -->
     <header class="fixed top-0 w-full p-4 flex items-center justify-between glass z-40">
         <div class="flex items-center gap-3">
-            <a href="index.html" class="p-2 hover:bg-white/10 rounded-full transition-colors">
-                <i class="fa-solid fa-house text-xl"></i>
+            <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors border border-white/10">
+                <i class="fa-solid fa-house text-slate-300"></i>
             </a>
-            <button onclick="openLeaderboard()" class="px-4 py-1.5 rounded-full bg-pink-600/20 border border-pink-500/30 text-pink-400 text-xs font-bold hover:bg-pink-600 hover:text-white transition-all">
-                <i class="fa-solid fa-ranking-star mr-1"></i> Ranking
+            <button onclick="logout()" class="px-3 py-1.5 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-600 hover:text-white transition-all hidden" id="logout-btn">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i> Change User
             </button>
         </div>
         
-        <h1 class="hidden md:block font-bold text-lg tracking-wider text-pink-500">Live Exam Terminal</h1>
+        <h1 class="hidden md:block font-bold text-lg tracking-wider text-pink-500">Live Exam Center</h1>
         
-        <div id="student-badge" class="hidden items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full text-xs font-bold text-slate-300">
+        <div id="student-badge" class="hidden items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-xs font-bold text-slate-200 shadow-inner">
             <i class="fa-solid fa-user-graduate text-pink-500"></i>
             <span id="header-student-name">Student</span>
         </div>
     </header>
 
-    <!-- Registration Modal -->
-    <div id="registration-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl">
+    <!-- 1. Registration Modal -->
+    <div id="registration-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl">
         <div class="max-w-md w-full text-center p-8 glass rounded-[2.5rem] shadow-pink-500/20 shadow-2xl">
             <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 mx-auto border border-pink-500/30">
                 <i class="fa-solid fa-id-card-clip text-4xl text-pink-500"></i>
             </div>
             <h2 class="text-3xl font-black mb-2 tracking-tighter uppercase">Student Login</h2>
-            <p class="text-slate-400 mb-8 text-sm">Exam shuru korar age aapnar details din.</p>
+            <p class="text-slate-400 mb-8 text-sm">Exam dashboard-e dhukar jonno details din.</p>
             
             <form id="registration-form" class="space-y-4">
                 <input type="text" id="student-name" required autocomplete="off"
@@ -68,20 +75,65 @@
                 
                 <button type="submit" 
                     class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-pink-600/20 mt-4">
-                    Start Exam Now
+                    Enter Dashboard
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Exam Content Area -->
-    <div id="exam-main-content" class="hidden w-full max-w-4xl mt-24 mb-20">
+    <!-- 2. Main Dashboard Container (Menu) -->
+    <div id="dashboard-container" class="hidden w-full max-w-4xl mt-24 mb-20 animate-[zoomIn_0.4s_ease-out]">
         <div class="text-center mb-10 px-4">
+            <h1 class="text-3xl md:text-4xl font-bold title-gradient leading-tight mb-2">Welcome, <span id="dash-name">Student</span>!</h1>
+            <p class="text-slate-400 text-sm md:text-base font-medium tracking-wide">Select an option below to proceed.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+            <!-- Start Exam -->
+            <button onclick="startExamMode()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-pink-600 to-purple-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                <i class="fa-solid fa-pen-to-square text-4xl text-white/80 mb-4 block"></i>
+                <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Live Exam</h3>
+                <p class="text-white/70 text-sm font-medium">Start the ongoing live examination. Your results will be saved.</p>
+            </button>
+
+            <!-- Practice Mode -->
+            <button onclick="startPracticeMode()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                <i class="fa-solid fa-book-open-reader text-4xl text-white/80 mb-4 block"></i>
+                <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Practice Questions</h3>
+                <p class="text-white/70 text-sm font-medium">Read today's questions with correct answers highlighted.</p>
+            </button>
+
+            <!-- Archive -->
+            <button onclick="startArchiveMode()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-amber-600 to-orange-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                <i class="fa-solid fa-box-archive text-4xl text-white/80 mb-4 block"></i>
+                <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Exam Archive</h3>
+                <p class="text-white/70 text-sm font-medium">View previous question papers and solutions from database.</p>
+            </button>
+
+            <!-- Merit List -->
+            <button onclick="openLeaderboard()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                <i class="fa-solid fa-ranking-star text-4xl text-white/80 mb-4 block"></i>
+                <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Merit List</h3>
+                <p class="text-white/70 text-sm font-medium">Check the global rankings and scores of all students.</p>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. Live Exam Area -->
+    <div id="exam-main-content" class="hidden w-full max-w-4xl mt-24 mb-20">
+        <div class="text-center mb-8 px-4 flex flex-col items-center">
+            <button onclick="backToDashboard('exam-main-content')" class="mb-4 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-bold hover:bg-white/10 transition-all">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
+            </button>
             <h1 id="exam-title-header" class="text-xl md:text-3xl font-bold title-gradient leading-tight mb-2">Loading Exam...</h1>
             <p id="exam-subtitle-header" class="text-slate-400 text-sm md:text-base font-medium tracking-wide">Please wait...</p>
         </div>
 
-        <main id="quiz-container" class="glass p-6 md:p-10 rounded-[2rem] shadow-2xl">
+        <main id="quiz-container" class="glass p-6 md:p-10 rounded-[2rem] shadow-2xl relative">
             <div class="flex justify-between items-center mb-6">
                 <div id="score-badge" class="bg-pink-600 px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">Score: 0</div>
                 <span id="question-count" class="text-xs text-slate-400 font-bold uppercase tracking-[0.2em]">Q: 1/10</span>
@@ -94,12 +146,46 @@
                 <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
             <div class="mt-10">
-                <button id="next-btn" disabled class="hidden w-full bg-slate-700 py-4 rounded-2xl font-bold tracking-widest hover:bg-slate-600 transition-all">Next Question</button>
+                <button id="next-btn" disabled class="hidden w-full bg-slate-700 py-4 rounded-2xl font-bold tracking-widest hover:bg-slate-600 transition-all text-white">Next Question</button>
             </div>
         </main>
     </div>
 
-    <!-- Result Modal -->
+    <!-- 4. Practice Mode Area -->
+    <div id="practice-content" class="hidden w-full max-w-4xl mt-24 mb-20">
+        <div class="text-center mb-8 px-4 flex flex-col items-center">
+            <button onclick="backToDashboard('practice-content')" class="mb-4 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-bold hover:bg-white/10 transition-all">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
+            </button>
+            <h1 id="practice-title" class="text-xl md:text-3xl font-bold text-blue-400 leading-tight mb-2">Practice View</h1>
+            <p id="practice-subtitle" class="text-slate-400 text-sm font-medium tracking-wide">All correct answers are marked in green.</p>
+        </div>
+
+        <div id="practice-list" class="space-y-6 px-2">
+            <!-- Practice Questions will be injected here -->
+            <div class="text-center text-slate-500 p-10"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>
+        </div>
+    </div>
+
+    <!-- 5. Archive Mode Area -->
+    <div id="archive-content" class="hidden w-full max-w-4xl mt-24 mb-20">
+        <div class="text-center mb-8 px-4 flex flex-col items-center">
+            <button onclick="backToDashboard('archive-content')" class="mb-4 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-bold hover:bg-white/10 transition-all">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
+            </button>
+            <h1 class="text-xl md:text-3xl font-bold text-amber-500 leading-tight mb-2">Exam Archives</h1>
+            <p class="text-slate-400 text-sm font-medium tracking-wide">Previous question papers from cloud storage.</p>
+        </div>
+
+        <div id="archive-list" class="space-y-6 px-2">
+            <div class="glass p-10 text-center rounded-[2rem] text-slate-400 italic border-dashed border-2 border-white/10">
+                <i class="fa-solid fa-cloud-arrow-down text-3xl mb-3 text-slate-500 block"></i>
+                Connecting to Firebase Archive Database...
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal (End of Exam) -->
     <div id="result-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl">
         <div class="max-w-md w-full text-center p-8 glass rounded-[2.5rem] shadow-2xl">
             <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mb-6 mx-auto border border-emerald-500/30">
@@ -120,9 +206,8 @@
                 </div>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-pink-600 text-white font-black py-4 rounded-2xl uppercase tracking-widest hover:scale-105 transition-all mb-4">Retake Exam</button>
-            <button onclick="openLeaderboard()" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl text-sm font-bold hover:bg-white/10 transition-all mb-4">View Leaderboard</button>
-            <a href="index.html" class="block text-slate-400 hover:text-white transition-colors text-sm font-bold underline">Back to Home</a>
+            <button onclick="backToDashboardFromResult()" class="w-full bg-pink-600 text-white font-black py-4 rounded-2xl uppercase tracking-widest hover:scale-105 transition-all mb-4">Back to Dashboard</button>
+            <button onclick="openLeaderboard()" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl text-sm font-bold hover:bg-white/10 transition-all">View Merit List</button>
         </div>
     </div>
 
@@ -153,20 +238,16 @@
                     </tbody>
                 </table>
             </div>
-            
-            <div class="p-4 bg-slate-900/80 border-t border-white/5 text-center">
-                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest italic">Sorted by highest marks obtained</p>
-            </div>
         </div>
     </div>
 
-    <!-- Firebase Logic -->
+    <!-- Firebase SDKs & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -181,121 +262,201 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Variables
         let questions = [];
+        let parsedTitle = "Live Exam";
+        let parsedSubtitle = "Test your knowledge";
+        
         let currentIndex = 0;
         let score = 0;
         let canAnswer = true;
         let currentStudent = { name: '', phone: '' };
         let currentUser = null;
 
+        // UI Elements
         const registrationModal = document.getElementById('registration-modal');
+        const dashboardContainer = document.getElementById('dashboard-container');
         const examMainContent = document.getElementById('exam-main-content');
+        const practiceContent = document.getElementById('practice-content');
+        const archiveContent = document.getElementById('archive-content');
+        
         const headerStudentName = document.getElementById('header-student-name');
         const studentBadge = document.getElementById('student-badge');
-        const examTitleHeader = document.getElementById('exam-title-header');
-        const examSubtitleHeader = document.getElementById('exam-subtitle-header');
-        const questionText = document.getElementById('question-text');
-        const optionsGrid = document.getElementById('options-grid');
-        const scoreBadge = document.getElementById('score-badge');
-        const nextBtn = document.getElementById('next-btn');
-        const resultModal = document.getElementById('result-modal');
-        const leaderboardBody = document.getElementById('leaderboard-body');
+        const dashName = document.getElementById('dash-name');
+        const logoutBtn = document.getElementById('logout-btn');
 
         // Initial Auth
         signInAnonymously(auth).catch(e => console.error("Auth failed", e));
         onAuthStateChanged(auth, user => { if(user) currentUser = user; });
 
-        // Registration
+        // 🔥 LOGIN CHECK (One-Time Login Logic)
+        function checkLogin() {
+            const savedData = localStorage.getItem('student_info');
+            if (savedData) {
+                currentStudent = JSON.parse(savedData);
+                activateUserSession();
+            } else {
+                registrationModal.classList.remove('hidden');
+            }
+        }
+
+        function activateUserSession() {
+            headerStudentName.innerText = currentStudent.name.split(' ')[0];
+            dashName.innerText = currentStudent.name.split(' ')[0];
+            studentBadge.classList.remove('hidden');
+            studentBadge.classList.add('flex');
+            logoutBtn.classList.remove('hidden');
+            
+            registrationModal.classList.add('hidden');
+            dashboardContainer.classList.remove('hidden');
+        }
+
+        // Registration Form Submit
         document.getElementById('registration-form').onsubmit = (e) => {
             e.preventDefault();
             const name = document.getElementById('student-name').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
             if(name && phone) {
                 currentStudent = { name, phone };
-                headerStudentName.innerText = name.split(' ')[0];
-                studentBadge.classList.remove('hidden');
-                studentBadge.classList.add('flex');
-                registrationModal.classList.add('hidden');
-                examMainContent.classList.remove('hidden');
-                loadQuestions();
+                localStorage.setItem('student_info', JSON.stringify(currentStudent));
+                activateUserSession();
             }
         };
 
-        // Load Questions
-        async function loadQuestions() {
+        // Logout logic
+        window.logout = () => {
+            localStorage.removeItem('student_info');
+            location.reload();
+        }
+
+        // View Router
+        function hideAllViews() {
+            dashboardContainer.classList.add('hidden');
+            examMainContent.classList.add('hidden');
+            practiceContent.classList.add('hidden');
+            archiveContent.classList.add('hidden');
+        }
+
+        window.backToDashboard = (currentViewId) => {
+            document.getElementById(currentViewId).classList.add('hidden');
+            dashboardContainer.classList.remove('hidden');
+        };
+
+        window.backToDashboardFromResult = () => {
+            document.getElementById('result-modal').classList.add('hidden');
+            examMainContent.classList.add('hidden');
+            dashboardContainer.classList.remove('hidden');
+        }
+
+        // =============== DATA FETCHING ===============
+        async function fetchQuestionsData() {
+            if(questions.length > 0) return true; // Already loaded
+
             try {
-                const response = await fetch('questions.txt');
-                if(!response.ok) throw new Error("Missing File");
+                const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+                const targetUrl = baseUrl.includes('blob:') ? 'questions.txt' : `${baseUrl}/questions.txt`;
+                const response = await fetch(targetUrl);
+                if(!response.ok) throw new Error("File Missing");
+                
                 const text = await response.text();
                 parseFileContent(text);
+                return true;
             } catch (err) {
-                if(window.location.href.includes('preview')) loadSampleData();
-                else examTitleHeader.innerText = "Error: questions.txt file load hoyni.";
+                console.error(err);
+                if(window.location.href.includes('preview')) {
+                    loadSampleData();
+                    return true;
+                }
+                return false;
             }
         }
 
         function parseFileContent(text) {
             const lines = text.trim().split('\n').filter(l => l.trim() !== '');
             if(lines.length >= 2) {
-                examTitleHeader.innerText = lines[0];
-                examSubtitleHeader.innerText = lines[1];
+                parsedTitle = lines[0];
+                parsedSubtitle = lines[1];
                 const questionLines = lines.slice(2);
                 questions = questionLines.map(line => {
                     const parts = line.split('|');
                     return { question: parts[0], options: [parts[1], parts[2], parts[3], parts[4]], correct: parseInt(parts[5]) };
                 });
             }
-            if(questions.length > 0) showQuestion();
         }
 
         function loadSampleData() {
-            const sample = `বাংলাদেশ পানি উন্নয়ন বোর্ড (BWDB)\n২০২৬ এর MCQ সমাধান | Merit-based Sorting Active\nSurjo kon dik theke othe?|Purbo|Poschim|Utor|Dokkhin|0`;
+            const sample = `বাংলাদেশ পানি উন্নয়ন বোর্ড (BWDB)\n২০২৬ এর MCQ সমাধান | Preview Data\nSurjo kon dik theke othe?|Purbo|Poschim|Utor|Dokkhin|0\nWeb styling er jonno ki use hoy?|HTML|Python|CSS|Java|2`;
             parseFileContent(sample);
         }
 
-        function showQuestion() {
+
+        // =============== 1. LIVE EXAM MODE ===============
+        window.startExamMode = async () => {
+            hideAllViews();
+            examMainContent.classList.remove('hidden');
+            
+            // Reset Exam State
+            currentIndex = 0;
+            score = 0;
+            document.getElementById('score-badge').innerText = `Score: 0`;
+            
+            const success = await fetchQuestionsData();
+            if (success && questions.length > 0) {
+                document.getElementById('exam-title-header').innerText = parsedTitle;
+                document.getElementById('exam-subtitle-header').innerText = parsedSubtitle;
+                showExamQuestion();
+            } else {
+                document.getElementById('question-text').innerText = "Questions not found. Check questions.txt";
+            }
+        };
+
+        function showExamQuestion() {
             const q = questions[currentIndex];
-            questionText.innerText = q.question;
+            document.getElementById('question-text').innerText = q.question;
             document.getElementById('question-count').innerText = `Q: ${currentIndex + 1}/${questions.length}`;
             document.getElementById('progress').style.width = `${((currentIndex) / questions.length) * 100}%`;
-            optionsGrid.innerHTML = '';
+            
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
             q.options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
                 btn.className = "option-btn w-full text-left p-4 rounded-2xl glass border border-white/10 flex items-center justify-between group";
                 btn.innerHTML = `<span class="font-medium text-sm md:text-base">${opt}</span>`;
                 btn.onclick = () => selectOption(idx, btn);
-                optionsGrid.appendChild(btn);
+                grid.appendChild(btn);
             });
+            
             canAnswer = true;
-            nextBtn.classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
         }
 
         function selectOption(idx, btn) {
             if(!canAnswer) return;
             canAnswer = false;
             const correctIdx = questions[currentIndex].correct;
-            const allBtns = optionsGrid.querySelectorAll('.option-btn');
+            const allBtns = document.getElementById('options-grid').querySelectorAll('.option-btn');
+            
             if(idx === correctIdx) {
                 btn.classList.add('correct');
                 score += 10;
-                scoreBadge.innerText = `Score: ${score}`;
+                document.getElementById('score-badge').innerText = `Score: ${score}`;
             } else {
                 btn.classList.add('wrong');
                 if (allBtns[correctIdx]) allBtns[correctIdx].classList.add('correct');
             }
+            
             if(currentIndex < questions.length - 1) {
-                nextBtn.classList.remove('hidden');
-                nextBtn.disabled = false;
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('next-btn').disabled = false;
             } else {
-                setTimeout(showResults, 1200);
+                setTimeout(finishExam, 1500);
             }
         }
 
-        nextBtn.onclick = () => { currentIndex++; showQuestion(); };
+        document.getElementById('next-btn').onclick = () => { currentIndex++; showExamQuestion(); };
 
-        // Save Result
-        async function showResults() {
-            resultModal.classList.remove('hidden');
+        async function finishExam() {
+            document.getElementById('result-modal').classList.remove('hidden');
             document.getElementById('result-student-name').innerText = currentStudent.name;
             document.getElementById('final-score').innerText = score;
             const accuracy = questions.length > 0 ? Math.round((score / (questions.length * 10)) * 100) : 0;
@@ -309,34 +470,112 @@
                         phone: currentStudent.phone,
                         score: score,
                         accuracy: accuracy,
-                        examTitle: examTitleHeader.innerText,
+                        examTitle: parsedTitle,
                         timestamp: Date.now().toString()
                     });
-                    document.getElementById('sync-status-text').innerText = "Result synced globally ✓";
+                    document.getElementById('sync-status-text').innerText = "Result saved to Global Merit List ✓";
                     document.getElementById('sync-status-text').classList.replace('text-slate-500', 'text-emerald-500');
                 } catch (e) {
-                    document.getElementById('sync-status-text').innerText = "Sync failed. Local view only.";
+                    document.getElementById('sync-status-text').innerText = "Failed to save online.";
                 }
             }
         }
 
-        // Merit-based Leaderboard Logic
+
+        // =============== 2. PRACTICE MODE ===============
+        window.startPracticeMode = async () => {
+            hideAllViews();
+            practiceContent.classList.remove('hidden');
+            const listContainer = document.getElementById('practice-list');
+            
+            const success = await fetchQuestionsData();
+            if (success && questions.length > 0) {
+                document.getElementById('practice-title').innerText = parsedTitle;
+                
+                let html = '';
+                questions.forEach((q, qIndex) => {
+                    html += `
+                    <div class="glass p-6 rounded-2xl border border-white/10 mb-4">
+                        <h3 class="text-lg font-bold mb-4"><span class="text-pink-500 mr-2">${qIndex + 1}.</span>${q.question}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    `;
+                    q.options.forEach((opt, optIdx) => {
+                        const isCorrect = (optIdx === q.correct);
+                        const styleClass = isCorrect ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-400 font-bold' : 'bg-white/5 border-white/10 text-slate-400';
+                        const icon = isCorrect ? '<i class="fa-solid fa-check-circle"></i>' : '';
+                        
+                        html += `<div class="p-3 rounded-xl border ${styleClass} flex justify-between items-center text-sm">
+                            <span>${opt}</span> ${icon}
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                });
+                listContainer.innerHTML = html;
+            } else {
+                listContainer.innerHTML = `<div class="text-center text-red-400 p-10">Failed to load practice questions.</div>`;
+            }
+        };
+
+
+        // =============== 3. ARCHIVE MODE ===============
+        window.startArchiveMode = () => {
+            hideAllViews();
+            archiveContent.classList.remove('hidden');
+            const archiveList = document.getElementById('archive-list');
+            
+            if(!currentUser) return;
+
+            const archiveRef = collection(db, 'artifacts', appId, 'public', 'data', 'exam_archives');
+            
+            // Realtime fetch for archives
+            onSnapshot(archiveRef, (snapshot) => {
+                let html = '';
+                if(snapshot.empty) {
+                    archiveList.innerHTML = `
+                    <div class="glass p-10 text-center rounded-[2rem] border-dashed border-2 border-white/10">
+                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-500 block"></i>
+                        <p class="text-slate-400 font-medium">No previous question papers found in database.</p>
+                        <p class="text-xs text-slate-500 mt-2">Admins can upload archives from the backend.</p>
+                    </div>`;
+                    return;
+                }
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const date = data.timestamp ? new Date(parseInt(data.timestamp)).toLocaleDateString() : 'Previous Exam';
+                    html += `
+                    <div class="glass p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 hover:bg-white/5 transition-all cursor-pointer">
+                        <div>
+                            <h3 class="font-bold text-lg text-amber-400">${data.title || 'Archived Paper'}</h3>
+                            <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest"><i class="fa-regular fa-calendar mr-1"></i> ${date}</p>
+                        </div>
+                        <button class="px-5 py-2 rounded-xl bg-amber-600/20 text-amber-400 border border-amber-500/30 hover:bg-amber-600 hover:text-white font-bold text-sm transition-all whitespace-nowrap">
+                            <i class="fa-solid fa-eye mr-1"></i> View Paper
+                        </button>
+                    </div>`;
+                });
+                archiveList.innerHTML = html;
+            }, (error) => {
+                archiveList.innerHTML = `<div class="text-center text-red-400 p-10">Error loading archives: ${error.message}</div>`;
+            });
+        };
+
+
+        // =============== 4. LEADERBOARD (MERIT LIST) ===============
         window.openLeaderboard = () => {
             document.getElementById('leaderboard-modal').classList.remove('hidden');
-            const resultsRef = collection(db, 'artifacts', appId, 'public', 'data', 'exam_results');
+            const leaderboardBody = document.getElementById('leaderboard-body');
             
-            // Real-time listener
+            const resultsRef = collection(db, 'artifacts', appId, 'public', 'data', 'exam_results');
             onSnapshot(resultsRef, (snapshot) => {
                 let allResults = [];
                 snapshot.forEach(docSnap => allResults.push(docSnap.data()));
                 
-                // 🔥 MERIT SORTING LOGIC: Highest score first. If scores are equal, sort by newest time.
+                // Sort by highest score, then newest
                 allResults.sort((a, b) => {
                     const scoreA = parseInt(a.score) || 0;
                     const scoreB = parseInt(b.score) || 0;
-                    if (scoreB !== scoreA) {
-                        return scoreB - scoreA;
-                    }
+                    if (scoreB !== scoreA) return scoreB - scoreA;
                     return parseInt(b.timestamp || 0) - parseInt(a.timestamp || 0);
                 });
 
@@ -358,7 +597,7 @@
                     tr.className = "border-b border-white/5 hover:bg-white/5 transition-colors";
                     tr.innerHTML = `
                         <td class="p-4 text-center">
-                            <div class="mx-auto rank-badge ${rankClass}">${rank}</div>
+                            <div class="rank-badge ${rankClass}">${rank}</div>
                         </td>
                         <td class="p-4">
                             <div class="font-bold text-slate-200">${res.name}</div>
@@ -375,6 +614,9 @@
         };
 
         window.closeLeaderboard = () => document.getElementById('leaderboard-modal').classList.add('hidden');
+
+        // Init Flow
+        window.onload = checkLogin;
 
     </script>
 </body>
