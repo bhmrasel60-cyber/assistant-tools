@@ -118,15 +118,19 @@
                 
                 let messages = [];
                 snapshot.forEach(doc => {
-                    messages.push({ id: doc.id, ...doc.data() });
+                    // ✅ FIX 1: Use 'estimate' jate send korar sathe sathei temporary time peye jay
+                    messages.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) });
                 });
 
-                // ✅ FIX: Jodi timestamp na thake (mane instant send hoyeche), setake current time dhore nibe.
-                messages.sort((a, b) => {
-                    const timeA = a.timestamp ? a.timestamp.toMillis() : Date.now();
-                    const timeB = b.timestamp ? b.timestamp.toMillis() : Date.now();
-                    return timeA - timeB;
-                });
+                // ✅ FIX 2: Time calculation crash error fix
+                const getTime = (ts) => {
+                    if (!ts) return Date.now();
+                    if (typeof ts.toMillis === 'function') return ts.toMillis();
+                    if (ts.seconds) return ts.seconds * 1000;
+                    return Date.now();
+                };
+
+                messages.sort((a, b) => getTime(a.timestamp) - getTime(b.timestamp));
 
                 // Clear purono UI
                 chatBox.innerHTML = '';
@@ -134,8 +138,8 @@
                 // Nutun message render kora
                 messages.forEach(msg => {
                     const isMe = msg.senderId === currentUser.uid;
-                    const dateObj = msg.timestamp ? new Date(msg.timestamp.toDate()) : new Date();
-                    const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const msgTime = getTime(msg.timestamp);
+                    const timeStr = new Date(msgTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
                     const div = document.createElement('div');
                     div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
