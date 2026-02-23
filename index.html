@@ -99,7 +99,7 @@
                 <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg">News</div>
                 <div class="flex-grow overflow-hidden relative h-full flex items-center">
                     <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200 italic">
-                        Initializing real-time connection...
+                        Initializing connection...
                     </div>
                 </div>
             </div>
@@ -146,7 +146,9 @@
                 <i class="fa-solid fa-shield-halved text-pink-500"></i> Admin Panel
             </h3>
             <div class="space-y-4">
-                <input type="password" id="admin-pass" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-pink-500 transition-all" placeholder="Password (rasel123)">
+                <!-- PASSWORD PLACEHOLDER FIXED HERE -->
+                <input type="password" id="admin-pass" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-pink-500 transition-all" placeholder="Enter Admin Password...">
+                
                 <textarea id="admin-msg" class="w-full bg-slate-800 border border-white/10 rounded-xl p-3 text-white outline-none h-24 focus:border-pink-500 transition-all" placeholder="Enter broadcast message..."></textarea>
             </div>
             <div class="flex gap-3 mt-6">
@@ -188,7 +190,7 @@
             const permission = await Notification.requestPermission();
             updateNotifStatusUI(permission);
             if (permission === "granted") {
-                new Notification("System Connected", { body: "Real-time sync active across all devices.", icon: "developer.jpg" });
+                new Notification("System Connected", { body: "Real-time sync active.", icon: "developer.jpg" });
             }
         };
 
@@ -204,6 +206,9 @@
             }
         }
 
+        // ==========================================
+        // FIREBASE LOGIC (Works in Canvas)
+        // ==========================================
         if (fbConfig) {
             const app = initializeApp(fbConfig);
             const auth = getAuth(app);
@@ -222,7 +227,6 @@
                 if (!user) return;
                 updateNotifStatusUI(Notification.permission);
 
-                // GLOBALLY SYNCED PATH
                 const notifRef = doc(db, 'artifacts', appId, 'public', 'data', 'broadcast', 'latest');
                 
                 onSnapshot(notifRef, (snapshot) => {
@@ -230,10 +234,8 @@
                         const data = snapshot.data();
                         latestUpdate = data;
                         
-                        // Ticker text update
                         document.getElementById('ticker-text').innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Sync Enabled &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
 
-                        // Display logic
                         if (data.timestamp > lastSeenTimestamp) {
                             document.getElementById('popup-text').innerText = data.message;
                             document.getElementById('global-popup').classList.remove('hidden');
@@ -267,6 +269,50 @@
                 document.getElementById('admin-pass').value = '';
                 document.getElementById('admin-msg').value = '';
             };
+        } 
+        // ==========================================
+        // LOCAL GITHUB FALLBACK (Works without Firebase)
+        // ==========================================
+        else {
+            updateNotifStatusUI(Notification.permission);
+            
+            document.getElementById('broadcast-btn').onclick = () => {
+                const pass = document.getElementById('admin-pass').value;
+                const msg = document.getElementById('admin-msg').value.trim();
+
+                if (pass !== ADMIN_PASSWORD) {
+                    alert("Incorrect Password!");
+                    return;
+                }
+                if (!msg) return;
+
+                latestUpdate = { message: msg, timestamp: Date.now().toString() };
+                localStorage.setItem('local_notif', JSON.stringify(latestUpdate));
+                
+                document.getElementById('ticker-text').innerHTML = `${msg} &nbsp;&bull;&nbsp; Local Mode Active &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
+                document.getElementById('popup-text').innerText = msg;
+                document.getElementById('global-popup').classList.remove('hidden');
+                
+                if (Notification.permission === "granted") {
+                    new Notification("Web Tools Update", { body: msg, icon: "developer.jpg" });
+                }
+
+                closeAdminModal();
+                document.getElementById('admin-pass').value = '';
+                document.getElementById('admin-msg').value = '';
+            };
+
+            const saved = localStorage.getItem('local_notif');
+            if (saved) {
+                latestUpdate = JSON.parse(saved);
+                document.getElementById('ticker-text').innerHTML = `${latestUpdate.message} &nbsp;&bull;&nbsp; Local Mode Active &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
+                if (latestUpdate.timestamp > lastSeenTimestamp) {
+                    document.getElementById('popup-text').innerText = latestUpdate.message;
+                    document.getElementById('global-popup').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('ticker-text').innerText = "Running in Local Mode (Push Updates will sync locally).";
+            }
         }
 
         window.openAdminModal = () => document.getElementById('admin-modal').classList.remove('hidden');
