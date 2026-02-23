@@ -33,12 +33,12 @@
                 <h1 class="font-bold text-lg tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">Global Chat</h1>
                 <p class="text-[10px] text-emerald-400 flex items-center gap-1.5 font-medium uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span> 
-                    Live Sync 
+                    Live Sync Active
                 </p>
             </div>
         </div>
-        <div id="user-badge" class="text-xs bg-gradient-to-r from-slate-800 to-slate-900 border border-white/10 px-4 py-1.5 rounded-full text-pink-300 font-bold shadow-inner">
-            <i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Wait...
+        <div id="user-badge" class="text-xs bg-gradient-to-r from-slate-800 to-slate-900 border border-white/10 px-4 py-1.5 rounded-full text-pink-300 font-bold shadow-inner flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-notch fa-spin"></i> Wait...
         </div>
     </header>
 
@@ -105,7 +105,7 @@
         const appId = "rasel-mia-universal-sync"; 
 
         let currentUser = null;
-        let chatUserName = localStorage.getItem('chat_user_name'); // Check kora hochhe name save ache kina
+        let chatUserName = localStorage.getItem('chat_user_name'); 
         
         const chatBox = document.getElementById('chat-box');
         const sendBtn = document.getElementById('send-btn');
@@ -113,27 +113,27 @@
         const nameModal = document.getElementById('name-modal');
         const nameForm = document.getElementById('name-form');
 
-        // 🔥 Name Logic: Jodi name na thake tahole popup show korbe
+        // 🔥 Initial Check: Name na thakle Modal dekhabe
         if (!chatUserName) {
             nameModal.classList.remove('hidden');
         } else {
             updateBadgeName(chatUserName);
         }
 
-        // Name Form Submit Event
+        // Name Form Submission
         nameForm.onsubmit = (e) => {
             e.preventDefault();
             const inputName = document.getElementById('user-name-input').value.trim();
             if (inputName) {
                 chatUserName = inputName;
-                localStorage.setItem('chat_user_name', chatUserName); // Device e save kore rakha hocche
+                localStorage.setItem('chat_user_name', chatUserName); 
                 nameModal.classList.add('hidden');
                 updateBadgeName(chatUserName);
             }
         };
 
         function updateBadgeName(name) {
-            document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-user-check mr-1 text-emerald-400"></i> ${name}`;
+            document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-user-check text-emerald-400"></i> <span>${name}</span>`;
         }
 
         // Auth Setup
@@ -151,7 +151,15 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // 🔄 Realtime Message Listener (REFRESH ISSUE FIXED)
+        // Helper: Time Ber Korar Nirapod Way
+        const getSafeTime = (ts) => {
+            if (!ts) return Date.now();
+            if (typeof ts.toMillis === 'function') return ts.toMillis();
+            if (ts.seconds) return ts.seconds * 1000;
+            return Date.now();
+        };
+
+        // 🔄 Realtime Message Listener (Instant Sync Logic)
         function loadRealtimeMessages() {
             const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
             
@@ -160,25 +168,20 @@
                 
                 let messages = [];
                 snapshot.forEach(doc => {
-                    // ✅ { serverTimestamps: 'estimate' } er karone message local cache theke sathe sathei show korbe crash chara
+                    // ✅ 'estimate' byabohar kora hocche jate send korar shathe shathei fake timestamp peye jay
                     messages.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) });
                 });
 
-                // Nirapod vabe shomoy hisab kora jate error na hoy
-                messages.sort((a, b) => {
-                    const timeA = a.timestamp ? (typeof a.timestamp.toMillis === 'function' ? a.timestamp.toMillis() : Date.now()) : Date.now();
-                    const timeB = b.timestamp ? (typeof b.timestamp.toMillis === 'function' ? b.timestamp.toMillis() : Date.now()) : Date.now();
-                    return timeA - timeB;
-                });
+                // Sort messages by time safely
+                messages.sort((a, b) => getSafeTime(a.timestamp) - getSafeTime(b.timestamp));
 
                 chatBox.innerHTML = '';
                 
                 messages.forEach(msg => {
                     const isMe = msg.senderId === currentUser.uid;
-                    const dateObj = msg.timestamp ? new Date(typeof msg.timestamp.toMillis === 'function' ? msg.timestamp.toMillis() : Date.now()) : new Date();
-                    const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const msgTime = getSafeTime(msg.timestamp);
+                    const timeStr = new Date(msgTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
-                    // Jodi kono karone nam na thake, tobe User ID dekhabe
                     const displayName = msg.senderName || ('User-' + msg.senderId.substring(0,4));
                     
                     const div = document.createElement('div');
@@ -195,19 +198,21 @@
                     chatBox.appendChild(div);
                 });
 
+                // Scroll slowly if needed, else instant
                 setTimeout(scrollToBottom, 50);
             }, (error) => {
                 console.error("Firebase Sync Error:", error);
             });
         }
 
-        // Send Message Function
+        // Send Message Event
         document.getElementById('chat-form').onsubmit = async (e) => {
             e.preventDefault();
             const text = msgInput.value.trim();
             
             if (!text || !currentUser || !chatUserName) return;
 
+            // Instant clean for smooth UX
             msgInput.value = '';
             msgInput.focus();
 
@@ -216,8 +221,8 @@
                 await addDoc(messagesRef, {
                     text: text,
                     senderId: currentUser.uid,
-                    senderName: chatUserName, // 🔥 Ekhane user-er deya naam Firebase-e save hochhe
-                    timestamp: serverTimestamp() 
+                    senderName: chatUserName, // Firebase-e nam save hochhe
+                    timestamp: serverTimestamp() // serverTimestamp ekhon estimate niye nibe realtime-e
                 });
                 scrollToBottom();
             } catch (error) {
