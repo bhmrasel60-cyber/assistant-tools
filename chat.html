@@ -63,7 +63,7 @@
         </form>
     </footer>
 
-    <!-- 🔥 Name Request Modal (Popup) -->
+    <!-- Name Request Modal (Popup) -->
     <div id="name-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
         <div class="bg-slate-900 border border-pink-500/30 p-8 rounded-3xl w-full max-w-sm shadow-[0_0_40px_rgba(236,72,153,0.2)] text-center animate-[slideUp_0.4s_ease-out]">
             <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 mx-auto border border-pink-500/30">
@@ -88,8 +88,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js";
 
-        // Firebase Config - Same as index.html
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -99,9 +99,15 @@
             appId: "1:979594414301:web:7048c995e56e331a85f334"
         };
 
+        const VAPID_KEY = "BOVXtUUCRy2p5-QqB1orahGTjdc1FGVIMJBf76hArZMnoWAtTpFodxPs1FjyX1gefbKB08RTUUbqDit2XeKc0DU";
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
+        // Messaging is only initialized if supported to prevent errors
+        let messaging = null;
+        try { messaging = getMessaging(app); } catch (e) { console.log("Messaging not supported here."); }
+
         const appId = "rasel-mia-universal-sync"; 
 
         let currentUser = null;
@@ -113,7 +119,7 @@
         const nameModal = document.getElementById('name-modal');
         const nameForm = document.getElementById('name-form');
 
-        // 🔥 Name Logic Check
+        // Check if name is saved
         if (!chatUserName) {
             nameModal.classList.remove('hidden');
         } else {
@@ -135,6 +141,16 @@
             document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-user-check text-emerald-400"></i> <span>${name}</span>`;
         }
 
+        // SW Setup with Error Avoidance (blob: protocol fix)
+        if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+            navigator.serviceWorker.register('./firebase-messaging-sw.js').then((registration) => {
+                if(messaging) {
+                    getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration })
+                    .catch(e => console.log('Token error bypassed'));
+                }
+            }).catch(e => console.log('SW register bypassed'));
+        }
+
         // Auth Setup
         signInAnonymously(auth).catch(err => console.error("Auth Failed", err));
 
@@ -150,7 +166,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // 🔄 Realtime Message Listener (Exact index.html Logic)
+        // Realtime Message Listener (Exact index.html Logic)
         function loadRealtimeMessages() {
             const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
             
@@ -162,7 +178,7 @@
                     messages.push({ id: doc.id, ...doc.data() });
                 });
 
-                // 🔥 Fix: Date.now().toString() logic byabohar kore sort kora hochhe
+                // Exactly matching index.html time sorting logic
                 messages.sort((a, b) => {
                     const timeA = parseInt(a.timestamp || 0);
                     const timeB = parseInt(b.timestamp || 0);
@@ -211,7 +227,7 @@
             try {
                 const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
                 
-                // 🔥 Exactly index.html er moton Date.now().toString() use kora holo
+                // Hubuhu index.html er moton Date.now().toString() use kora holo
                 await addDoc(messagesRef, {
                     text: text,
                     senderId: currentUser.uid,
