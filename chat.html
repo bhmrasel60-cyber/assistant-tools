@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Chat | Web Tools</title>
+    <title>Global Chat | Admin View</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; overflow: hidden; }
         .bg-overlay { position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.98)), url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500'); background-size: cover; background-position: center; }
         .chat-container { height: calc(100vh - 160px); scroll-behavior: smooth; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .message-bubble { max-width: 85%; animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
     </style>
 </head>
@@ -23,73 +22,54 @@
 
     <div class="bg-overlay"></div>
 
-    <!-- Header -->
+    <!-- Header Section -->
     <header class="p-4 glass-panel flex items-center justify-between shadow-md relative z-10">
         <div class="flex items-center gap-3">
-            <a href="index.html" class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/10 text-slate-300 hover:text-white">
+            <a href="index.html" class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/10 text-slate-300">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <div>
-                <h1 class="font-bold text-lg tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">Global Chat</h1>
+                <h1 class="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">Admin Broadcast</h1>
                 <p class="text-[10px] text-emerald-400 flex items-center gap-1.5 font-medium uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span> 
-                    Live Sync Active
+                    Real-time Active
                 </p>
             </div>
         </div>
-        <div id="user-badge" class="text-xs bg-gradient-to-r from-slate-800 to-slate-900 border border-white/10 px-4 py-1.5 rounded-full text-pink-300 font-bold shadow-inner flex items-center gap-1.5">
-            <i class="fa-solid fa-circle-notch fa-spin"></i> Wait...
+        <div class="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            <img src="developer.jpg" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
+            <span class="text-[10px] font-bold text-pink-400 uppercase tracking-widest">Admin</span>
         </div>
     </header>
 
-    <!-- Chat Area -->
-    <main id="chat-box" class="flex-grow overflow-y-auto p-4 space-y-5 chat-container relative z-10">
+    <!-- Chat Messages Area -->
+    <main id="chat-box" class="flex-grow overflow-y-auto p-4 space-y-6 chat-container relative z-10">
         <div id="loading" class="flex flex-col items-center justify-center h-full text-slate-500">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500 mb-3"></div>
-            <p class="text-sm animate-pulse font-medium">Loading previous messages...</p>
+            <p class="text-sm">Connecting to broadcast feed...</p>
         </div>
     </main>
 
-    <!-- Input Area -->
+    <!-- Admin Message Input Area (No Password) -->
     <footer class="p-4 glass-panel border-t border-white/10 relative z-10">
         <form id="chat-form" class="max-w-4xl mx-auto flex gap-3">
             <input type="text" id="msg-input" autocomplete="off" 
                 class="flex-grow bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-pink-500/70 focus:bg-black/60 transition-all placeholder-slate-500" 
-                placeholder="Type your message here...">
+                placeholder="Write your update message here...">
             <button type="submit" id="send-btn" disabled
-                class="bg-gradient-to-r from-pink-600 to-purple-600 px-6 py-3.5 rounded-2xl flex items-center justify-center hover:shadow-[0_0_20px_rgba(236,72,153,0.5)] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                class="bg-gradient-to-r from-pink-600 to-purple-600 px-6 py-3.5 rounded-2xl flex items-center justify-center hover:shadow-[0_0_20px_rgba(236,72,153,0.5)] active:scale-95 transition-all disabled:opacity-50">
                 <i class="fa-solid fa-paper-plane text-white text-lg"></i>
             </button>
         </form>
     </footer>
 
-    <!-- Name Request Modal (Popup) -->
-    <div id="name-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-        <div class="bg-slate-900 border border-pink-500/30 p-8 rounded-3xl w-full max-w-sm shadow-[0_0_40px_rgba(236,72,153,0.2)] text-center animate-[slideUp_0.4s_ease-out]">
-            <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 mx-auto border border-pink-500/30">
-                <i class="fa-solid fa-user-astronaut text-4xl text-pink-500"></i>
-            </div>
-            <h2 class="text-2xl font-black text-white mb-2 tracking-tight">Join Chatroom</h2>
-            <p class="text-slate-400 text-sm mb-8">Please enter your name. This will be visible to everyone in the chat.</p>
-            <form id="name-form" class="space-y-4">
-                <input type="text" id="user-name-input" required autocomplete="off" maxlength="15"
-                    class="w-full bg-slate-800 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500/70 focus:bg-slate-800/80 transition-all font-bold placeholder-slate-500" 
-                    placeholder="Enter your name...">
-                <button type="submit" 
-                    class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-pink-600/20">
-                    Start Chatting
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Firebase Logic -->
+    <!-- Firebase Logic Section -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // 🔥 Aapnar Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -99,148 +79,92 @@
             appId: "1:979594414301:web:7048c995e56e331a85f334"
         };
 
-        const VAPID_KEY = "BOVXtUUCRy2p5-QqB1orahGTjdc1FGVIMJBf76hArZMnoWAtTpFodxPs1FjyX1gefbKB08RTUUbqDit2XeKc0DU";
+        const SYNC_APP_ID = "rasel-mia-universal-sync"; 
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        let messaging = null;
-        try { messaging = getMessaging(app); } catch (e) { console.log("Messaging not supported here."); }
-
-        const appId = "rasel-mia-universal-sync"; 
-
-        let currentUser = null;
-        let chatUserName = localStorage.getItem('chat_user_name'); 
-        
         const chatBox = document.getElementById('chat-box');
         const sendBtn = document.getElementById('send-btn');
         const msgInput = document.getElementById('msg-input');
-        const nameModal = document.getElementById('name-modal');
-        const nameForm = document.getElementById('name-form');
 
-        // Check if name is saved
-        if (!chatUserName) {
-            nameModal.classList.remove('hidden');
-        } else {
-            updateBadgeName(chatUserName);
-        }
-
-        nameForm.onsubmit = (e) => {
-            e.preventDefault();
-            const inputName = document.getElementById('user-name-input').value.trim();
-            if (inputName) {
-                chatUserName = inputName;
-                localStorage.setItem('chat_user_name', chatUserName); 
-                nameModal.classList.add('hidden');
-                updateBadgeName(chatUserName);
-            }
-        };
-
-        function updateBadgeName(name) {
-            document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-user-check text-emerald-400"></i> <span>${name}</span>`;
-        }
-
-        if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
-            navigator.serviceWorker.register('./firebase-messaging-sw.js').then((registration) => {
-                if(messaging) {
-                    getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration })
-                    .catch(e => console.log('Token error bypassed'));
-                }
-            }).catch(e => console.log('SW register bypassed'));
-        }
-
-        // Auth Setup
-        signInAnonymously(auth).catch(err => console.error("Auth Failed", err));
+        // Automatic Anonymous Authentication
+        signInAnonymously(auth).catch(err => console.error("Auth Error", err));
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUser = user;
                 sendBtn.disabled = false;
-                loadRealtimeMessages();
+                loadBroadcastFeed();
             }
         });
 
-        function scrollToBottom() {
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        // 🔥 CRITICAL FIX: Safe Time Parser (Handles both old Firebase Objects and new String Numbers)
-        function getSafeTime(ts) {
-            if (!ts) return Date.now();
-            if (typeof ts === 'string' || typeof ts === 'number') return parseInt(ts) || Date.now();
-            if (typeof ts.toMillis === 'function') return ts.toMillis();
-            if (ts.seconds) return ts.seconds * 1000;
-            return Date.now();
-        }
-
-        // Realtime Message Listener
-        function loadRealtimeMessages() {
-            const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
+        // 🔄 Real-time Listener Logic from index.html
+        function loadBroadcastFeed() {
+            const messagesRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'global_chat');
             
+            // onSnapshot ensures instant updates without refresh
             onSnapshot(messagesRef, (snapshot) => {
                 document.getElementById('loading').style.display = 'none';
                 
                 let messages = [];
-                snapshot.forEach(doc => {
-                    messages.push({ id: doc.id, ...doc.data() });
+                snapshot.forEach(docSnap => {
+                    messages.push({ id: docSnap.id, ...docSnap.data() });
                 });
 
-                // Safely sort using the new robust time parser
-                messages.sort((a, b) => getSafeTime(a.timestamp) - getSafeTime(b.timestamp));
+                // Sorting logic using Date.now().toString() parsing
+                messages.sort((a, b) => parseInt(a.timestamp || "0") - parseInt(b.timestamp || "0"));
 
                 chatBox.innerHTML = '';
                 
                 messages.forEach(msg => {
-                    const isMe = msg.senderId === currentUser.uid;
-                    const msgTime = getSafeTime(msg.timestamp);
+                    const msgTime = parseInt(msg.timestamp || Date.now());
                     const timeStr = new Date(msgTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
-                    const displayName = msg.senderName || ('User-' + msg.senderId.substring(0,4));
-                    
                     const div = document.createElement('div');
-                    div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
+                    div.className = "flex flex-col items-start w-full";
                     
                     div.innerHTML = `
-                        <div class="message-bubble px-5 py-3 text-sm md:text-base leading-relaxed ${isMe ? 'bg-gradient-to-tr from-pink-600 to-rose-500 text-white rounded-2xl rounded-tr-sm shadow-[0_5px_15px_rgba(236,72,153,0.25)]' : 'bg-slate-800 text-slate-200 border border-white/5 rounded-2xl rounded-tl-sm shadow-md'}">
+                        <div class="message-bubble px-5 py-3 text-sm bg-slate-800 border border-white/10 text-slate-100 rounded-2xl rounded-tl-sm shadow-lg">
                             ${msg.text}
                         </div>
-                        <span class="text-[10px] text-slate-500 mt-1.5 px-1 font-semibold tracking-wide">
-                            ${isMe ? 'You' : `<i class="fa-solid fa-user-astronaut text-slate-600 mr-1"></i> ${displayName}`} &bull; ${timeStr}
+                        <span class="text-[10px] text-slate-500 mt-2 px-1 font-bold tracking-widest uppercase">
+                            <i class="fa-solid fa-user-shield text-pink-600 mr-1"></i> Admin &bull; ${timeStr}
                         </span>
                     `;
                     chatBox.appendChild(div);
                 });
 
-                scrollToBottom();
+                // Auto Scroll to the latest message
+                chatBox.scrollTop = chatBox.scrollHeight;
             }, (error) => {
-                console.error("Firebase Sync Error:", error);
+                console.error("Firestore Sync Error:", error);
             });
         }
 
-        // Send Message Event
+        // Send Message Handler
         document.getElementById('chat-form').onsubmit = async (e) => {
             e.preventDefault();
-            const text = msgInput.value.trim();
-            
-            if (!text || !currentUser || !chatUserName) return;
+            const msg = msgInput.value.trim();
+            if (!msg) return;
 
+            // Clear input instantly for smooth feel
             msgInput.value = '';
             msgInput.focus();
 
             try {
-                const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
+                const messagesRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'global_chat');
                 
-                // Saving time as string exactly like index.html
+                // 🔥 Using Date.now().toString() logic for zero-delay synchronization
                 await addDoc(messagesRef, {
-                    text: text,
-                    senderId: currentUser.uid,
-                    senderName: chatUserName, 
+                    text: msg,
+                    senderId: "Admin",
                     timestamp: Date.now().toString() 
                 });
-                
+
             } catch (error) {
-                console.error("Write error:", error);
-                alert("Message pathate somossa! Firebase Database Rules check korun.");
+                console.error("Error broadcasting message:", error);
+                alert("Message pathate somossa hoyeche!");
             }
         };
     </script>
