@@ -87,9 +87,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config
+        // Firebase Config - Same as index.html
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -113,14 +113,13 @@
         const nameModal = document.getElementById('name-modal');
         const nameForm = document.getElementById('name-form');
 
-        // 🔥 Initial Check: Name na thakle Modal dekhabe
+        // 🔥 Name Logic Check
         if (!chatUserName) {
             nameModal.classList.remove('hidden');
         } else {
             updateBadgeName(chatUserName);
         }
 
-        // Name Form Submission
         nameForm.onsubmit = (e) => {
             e.preventDefault();
             const inputName = document.getElementById('user-name-input').value.trim();
@@ -151,15 +150,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Helper: Time Ber Korar Nirapod Way
-        const getSafeTime = (ts) => {
-            if (!ts) return Date.now();
-            if (typeof ts.toMillis === 'function') return ts.toMillis();
-            if (ts.seconds) return ts.seconds * 1000;
-            return Date.now();
-        };
-
-        // 🔄 Realtime Message Listener (Instant Sync Logic)
+        // 🔄 Realtime Message Listener (Exact index.html Logic)
         function loadRealtimeMessages() {
             const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
             
@@ -168,18 +159,21 @@
                 
                 let messages = [];
                 snapshot.forEach(doc => {
-                    // ✅ 'estimate' byabohar kora hocche jate send korar shathe shathei fake timestamp peye jay
-                    messages.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) });
+                    messages.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Sort messages by time safely
-                messages.sort((a, b) => getSafeTime(a.timestamp) - getSafeTime(b.timestamp));
+                // 🔥 Fix: Date.now().toString() logic byabohar kore sort kora hochhe
+                messages.sort((a, b) => {
+                    const timeA = parseInt(a.timestamp || 0);
+                    const timeB = parseInt(b.timestamp || 0);
+                    return timeA - timeB;
+                });
 
                 chatBox.innerHTML = '';
                 
                 messages.forEach(msg => {
                     const isMe = msg.senderId === currentUser.uid;
-                    const msgTime = getSafeTime(msg.timestamp);
+                    const msgTime = parseInt(msg.timestamp || Date.now());
                     const timeStr = new Date(msgTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
                     const displayName = msg.senderName || ('User-' + msg.senderId.substring(0,4));
@@ -198,8 +192,7 @@
                     chatBox.appendChild(div);
                 });
 
-                // Scroll slowly if needed, else instant
-                setTimeout(scrollToBottom, 50);
+                scrollToBottom();
             }, (error) => {
                 console.error("Firebase Sync Error:", error);
             });
@@ -212,19 +205,20 @@
             
             if (!text || !currentUser || !chatUserName) return;
 
-            // Instant clean for smooth UX
             msgInput.value = '';
             msgInput.focus();
 
             try {
                 const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
+                
+                // 🔥 Exactly index.html er moton Date.now().toString() use kora holo
                 await addDoc(messagesRef, {
                     text: text,
                     senderId: currentUser.uid,
-                    senderName: chatUserName, // Firebase-e nam save hochhe
-                    timestamp: serverTimestamp() // serverTimestamp ekhon estimate niye nibe realtime-e
+                    senderName: chatUserName, 
+                    timestamp: Date.now().toString() 
                 });
-                scrollToBottom();
+                
             } catch (error) {
                 console.error("Write error:", error);
                 alert("Message pathate somossa! Firebase Database Rules check korun.");
