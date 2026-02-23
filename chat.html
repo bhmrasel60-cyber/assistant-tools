@@ -17,10 +17,6 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-        .typing-indicator span { animation: blink 1.4s infinite both; }
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden relative">
@@ -41,7 +37,7 @@
                 </p>
             </div>
         </div>
-        <div id="user-badge" class="text-xs bg-gradient-to-r from-slate-800 to-slate-900 border border-white/10 px-4 py-1.5 rounded-full text-pink-300 font-mono shadow-inner">
+        <div id="user-badge" class="text-xs bg-gradient-to-r from-slate-800 to-slate-900 border border-white/10 px-4 py-1.5 rounded-full text-pink-300 font-bold shadow-inner">
             <i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Wait...
         </div>
     </header>
@@ -67,13 +63,33 @@
         </form>
     </footer>
 
+    <!-- 🔥 Name Request Modal (Popup) -->
+    <div id="name-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div class="bg-slate-900 border border-pink-500/30 p-8 rounded-3xl w-full max-w-sm shadow-[0_0_40px_rgba(236,72,153,0.2)] text-center animate-[slideUp_0.4s_ease-out]">
+            <div class="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 mx-auto border border-pink-500/30">
+                <i class="fa-solid fa-user-astronaut text-4xl text-pink-500"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-2 tracking-tight">Join Chatroom</h2>
+            <p class="text-slate-400 text-sm mb-8">Please enter your name. This will be visible to everyone in the chat.</p>
+            <form id="name-form" class="space-y-4">
+                <input type="text" id="user-name-input" required autocomplete="off" maxlength="15"
+                    class="w-full bg-slate-800 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500/70 focus:bg-slate-800/80 transition-all font-bold placeholder-slate-500" 
+                    placeholder="Enter your name...">
+                <button type="submit" 
+                    class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-pink-600/20">
+                    Start Chatting
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 Firebase Config (Aapnar Project-er details)
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -89,17 +105,43 @@
         const appId = "rasel-mia-universal-sync"; 
 
         let currentUser = null;
+        let chatUserName = localStorage.getItem('chat_user_name'); // Check kora hochhe name save ache kina
+        
         const chatBox = document.getElementById('chat-box');
         const sendBtn = document.getElementById('send-btn');
         const msgInput = document.getElementById('msg-input');
+        const nameModal = document.getElementById('name-modal');
+        const nameForm = document.getElementById('name-form');
 
-        // Initial Auth Setup
+        // 🔥 Name Logic: Jodi name na thake tahole popup show korbe
+        if (!chatUserName) {
+            nameModal.classList.remove('hidden');
+        } else {
+            updateBadgeName(chatUserName);
+        }
+
+        // Name Form Submit Event
+        nameForm.onsubmit = (e) => {
+            e.preventDefault();
+            const inputName = document.getElementById('user-name-input').value.trim();
+            if (inputName) {
+                chatUserName = inputName;
+                localStorage.setItem('chat_user_name', chatUserName); // Device e save kore rakha hocche
+                nameModal.classList.add('hidden');
+                updateBadgeName(chatUserName);
+            }
+        };
+
+        function updateBadgeName(name) {
+            document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-user-check mr-1 text-emerald-400"></i> ${name}`;
+        }
+
+        // Auth Setup
         signInAnonymously(auth).catch(err => console.error("Auth Failed", err));
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                document.getElementById('user-badge').innerHTML = `<i class="fa-regular fa-user mr-1 text-slate-400"></i> ${user.uid.substring(0, 5).toUpperCase()}`;
                 sendBtn.disabled = false;
                 loadRealtimeMessages();
             }
@@ -109,7 +151,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // 🔄 Realtime Message Listener (FIXED LOGIC)
+        // 🔄 Realtime Message Listener (REFRESH ISSUE FIXED)
         function loadRealtimeMessages() {
             const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
             
@@ -118,28 +160,26 @@
                 
                 let messages = [];
                 snapshot.forEach(doc => {
-                    // ✅ FIX 1: Use 'estimate' jate send korar sathe sathei temporary time peye jay
+                    // ✅ { serverTimestamps: 'estimate' } er karone message local cache theke sathe sathei show korbe crash chara
                     messages.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) });
                 });
 
-                // ✅ FIX 2: Time calculation crash error fix
-                const getTime = (ts) => {
-                    if (!ts) return Date.now();
-                    if (typeof ts.toMillis === 'function') return ts.toMillis();
-                    if (ts.seconds) return ts.seconds * 1000;
-                    return Date.now();
-                };
+                // Nirapod vabe shomoy hisab kora jate error na hoy
+                messages.sort((a, b) => {
+                    const timeA = a.timestamp ? (typeof a.timestamp.toMillis === 'function' ? a.timestamp.toMillis() : Date.now()) : Date.now();
+                    const timeB = b.timestamp ? (typeof b.timestamp.toMillis === 'function' ? b.timestamp.toMillis() : Date.now()) : Date.now();
+                    return timeA - timeB;
+                });
 
-                messages.sort((a, b) => getTime(a.timestamp) - getTime(b.timestamp));
-
-                // Clear purono UI
                 chatBox.innerHTML = '';
                 
-                // Nutun message render kora
                 messages.forEach(msg => {
                     const isMe = msg.senderId === currentUser.uid;
-                    const msgTime = getTime(msg.timestamp);
-                    const timeStr = new Date(msgTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const dateObj = msg.timestamp ? new Date(typeof msg.timestamp.toMillis === 'function' ? msg.timestamp.toMillis() : Date.now()) : new Date();
+                    const timeStr = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    // Jodi kono karone nam na thake, tobe User ID dekhabe
+                    const displayName = msg.senderName || ('User-' + msg.senderId.substring(0,4));
                     
                     const div = document.createElement('div');
                     div.className = `flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`;
@@ -149,17 +189,15 @@
                             ${msg.text}
                         </div>
                         <span class="text-[10px] text-slate-500 mt-1.5 px-1 font-semibold tracking-wide">
-                            ${isMe ? 'You' : '<i class="fa-solid fa-user-astronaut text-slate-600 mr-1"></i> User-' + msg.senderId.substring(0,5).toUpperCase()} &bull; ${timeStr}
+                            ${isMe ? 'You' : `<i class="fa-solid fa-user-astronaut text-slate-600 mr-1"></i> ${displayName}`} &bull; ${timeStr}
                         </span>
                     `;
                     chatBox.appendChild(div);
                 });
 
-                // Auto Scroll instantly
                 setTimeout(scrollToBottom, 50);
             }, (error) => {
                 console.error("Firebase Sync Error:", error);
-                chatBox.innerHTML = `<div class="text-center text-red-400 p-4 bg-red-900/20 rounded-xl">Connection Error. Please refresh.</div>`;
             });
         }
 
@@ -168,9 +206,8 @@
             e.preventDefault();
             const text = msgInput.value.trim();
             
-            if (!text || !currentUser) return;
+            if (!text || !currentUser || !chatUserName) return;
 
-            // Form lock kore deya temporary
             msgInput.value = '';
             msgInput.focus();
 
@@ -179,7 +216,8 @@
                 await addDoc(messagesRef, {
                     text: text,
                     senderId: currentUser.uid,
-                    timestamp: serverTimestamp() // Ei function tar karonei problem hochilo, ekhon fix kora ache
+                    senderName: chatUserName, // 🔥 Ekhane user-er deya naam Firebase-e save hochhe
+                    timestamp: serverTimestamp() 
                 });
                 scrollToBottom();
             } catch (error) {
