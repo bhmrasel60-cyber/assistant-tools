@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nature Noise Generator</title>
+    <title>Nature & Focus Noise Generator</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #000; /* ব্যাকগ্রাউন্ড কালো করা হলো ক্যানভাসের জন্য */
+            background-color: #000;
             color: white;
             display: flex;
             flex-direction: column;
@@ -15,39 +15,52 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden; /* স্ক্রল বন্ধ */
+            overflow: hidden;
         }
 
-        /* ভিজ্যুয়াল ক্যানভাস স্টাইল */
         #visual-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* সবকিছুর নিচে থাকবে */
-            opacity: 0.6; /* দৃশ্যমানতা বাড়ানো হলো */
+            z-index: -1;
+            opacity: 0.6;
         }
 
-        h1 { margin-bottom: 30px; color: #00d2be; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        h1 { 
+            margin-bottom: 30px; 
+            color: #00d2be; 
+            text-shadow: 0 0 10px rgba(0,0,0,0.5); 
+            text-align: center;
+        }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* ৪ কলাম */
+            grid-template-columns: repeat(5, 1fr); /* ৫ কলাম করা হলো */
             gap: 15px;
             max-width: 900px;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .sound-btn {
-            background: rgba(51, 51, 51, 0.6); /* একটু স্বচ্ছ */
+            background: rgba(51, 51, 51, 0.6);
             border: 1px solid #444;
             color: #ddd;
             padding: 15px 10px;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: bold;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
-            width: 140px;
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -55,7 +68,7 @@
         }
 
         .sound-btn span {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 8px;
         }
 
@@ -64,39 +77,49 @@
             background: rgba(0, 106, 78, 0.8);
             border-color: #00d2be;
             color: white;
-            box-shadow: 0 0 15px rgba(0, 210, 190, 0.4);
+            box-shadow: 0 0 15px rgba(0, 210, 190, 0.5);
             transform: scale(1.05);
         }
 
-        .sound-btn:hover {
+        .sound-btn.active-focus {
+            background: rgba(88, 28, 135, 0.8);
+            border-color: #c084fc;
+            box-shadow: 0 0 15px rgba(192, 132, 252, 0.5);
+        }
+
+        .sound-btn:hover:not(.active):not(.active-focus) {
             border-color: #00d2be;
             background: rgba(70, 70, 70, 0.8);
+            transform: translateY(-2px);
         }
 
         .volume-control {
             margin-top: 40px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 20px;
-            border-radius: 20px;
+            gap: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         input[type=range] {
             width: 200px;
             cursor: pointer;
+            accent-color: #00d2be;
         }
     </style>
 </head>
 <body>
 
-    <!-- অ্যানিমেশনের জন্য ক্যানভাস -->
     <canvas id="visual-canvas"></canvas>
 
-    <h1>Nature Noise Generator</h1>
+    <h1>Nature & Study Noise Generator</h1>
 
     <div class="grid">
+        <!-- Nature Sounds -->
         <button class="sound-btn" id="white" onclick="toggleSound('white')">
             <span>📺</span> White Noise
         </button>
@@ -109,8 +132,6 @@
         <button class="sound-btn" id="waterfall" onclick="toggleSound('waterfall')">
             <span>🌊</span> Waterfall
         </button>
-        
-        <!-- নতুন বাটন -->
         <button class="sound-btn" id="wind" onclick="toggleSound('wind')">
             <span>💨</span> Wind
         </button>
@@ -123,17 +144,25 @@
         <button class="sound-btn" id="night" onclick="toggleSound('night')">
             <span>🦗</span> Night
         </button>
+
+        <!-- 🔥 Focus / Extreme Study Sounds -->
+        <button class="sound-btn" id="focus" onclick="toggleSound('focus', true)">
+            <span>🧠</span> Deep Focus
+        </button>
+        <button class="sound-btn" id="drone" onclick="toggleSound('drone', true)">
+            <span>🌌</span> Space Drone
+        </button>
     </div>
 
     <div class="volume-control">
-        <span>Volume: </span>
+        <span><i class="fa-solid fa-volume-high"></i> Volume: </span>
         <input type="range" min="0" max="100" value="30" oninput="changeVolume(this.value)">
     </div>
 
     <script>
         // --- ১. অডিও সেটআপ ---
         let audioCtx;
-        const activeNodes = {}; // প্লে হওয়া সাউন্ড ট্র্যাক করার জন্য
+        let activeNodes = {}; // প্লে হওয়া সাউন্ড ট্র্যাক করার জন্য (এখন শুধু ১টাই থাকবে)
         let masterGain;
 
         function initAudio() {
@@ -169,29 +198,43 @@
             return buffer;
         }
 
-        function toggleSound(type) {
+        // 🔥 প্রধান ফাংশন (সিঙ্গেল সাউন্ড প্লে লজিক)
+        function toggleSound(type, isStudyMode = false) {
             initAudio();
             const btn = document.getElementById(type);
+            const isCurrentlyPlaying = !!activeNodes[type];
 
-            // সাউন্ড বন্ধ করা
-            if (activeNodes[type]) {
-                if(activeNodes[type].stop) activeNodes[type].stop(); // For oscillators
-                if(activeNodes[type].source) activeNodes[type].source.stop(); // For buffers
-                delete activeNodes[type];
-                btn.classList.remove('active');
-                return;
+            // ১. আগে চলা সব সাউন্ড বন্ধ করা
+            for (let key in activeNodes) {
+                if (activeNodes[key].stop) activeNodes[key].stop();
+                if (activeNodes[key].source) activeNodes[key].source.stop();
+                document.getElementById(key).classList.remove('active', 'active-focus');
+                delete activeNodes[key];
             }
 
-            // সাউন্ড চালু করা
-            btn.classList.add('active');
+            // ২. যদি যেই বাটনে ক্লিক করা হয়েছে সেটাই আগে চলছিল, তবে সাউন্ড বন্ধ হয়েই থাকবে (Toggle Off)
+            if (isCurrentlyPlaying) return;
 
-            // বিশেষ সাউন্ড (Night/Cricket) - অসিলেটর ব্যবহার করে
+            // ৩. নতুন সাউন্ড চালু করা
+            if (isStudyMode) {
+                btn.classList.add('active-focus'); // স্টাডি মোডের জন্য আলাদা কালার
+            } else {
+                btn.classList.add('active');
+            }
+
+            // বিশেষ সাউন্ড জেনারেটর
             if (type === 'night') {
                 playCrickets(type);
                 return;
+            } else if (type === 'focus') {
+                playDeepFocus(type);
+                return;
+            } else if (type === 'drone') {
+                playSpaceDrone(type);
+                return;
             }
             
-            // নয়েজ সাউন্ড
+            // সাধারণ নয়েজ সাউন্ড
             const buffer = createNoiseBuffer(type);
             const source = audioCtx.createBufferSource();
             source.buffer = buffer;
@@ -199,7 +242,6 @@
 
             const filter = audioCtx.createBiquadFilter();
 
-            // সাউন্ড ফিল্টারিং লজিক
             if (type === 'white') {
                 source.connect(masterGain);
             } 
@@ -219,33 +261,30 @@
                 filter.connect(masterGain);
             }
             else if (type === 'wind') {
-                // বাতাসের জন্য ব্যান্ডপাস ফিল্টার
                 filter.type = 'bandpass';
                 filter.frequency.value = 400;
-                filter.Q.value = 1; // বাতাসের শোঁ শোঁ ভাব
+                filter.Q.value = 1; 
                 source.connect(filter);
                 filter.connect(masterGain);
                 
-                // বাতাসের গতি পরিবর্তন (Modulation)
                 const lfo = audioCtx.createOscillator();
-                lfo.frequency.value = 0.1; // খুব ধীর গতি
+                lfo.frequency.value = 0.1; 
                 const lfoGain = audioCtx.createGain();
                 lfoGain.gain.value = 300;
                 lfo.connect(lfoGain);
                 lfoGain.connect(filter.frequency);
                 lfo.start();
-                activeNodes[type] = { source: source, lfo: lfo }; // LFO সহ সেভ
+                activeNodes[type] = { source: source, stop: () => { source.stop(); lfo.stop(); } }; 
+                source.start();
                 return;
             }
             else if (type === 'fire') {
-                // আগুনের জন্য লো-পাস ব্রাউন নয়েজ + ক্র্যাকলিং দরকার (এখানে শুধু বেস দেওয়া হলো)
                 filter.type = 'lowpass';
-                filter.frequency.value = 200; // আগুনের গর্জন
+                filter.frequency.value = 200; 
                 source.connect(filter);
                 filter.connect(masterGain);
             }
             else if (type === 'thunder') {
-                // বজ্রপাতের জন্য খুব গভীর শব্দ
                 filter.type = 'lowpass';
                 filter.frequency.value = 150;
                 source.connect(filter);
@@ -253,31 +292,94 @@
             }
 
             source.start();
-            if (!activeNodes[type]) activeNodes[type] = { source: source };
+            activeNodes[type] = { source: source, stop: () => source.stop() };
         }
 
-        // ঝিঁঝিঁ পোকার ডাক (Cricket Sound Synthesis)
+        // --- স্টাডি মোড সাউন্ড সিন্থেসিস ---
+
+        // 🧠 Deep Focus (Binaural Beats + Brown Noise)
+        function playDeepFocus(type) {
+            // Binaural Beats: Left 250Hz, Right 264Hz (14Hz Beta Wave for extreme concentration)
+            const oscL = audioCtx.createOscillator();
+            const oscR = audioCtx.createOscillator();
+            const merger = audioCtx.createChannelMerger(2);
+            
+            oscL.type = 'sine';
+            oscL.frequency.value = 250;
+            oscR.type = 'sine';
+            oscR.frequency.value = 264;
+
+            oscL.connect(merger, 0, 0); // বাম কান
+            oscR.connect(merger, 0, 1); // ডান কান
+            merger.connect(masterGain);
+
+            // ব্যাকগ্রাউন্ডে ব্রাউন নয়েজ (স্মুথ করার জন্য)
+            const buffer = createNoiseBuffer('brown');
+            const noiseSrc = audioCtx.createBufferSource();
+            noiseSrc.buffer = buffer;
+            noiseSrc.loop = true;
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 150; // খুব নিচু সাউন্ড
+            
+            noiseSrc.connect(filter);
+            filter.connect(masterGain);
+
+            oscL.start();
+            oscR.start();
+            noiseSrc.start();
+
+            activeNodes[type] = { 
+                stop: () => { oscL.stop(); oscR.stop(); noiseSrc.stop(); } 
+            };
+        }
+
+        // 🌌 Space Drone (Ambient Study Sound)
+        function playSpaceDrone(type) {
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            
+            osc1.type = 'sine'; osc1.frequency.value = 55; // Low hum
+            osc2.type = 'triangle'; osc2.frequency.value = 110;
+
+            const lfo = audioCtx.createOscillator();
+            lfo.frequency.value = 0.05; // খুব ধীর পরিবর্তন
+            const lfoGain = audioCtx.createGain();
+            lfoGain.gain.value = 10;
+
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc2.frequency); // Pitch modulation
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 300;
+
+            osc1.connect(filter);
+            osc2.connect(filter);
+            filter.connect(masterGain);
+
+            osc1.start(); osc2.start(); lfo.start();
+
+            activeNodes[type] = { 
+                stop: () => { osc1.stop(); osc2.stop(); lfo.stop(); } 
+            };
+        }
+
+        // 🦗 Night / Crickets
         function playCrickets(type) {
             const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
             const modulator = audioCtx.createOscillator();
             const modGain = audioCtx.createGain();
+            const amGain = audioCtx.createGain();
 
             osc.type = 'triangle';
-            osc.frequency.value = 4500; // হাই পিচ
-
+            osc.frequency.value = 4500;
             modulator.type = 'square';
-            modulator.frequency.value = 4; // পোকার ডাকের রিদম
+            modulator.frequency.value = 4;
             
-            modGain.gain.value = 1000; // মডুলেশন ডেপথ
-
-            // কানেকশন: Modulator -> Oscillator Frequency (FM)
-            // সিম্পল আম্পলিচিউড মডুলেশন (AM) ভালো শোনায়
-            const amGain = audioCtx.createGain();
             osc.connect(amGain);
-            
             modulator.connect(amGain.gain);
-            
             amGain.connect(masterGain);
             
             osc.start();
@@ -299,10 +401,10 @@
         const ctx = canvas.getContext('2d');
         let width, height;
         let particles = []; 
-        let stars = []; // তারার জন্য
-        let flashOpacity = 0; // বজ্রপাতের জন্য
+        let stars = []; 
+        let flashOpacity = 0;
+        let focusPulse = 0; // Deep Focus visual
 
-        // ক্যানভাস রিসাইজ হ্যান্ডেল করা
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
@@ -314,12 +416,7 @@
         function initStars() {
             stars = [];
             for(let i=0; i<200; i++) {
-                stars.push({
-                    x: Math.random() * width,
-                    y: Math.random() * height,
-                    size: Math.random() * 2,
-                    alpha: Math.random()
-                });
+                stars.push({ x: Math.random() * width, y: Math.random() * height, size: Math.random() * 2, alpha: Math.random() });
             }
         }
 
@@ -331,38 +428,27 @@
                     y: Math.random() * height,
                     speed: Math.random() * 10 + 5,
                     len: Math.random() * 20 + 10,
-                    angle: Math.random() * Math.PI * 2, // বাতাসের জন্য
-                    life: Math.random() * 100 // আগুনের জন্য
+                    angle: Math.random() * Math.PI * 2,
+                    life: Math.random() * 100
                 });
             }
         }
         
         resize();
 
-        // কোন ভিজ্যুয়াল দেখাতে হবে তা ঠিক করা
-        function getVisualType() {
-            // লাস্ট ক্লিক করা বা অ্যাক্টিভ থাকা সাউন্ডের ভিজ্যুয়াল দেখাবে
-            if (activeNodes['thunder']) return 'thunder';
-            if (activeNodes['fire']) return 'fire';
-            if (activeNodes['wind']) return 'wind';
-            if (activeNodes['night']) return 'night';
-            if (activeNodes['waterfall']) return 'waterfall';
-            if (activeNodes['rain']) return 'rain';
-            if (activeNodes['white']) return 'white';
-            if (activeNodes['brown']) return 'brown';
-            return null;
+        function getActiveType() {
+            return Object.keys(activeNodes)[0] || null; // যেহেতু একটাই বাজবে
         }
 
-        // অ্যানিমেশন লুপ
         function animate() {
             requestAnimationFrame(animate);
-            const activeType = getVisualType();
+            const activeType = getActiveType();
 
-            // ট্রেইল এফেক্ট বা ক্লিয়ার করা
-            if (activeType === 'white' || activeType === 'brown' || activeType === 'night') {
+            // ক্যানভাস ক্লিয়ার বা ট্রেইল এফেক্ট
+            if (activeType === 'white' || activeType === 'brown' || activeType === 'night' || activeType === 'focus') {
                 ctx.clearRect(0, 0, width, height);
-            } else if (activeType === 'fire') {
-                 ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // স্মুথ ট্রেইল
+            } else if (activeType === 'fire' || activeType === 'drone') {
+                 ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; 
                  ctx.fillRect(0, 0, width, height);
             } else {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; 
@@ -371,7 +457,7 @@
 
             if (!activeType) return;
 
-            // ভিজ্যুয়াল ড্র করা
+            // ভিজ্যুয়াল ড্র করা
             if (activeType === 'white') drawStatic(2, 'white');
             else if (activeType === 'brown') drawStatic(20, '#5C4033');
             else if (activeType === 'rain') drawRain(false);
@@ -380,15 +466,43 @@
             else if (activeType === 'fire') drawFire();
             else if (activeType === 'thunder') drawThunder();
             else if (activeType === 'night') drawNight();
+            else if (activeType === 'focus') drawFocus();
+            else if (activeType === 'drone') drawSpace();
         }
 
-        // --- ড্রয়িং ফাংশনসমূহ ---
+        // --- নতুন ড্রয়িং ফাংশন ---
+        function drawFocus() {
+            focusPulse += 0.02;
+            const size = Math.abs(Math.sin(focusPulse)) * 100 + 50;
+            
+            ctx.fillStyle = `rgba(147, 51, 234, 0.1)`;
+            ctx.beginPath();
+            ctx.arc(width/2, height/2, size * 2, 0, Math.PI * 2);
+            ctx.fill();
 
+            ctx.strokeStyle = `rgba(192, 132, 252, 0.5)`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(width/2, height/2, size, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function drawSpace() {
+            for(let p of particles) {
+                ctx.fillStyle = `rgba(59, 130, 246, ${Math.random() * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.random() * 3, 0, Math.PI * 2);
+                ctx.fill();
+                p.x += Math.sin(p.life) * 0.5;
+                p.y += Math.cos(p.life) * 0.5;
+                p.life += 0.01;
+            }
+        }
+
+        // --- পুরনো ড্রয়িং ফাংশন ---
         function drawStatic(size, color) {
             for (let i = 0; i < 800; i++) {
-                ctx.fillStyle = color === 'white' ? 
-                    `rgba(255, 255, 255, ${Math.random()})` : 
-                    `rgba(92, 64, 51, ${Math.random() * 0.5})`;
+                ctx.fillStyle = color === 'white' ? `rgba(255, 255, 255, ${Math.random()})` : `rgba(92, 64, 51, ${Math.random() * 0.5})`;
                 const x = Math.floor(Math.random() * (width / size)) * size;
                 const y = Math.floor(Math.random() * (height / size)) * size;
                 ctx.fillRect(x, y, size, size);
@@ -414,8 +528,8 @@
             ctx.beginPath();
             for(let p of particles) {
                 ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x + p.len * 2, p.y); // হরাইজন্টাল লাইন
-                p.x += p.speed * 3; // দ্রুত গতি
+                ctx.lineTo(p.x + p.len * 2, p.y); 
+                p.x += p.speed * 3; 
                 if (p.x > width) { p.x = -p.len * 2; p.y = Math.random() * height; }
             }
             ctx.stroke();
@@ -423,62 +537,46 @@
 
         function drawFire() {
             for(let p of particles) {
-                // আগুন নিচ থেকে উঠবে
                 if (p.life <= 0) {
                     p.x = width / 2 + (Math.random() * 100 - 50);
                     p.y = height;
                     p.life = Math.random() * 100;
                     p.speed = Math.random() * 2 + 1;
                 }
-                
-                // কালার গ্রেডিয়েন্ট (হলুদ থেকে লাল)
-                const r = 255;
-                const g = Math.floor((p.life / 100) * 200);
-                const b = 0;
-                const a = p.life / 100;
-                
+                const r = 255; const g = Math.floor((p.life / 100) * 200); const b = 0; const a = p.life / 100;
                 ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, Math.random() * 5 + 2, 0, Math.PI * 2);
                 ctx.fill();
-
-                p.y -= p.speed; // উপরে ওঠা
-                p.x += Math.random() * 2 - 1; // একটু নড়াচড়া
+                p.y -= p.speed; 
+                p.x += Math.random() * 2 - 1; 
                 p.life -= 1;
             }
         }
 
         function drawThunder() {
-            // ব্যাকগ্রাউন্ড ফ্ল্যাশ লজিক
-            if (Math.random() > 0.98) flashOpacity = 1; // হঠাৎ ফ্ল্যাশ
-            
+            if (Math.random() > 0.98) flashOpacity = 1; 
             if (flashOpacity > 0) {
                 ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`;
                 ctx.fillRect(0, 0, width, height);
-                flashOpacity -= 0.1; // ফেড আউট
+                flashOpacity -= 0.1; 
             } else {
-                drawRain(false); // ফ্ল্যাশ না থাকলে বৃষ্টি দেখাবে
+                drawRain(false); 
             }
         }
 
         function drawNight() {
-            // কালো আকাশ
             ctx.fillStyle = '#050510';
             ctx.fillRect(0, 0, width, height);
-
-            // তারা
             for(let s of stars) {
-                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(Date.now() * 0.001 + s.x))})`; // মিটমিট করা
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(Date.now() * 0.001 + s.x))})`; 
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
-        // অ্যানিমেশন শুরু
         animate();
-
     </script>
-    <script type="module" src="tracker.js"></script>
 </body>
 </html>
