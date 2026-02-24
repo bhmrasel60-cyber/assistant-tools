@@ -12,9 +12,7 @@
         .bg-overlay { position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.98)), url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500'); background-size: cover; background-position: center; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .option-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .option-btn:hover:not(:disabled) { transform: translateX(10px); background: rgba(236, 72, 153, 0.1); border-color: #ec4899; }
-        .correct { background: #059669 !important; border-color: #10b981 !important; color: white; }
-        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; color: white; }
+        .option-btn:hover:not(:disabled) { transform: translateX(5px); background: rgba(236, 72, 153, 0.1); border-color: #ec4899; }
         .title-gradient { background: linear-gradient(to right, #ffffff, #f9a8d4, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
         /* Custom Scrollbar */
@@ -40,8 +38,8 @@
     <!-- Top Header -->
     <header class="fixed top-0 w-full p-4 flex items-center justify-between glass z-40">
         <div class="flex items-center gap-3">
-            <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors border border-white/10">
-                <i class="fa-solid fa-house text-slate-300"></i>
+            <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors border border-white/10 text-slate-300">
+                <i class="fa-solid fa-house"></i>
             </a>
             <button onclick="logout()" class="px-3 py-1.5 rounded-full bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-600 hover:text-white transition-all hidden" id="logout-btn">
                 <i class="fa-solid fa-right-from-bracket mr-1"></i> Change User
@@ -81,7 +79,7 @@
         </div>
     </div>
 
-    <!-- 2. Main Dashboard Container (Menu) -->
+    <!-- 2. Main Dashboard Container -->
     <div id="dashboard-container" class="hidden w-full max-w-4xl mt-24 mb-20 animate-[zoomIn_0.4s_ease-out]">
         <div class="text-center mb-10 px-4">
             <h1 class="text-3xl md:text-4xl font-bold title-gradient leading-tight mb-2">Welcome, <span id="dash-name">Student</span>!</h1>
@@ -89,28 +87,30 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
-            <!-- Start Exam -->
-            <button onclick="startExamMode()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-pink-600 to-purple-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
+            
+            <!-- Live Exam Card -->
+            <button onclick="startLiveMode('exam')" class="dash-card group relative overflow-hidden bg-gradient-to-br from-pink-600 to-purple-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
-                <i class="fa-solid fa-pen-to-square text-4xl text-white/80 mb-4 block"></i>
-                <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Live Exam</h3>
-                <p class="text-white/70 text-sm font-medium">Start the ongoing live examination. Your results will be saved.</p>
+                <i class="fa-solid fa-pen-to-square text-4xl text-white/80 mb-3 block"></i>
+                <h3 class="text-2xl font-black text-white tracking-tight">Today's Live Exam</h3>
+                <p id="live-exam-date" class="text-pink-200 text-[11px] font-bold uppercase tracking-[0.2em] mb-3 italic">Loading date...</p>
+                <p class="text-white/70 text-sm font-medium">Start the ongoing live examination. Your results will be saved globally.</p>
             </button>
 
             <!-- Practice Mode -->
-            <button onclick="startPracticeMode()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
+            <button onclick="startLiveMode('practice')" class="dash-card group relative overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
                 <i class="fa-solid fa-book-open-reader text-4xl text-white/80 mb-4 block"></i>
-                <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Practice Questions</h3>
-                <p class="text-white/70 text-sm font-medium">Read today's questions with correct answers highlighted.</p>
+                <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Practice View</h3>
+                <p class="text-white/70 text-sm font-medium">Read today's live questions with correct answers highlighted.</p>
             </button>
 
             <!-- Archive -->
-            <button onclick="startArchiveMode()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-amber-600 to-orange-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
+            <button onclick="openArchiveView()" class="dash-card group relative overflow-hidden bg-gradient-to-br from-amber-600 to-orange-700 p-8 rounded-[2rem] text-left border border-white/10 shadow-lg">
                 <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
                 <i class="fa-solid fa-box-archive text-4xl text-white/80 mb-4 block"></i>
                 <h3 class="text-2xl font-black text-white mb-2 tracking-tight">Exam Archive</h3>
-                <p class="text-white/70 text-sm font-medium">View previous question papers and solutions from database.</p>
+                <p class="text-white/70 text-sm font-medium">View previous question papers for test or practice from cloud.</p>
             </button>
 
             <!-- Merit List -->
@@ -123,31 +123,54 @@
         </div>
     </div>
 
-    <!-- 3. Live Exam Area -->
+    <!-- 3. Exam Mode Area (20 Questions Per Page) -->
     <div id="exam-main-content" class="hidden w-full max-w-4xl mt-24 mb-20">
-        <div class="text-center mb-8 px-4 flex flex-col items-center">
+        <div class="text-center mb-6 px-4 flex flex-col items-center">
             <button onclick="backToDashboard('exam-main-content')" class="mb-4 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-bold hover:bg-white/10 transition-all">
-                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
+                <i class="fa-solid fa-arrow-left mr-1"></i> Quit Exam
             </button>
-            <h1 id="exam-title-header" class="text-xl md:text-3xl font-bold title-gradient leading-tight mb-2">Loading Exam...</h1>
-            <p id="exam-subtitle-header" class="text-slate-400 text-sm md:text-base font-medium tracking-wide">Please wait...</p>
+            <h1 id="exam-title-header" class="text-xl md:text-3xl font-bold title-gradient leading-tight mb-2">Loading...</h1>
+            <p id="exam-subtitle-header" class="text-slate-400 text-sm font-medium tracking-wide">Please wait</p>
         </div>
 
-        <main id="quiz-container" class="glass p-6 md:p-10 rounded-[2rem] shadow-2xl relative">
-            <div class="flex justify-between items-center mb-6">
-                <div id="score-badge" class="bg-pink-600 px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">Score: 0</div>
-                <span id="question-count" class="text-xs text-slate-400 font-bold uppercase tracking-[0.2em]">Q: 1/10</span>
+        <main class="glass p-4 md:p-8 rounded-[2rem] shadow-2xl relative">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-slate-900/50 p-4 rounded-2xl border border-white/5">
+                <div id="score-badge" class="bg-pink-600 px-5 py-2 rounded-xl text-sm font-black tracking-widest uppercase shadow-lg shadow-pink-600/20">Score: 0</div>
+                <div class="w-full md:w-1/2 bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div id="progress" class="bg-gradient-to-r from-pink-500 to-purple-600 h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <span id="answered-count" class="text-xs text-slate-400 font-bold uppercase tracking-[0.2em] whitespace-nowrap">0/0 Answered</span>
             </div>
-            <div class="w-full bg-slate-700 h-1.5 rounded-full mb-8 overflow-hidden">
-                <div id="progress" class="bg-gradient-to-r from-pink-500 to-purple-600 h-full transition-all duration-500" style="width: 0%"></div>
+
+            <div class="flex justify-between items-center mb-6 bg-white/5 p-3 rounded-2xl border border-white/5">
+                <button onclick="changePage(-1)" id="prev-btn-top" class="px-5 py-2.5 bg-slate-700/50 hover:bg-slate-600 rounded-xl text-sm font-bold transition-all disabled:opacity-30">
+                    <i class="fa-solid fa-angle-left mr-1"></i> Prev
+                </button>
+                <span id="page-info-top" class="text-pink-400 font-black tracking-[0.2em] text-xs uppercase">Page 1/1</span>
+                <button onclick="changePage(1)" id="next-btn-top" class="px-5 py-2.5 bg-pink-600/80 hover:bg-pink-500 rounded-xl text-sm font-bold transition-all text-white">
+                    Next <i class="fa-solid fa-angle-right ml-1"></i>
+                </button>
+                <button onclick="finishExam()" id="submit-btn-top" class="hidden px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-bold transition-all text-white shadow-lg shadow-emerald-500/30">
+                    Submit Exam <i class="fa-solid fa-check ml-1"></i>
+                </button>
             </div>
-            <div id="question-area">
-                <h2 id="question-text" class="text-xl md:text-2xl font-bold mb-8 leading-relaxed">Questions are loading...</h2>
-                <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+            <div id="exam-questions-list" class="space-y-6"></div>
+
+            <div class="flex justify-between items-center mt-6 bg-white/5 p-3 rounded-2xl border border-white/5">
+                <button onclick="changePage(-1)" id="prev-btn-bottom" class="px-5 py-2.5 bg-slate-700/50 hover:bg-slate-600 rounded-xl text-sm font-bold transition-all disabled:opacity-30">
+                    <i class="fa-solid fa-angle-left mr-1"></i> Prev
+                </button>
+                <span id="page-info-bottom" class="text-pink-400 font-black tracking-[0.2em] text-xs uppercase">Page 1/1</span>
+                <button onclick="changePage(1)" id="next-btn-bottom" class="px-5 py-2.5 bg-pink-600/80 hover:bg-pink-500 rounded-xl text-sm font-bold transition-all text-white">
+                    Next <i class="fa-solid fa-angle-right ml-1"></i>
+                </button>
+                <button onclick="finishExam()" id="submit-btn-bottom" class="hidden px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-bold transition-all text-white shadow-lg shadow-emerald-500/30">
+                    Submit Exam <i class="fa-solid fa-check ml-1"></i>
+                </button>
             </div>
-            <div class="mt-10">
-                <button id="next-btn" disabled class="hidden w-full bg-slate-700 py-4 rounded-2xl font-bold tracking-widest hover:bg-slate-600 transition-all text-white">Next Question</button>
-            </div>
+
         </main>
     </div>
 
@@ -160,11 +183,7 @@
             <h1 id="practice-title" class="text-xl md:text-3xl font-bold text-blue-400 leading-tight mb-2">Practice View</h1>
             <p id="practice-subtitle" class="text-slate-400 text-sm font-medium tracking-wide">All correct answers are marked in green.</p>
         </div>
-
-        <div id="practice-list" class="space-y-6 px-2">
-            <!-- Practice Questions will be injected here -->
-            <div class="text-center text-slate-500 p-10"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>
-        </div>
+        <div id="practice-list" class="space-y-6 px-2"></div>
     </div>
 
     <!-- 5. Archive Mode Area -->
@@ -174,15 +193,9 @@
                 <i class="fa-solid fa-arrow-left mr-1"></i> Back to Dashboard
             </button>
             <h1 class="text-xl md:text-3xl font-bold text-amber-500 leading-tight mb-2">Exam Archives</h1>
-            <p class="text-slate-400 text-sm font-medium tracking-wide">Previous question papers from cloud storage.</p>
+            <p class="text-slate-400 text-sm font-medium tracking-wide">Select 'Practice' to read or 'Test' to give the exam.</p>
         </div>
-
-        <div id="archive-list" class="space-y-6 px-2">
-            <div class="glass p-10 text-center rounded-[2rem] text-slate-400 italic border-dashed border-2 border-white/10">
-                <i class="fa-solid fa-cloud-arrow-down text-3xl mb-3 text-slate-500 block"></i>
-                Connecting to Firebase Archive Database...
-            </div>
-        </div>
+        <div id="archive-list" class="space-y-4 px-2"></div>
     </div>
 
     <!-- Result Modal (End of Exam) -->
@@ -206,7 +219,7 @@
                 </div>
             </div>
 
-            <button onclick="backToDashboardFromResult()" class="w-full bg-pink-600 text-white font-black py-4 rounded-2xl uppercase tracking-widest hover:scale-105 transition-all mb-4">Back to Dashboard</button>
+            <button onclick="backToDashboardFromResult()" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-black py-4 rounded-2xl uppercase tracking-widest transition-all mb-4">Back to Dashboard</button>
             <button onclick="openLeaderboard()" class="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl text-sm font-bold hover:bg-white/10 transition-all">View Merit List</button>
         </div>
     </div>
@@ -230,7 +243,7 @@
                             <th class="p-4 w-16 text-center">Rank</th>
                             <th class="p-4">Student Name</th>
                             <th class="p-4 text-center">Score</th>
-                            <th class="p-4 text-right">Time</th>
+                            <th class="p-4 text-right">Exam Mode</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body">
@@ -243,11 +256,17 @@
 
     <!-- Firebase SDKs & Logic -->
     <script type="module">
+        const dateElement = document.getElementById('live-exam-date');
+        if (dateElement) {
+            const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+            dateElement.innerText = new Date().toLocaleDateString('en-US', options);
+        }
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config
+        // 🔥 Aapnar Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -262,56 +281,46 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Variables
+        // State Variables
         let questions = [];
         let parsedTitle = "Live Exam";
         let parsedSubtitle = "Test your knowledge";
         
-        let currentIndex = 0;
-        let score = 0;
-        let canAnswer = true;
         let currentStudent = { name: '', phone: '' };
         let currentUser = null;
+        let archiveCache = {};
 
-        // UI Elements
-        const registrationModal = document.getElementById('registration-modal');
-        const dashboardContainer = document.getElementById('dashboard-container');
-        const examMainContent = document.getElementById('exam-main-content');
-        const practiceContent = document.getElementById('practice-content');
-        const archiveContent = document.getElementById('archive-content');
-        
-        const headerStudentName = document.getElementById('header-student-name');
-        const studentBadge = document.getElementById('student-badge');
-        const dashName = document.getElementById('dash-name');
-        const logoutBtn = document.getElementById('logout-btn');
+        // Pagination Exam Variables
+        let currentPage = 0;
+        const questionsPerPage = 20;
+        let score = 0;
+        let userAnswers = {}; 
+        let answeredQuestions = new Set(); 
 
-        // Initial Auth
         signInAnonymously(auth).catch(e => console.error("Auth failed", e));
         onAuthStateChanged(auth, user => { if(user) currentUser = user; });
 
-        // 🔥 LOGIN CHECK (One-Time Login Logic)
-        function checkLogin() {
+        window.onload = () => {
             const savedData = localStorage.getItem('student_info');
             if (savedData) {
                 currentStudent = JSON.parse(savedData);
                 activateUserSession();
             } else {
-                registrationModal.classList.remove('hidden');
+                document.getElementById('registration-modal').classList.remove('hidden');
             }
-        }
+        };
 
         function activateUserSession() {
-            headerStudentName.innerText = currentStudent.name.split(' ')[0];
-            dashName.innerText = currentStudent.name.split(' ')[0];
-            studentBadge.classList.remove('hidden');
-            studentBadge.classList.add('flex');
-            logoutBtn.classList.remove('hidden');
+            document.getElementById('header-student-name').innerText = currentStudent.name.split(' ')[0];
+            document.getElementById('dash-name').innerText = currentStudent.name.split(' ')[0];
+            document.getElementById('student-badge').classList.remove('hidden');
+            document.getElementById('student-badge').classList.add('flex');
+            document.getElementById('logout-btn').classList.remove('hidden');
             
-            registrationModal.classList.add('hidden');
-            dashboardContainer.classList.remove('hidden');
+            document.getElementById('registration-modal').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
         }
 
-        // Registration Form Submit
         document.getElementById('registration-form').onsubmit = (e) => {
             e.preventDefault();
             const name = document.getElementById('student-name').value.trim();
@@ -323,139 +332,195 @@
             }
         };
 
-        // Logout logic
         window.logout = () => {
             localStorage.removeItem('student_info');
             location.reload();
         }
 
-        // View Router
         function hideAllViews() {
-            dashboardContainer.classList.add('hidden');
-            examMainContent.classList.add('hidden');
-            practiceContent.classList.add('hidden');
-            archiveContent.classList.add('hidden');
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('exam-main-content').classList.add('hidden');
+            document.getElementById('practice-content').classList.add('hidden');
+            document.getElementById('archive-content').classList.add('hidden');
         }
 
         window.backToDashboard = (currentViewId) => {
             document.getElementById(currentViewId).classList.add('hidden');
-            dashboardContainer.classList.remove('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
         };
 
         window.backToDashboardFromResult = () => {
             document.getElementById('result-modal').classList.add('hidden');
-            examMainContent.classList.add('hidden');
-            dashboardContainer.classList.remove('hidden');
+            document.getElementById('exam-main-content').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
         }
 
-        // =============== DATA FETCHING ===============
-        async function fetchQuestionsData() {
-            if(questions.length > 0) return true; // Already loaded
-
+        // 🔥 Notun Data Fetching Logic (Sorasori Firebase theke)
+        async function fetchLiveQuestionsData() {
             try {
-                const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
-                const targetUrl = baseUrl.includes('blob:') ? 'questions.txt' : `${baseUrl}/questions.txt`;
-                const response = await fetch(targetUrl);
-                if(!response.ok) throw new Error("File Missing");
+                const liveRef = doc(db, 'artifacts', appId, 'public', 'data', 'live_exam', 'current');
+                const docSnap = await getDoc(liveRef);
                 
-                const text = await response.text();
-                parseFileContent(text);
-                return true;
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    parsedTitle = data.title;
+                    parsedSubtitle = data.subtitle;
+                    
+                    const lines = data.questions.trim().split('\n').filter(l => l.trim() !== '');
+                    questions = lines.map(line => {
+                        const parts = line.split('|');
+                        return { question: parts[0], options: [parts[1], parts[2], parts[3], parts[4]], correct: parseInt(parts[5]) };
+                    });
+                    return true;
+                } else {
+                    return false; // Kono live exam nei
+                }
             } catch (err) {
                 console.error(err);
-                if(window.location.href.includes('preview')) {
-                    loadSampleData();
-                    return true;
-                }
                 return false;
             }
         }
 
-        function parseFileContent(text) {
-            const lines = text.trim().split('\n').filter(l => l.trim() !== '');
-            if(lines.length >= 2) {
-                parsedTitle = lines[0];
-                parsedSubtitle = lines[1];
-                const questionLines = lines.slice(2);
-                questions = questionLines.map(line => {
-                    const parts = line.split('|');
-                    return { question: parts[0], options: [parts[1], parts[2], parts[3], parts[4]], correct: parseInt(parts[5]) };
-                });
-            }
-        }
 
-        function loadSampleData() {
-            const sample = `বাংলাদেশ পানি উন্নয়ন বোর্ড (BWDB)\n২০২৬ এর MCQ সমাধান | Preview Data\nSurjo kon dik theke othe?|Purbo|Poschim|Utor|Dokkhin|0\nWeb styling er jonno ki use hoy?|HTML|Python|CSS|Java|2`;
-            parseFileContent(sample);
-        }
-
-
-        // =============== 1. LIVE EXAM MODE ===============
-        window.startExamMode = async () => {
+        // =============== EXAM MODE ===============
+        window.startLiveMode = async (mode) => {
             hideAllViews();
-            examMainContent.classList.remove('hidden');
-            
-            // Reset Exam State
-            currentIndex = 0;
-            score = 0;
-            document.getElementById('score-badge').innerText = `Score: 0`;
-            
-            const success = await fetchQuestionsData();
+            const success = await fetchLiveQuestionsData();
             if (success && questions.length > 0) {
-                document.getElementById('exam-title-header').innerText = parsedTitle;
-                document.getElementById('exam-subtitle-header').innerText = parsedSubtitle;
-                showExamQuestion();
+                if(mode === 'exam') initExamView();
+                else initPracticeView();
             } else {
-                document.getElementById('question-text').innerText = "Questions not found. Check questions.txt";
+                alert("Opekkhwa korun! Admin ekhono ajker notun exam upload koreni.");
+                backToDashboard('exam-main-content');
             }
         };
 
-        function showExamQuestion() {
-            const q = questions[currentIndex];
-            document.getElementById('question-text').innerText = q.question;
-            document.getElementById('question-count').innerText = `Q: ${currentIndex + 1}/${questions.length}`;
-            document.getElementById('progress').style.width = `${((currentIndex) / questions.length) * 100}%`;
+        function initExamView() {
+            hideAllViews();
+            document.getElementById('exam-main-content').classList.remove('hidden');
+            document.getElementById('exam-title-header').innerText = parsedTitle;
+            document.getElementById('exam-subtitle-header').innerText = parsedSubtitle;
             
-            const grid = document.getElementById('options-grid');
-            grid.innerHTML = '';
-            q.options.forEach((opt, idx) => {
-                const btn = document.createElement('button');
-                btn.className = "option-btn w-full text-left p-4 rounded-2xl glass border border-white/10 flex items-center justify-between group";
-                btn.innerHTML = `<span class="font-medium text-sm md:text-base">${opt}</span>`;
-                btn.onclick = () => selectOption(idx, btn);
-                grid.appendChild(btn);
-            });
+            currentPage = 0;
+            score = 0;
+            userAnswers = {};
+            answeredQuestions.clear();
+            document.getElementById('score-badge').innerText = `Score: 0`;
             
-            canAnswer = true;
-            document.getElementById('next-btn').classList.add('hidden');
+            renderExamPage();
         }
 
-        function selectOption(idx, btn) {
-            if(!canAnswer) return;
-            canAnswer = false;
-            const correctIdx = questions[currentIndex].correct;
-            const allBtns = document.getElementById('options-grid').querySelectorAll('.option-btn');
+        function renderExamPage() {
+            const container = document.getElementById('exam-questions-list');
+            container.innerHTML = '';
             
-            if(idx === correctIdx) {
-                btn.classList.add('correct');
+            const start = currentPage * questionsPerPage;
+            const end = Math.min(start + questionsPerPage, questions.length);
+
+            for (let i = start; i < end; i++) {
+                const q = questions[i];
+                const qDiv = document.createElement('div');
+                qDiv.className = "mb-6 p-5 md:p-6 bg-slate-900/60 rounded-2xl border border-white/5 shadow-inner relative";
+                qDiv.innerHTML = `<h3 class="text-base md:text-lg font-bold mb-4 flex items-start gap-3"><span class="bg-pink-600/20 text-pink-400 px-2.5 py-1 rounded-lg text-xs mt-1 shrink-0">${i + 1}</span> <span>${q.question}</span></h3>`;
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-3";
+
+                q.options.forEach((opt, optIdx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 transition-all text-sm md:text-base font-medium flex items-center justify-between";
+                    
+                    if (answeredQuestions.has(i)) {
+                        btn.disabled = true;
+                        if (optIdx === q.correct) {
+                            btn.className = "w-full text-left p-4 rounded-xl bg-emerald-600 border border-emerald-500 text-white font-bold flex justify-between";
+                            btn.innerHTML = `<span>${opt}</span><i class="fa-solid fa-check"></i>`;
+                        } else if (userAnswers[i] === optIdx) {
+                            btn.className = "w-full text-left p-4 rounded-xl bg-red-600 border border-red-500 text-white font-bold flex justify-between";
+                            btn.innerHTML = `<span>${opt}</span><i class="fa-solid fa-xmark"></i>`;
+                        } else {
+                            btn.innerHTML = `<span>${opt}</span>`;
+                            btn.classList.add('opacity-50');
+                        }
+                    } else {
+                        btn.classList.add('hover:bg-white/10', 'hover:border-pink-500/50');
+                        btn.innerHTML = `<span>${opt}</span>`;
+                        btn.onclick = () => handleQuestionAnswer(i, optIdx, optionsGrid, q.correct);
+                    }
+                    optionsGrid.appendChild(btn);
+                });
+
+                qDiv.appendChild(optionsGrid);
+                container.appendChild(qDiv);
+            }
+
+            updatePaginationUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.handleQuestionAnswer = (qIndex, optIndex, gridElement, correctIdx) => {
+            if (answeredQuestions.has(qIndex)) return;
+            answeredQuestions.add(qIndex);
+            userAnswers[qIndex] = optIndex;
+
+            const btns = gridElement.querySelectorAll('button');
+            btns.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-white/10', 'hover:border-pink-500/50');
+                if (idx === correctIdx) {
+                    btn.className = "w-full text-left p-4 rounded-xl bg-emerald-600 border border-emerald-500 text-white font-bold flex justify-between";
+                    btn.innerHTML += `<i class="fa-solid fa-check"></i>`;
+                } else if (idx === optIndex) {
+                    btn.className = "w-full text-left p-4 rounded-xl bg-red-600 border border-red-500 text-white font-bold flex justify-between";
+                    btn.innerHTML += `<i class="fa-solid fa-xmark"></i>`;
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            if (optIndex === correctIdx) {
                 score += 10;
                 document.getElementById('score-badge').innerText = `Score: ${score}`;
-            } else {
-                btn.classList.add('wrong');
-                if (allBtns[correctIdx]) allBtns[correctIdx].classList.add('correct');
             }
             
-            if(currentIndex < questions.length - 1) {
-                document.getElementById('next-btn').classList.remove('hidden');
-                document.getElementById('next-btn').disabled = false;
-            } else {
-                setTimeout(finishExam, 1500);
+            const pct = (answeredQuestions.size / questions.length) * 100;
+            document.getElementById('progress').style.width = `${pct}%`;
+            document.getElementById('answered-count').innerText = `${answeredQuestions.size}/${questions.length} Answered`;
+        }
+
+        function updatePaginationUI() {
+            const totalPages = Math.ceil(questions.length / questionsPerPage);
+            
+            ['top', 'bottom'].forEach(pos => {
+                document.getElementById(`page-info-${pos}`).innerText = `Page ${currentPage + 1}/${totalPages || 1}`;
+                
+                const prevBtn = document.getElementById(`prev-btn-${pos}`);
+                prevBtn.disabled = (currentPage === 0);
+                prevBtn.classList.toggle('opacity-50', currentPage === 0);
+
+                const nextBtn = document.getElementById(`next-btn-${pos}`);
+                const submitBtn = document.getElementById(`submit-btn-${pos}`);
+
+                if (currentPage >= totalPages - 1) {
+                    nextBtn.classList.add('hidden');
+                    submitBtn.classList.remove('hidden');
+                } else {
+                    nextBtn.classList.remove('hidden');
+                    submitBtn.classList.add('hidden');
+                }
+            });
+        }
+
+        window.changePage = (step) => {
+            const totalPages = Math.ceil(questions.length / questionsPerPage);
+            const newPage = currentPage + step;
+            if (newPage >= 0 && newPage < totalPages) {
+                currentPage = newPage;
+                renderExamPage();
             }
         }
 
-        document.getElementById('next-btn').onclick = () => { currentIndex++; showExamQuestion(); };
-
-        async function finishExam() {
+        window.finishExam = async () => {
             document.getElementById('result-modal').classList.remove('hidden');
             document.getElementById('result-student-name').innerText = currentStudent.name;
             document.getElementById('final-score').innerText = score;
@@ -482,86 +547,102 @@
         }
 
 
-        // =============== 2. PRACTICE MODE ===============
-        window.startPracticeMode = async () => {
+        // =============== PRACTICE VIEW ===============
+        function initPracticeView() {
             hideAllViews();
-            practiceContent.classList.remove('hidden');
-            const listContainer = document.getElementById('practice-list');
+            document.getElementById('practice-content').classList.remove('hidden');
+            document.getElementById('practice-title').innerText = parsedTitle;
+            document.getElementById('practice-subtitle').innerText = parsedSubtitle;
             
-            const success = await fetchQuestionsData();
-            if (success && questions.length > 0) {
-                document.getElementById('practice-title').innerText = parsedTitle;
-                
-                let html = '';
-                questions.forEach((q, qIndex) => {
-                    html += `
-                    <div class="glass p-6 rounded-2xl border border-white/10 mb-4">
-                        <h3 class="text-lg font-bold mb-4"><span class="text-pink-500 mr-2">${qIndex + 1}.</span>${q.question}</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    `;
-                    q.options.forEach((opt, optIdx) => {
-                        const isCorrect = (optIdx === q.correct);
-                        const styleClass = isCorrect ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-400 font-bold' : 'bg-white/5 border-white/10 text-slate-400';
-                        const icon = isCorrect ? '<i class="fa-solid fa-check-circle"></i>' : '';
-                        
-                        html += `<div class="p-3 rounded-xl border ${styleClass} flex justify-between items-center text-sm">
-                            <span>${opt}</span> ${icon}
-                        </div>`;
-                    });
-                    html += `</div></div>`;
+            const listContainer = document.getElementById('practice-list');
+            let html = '';
+            questions.forEach((q, qIndex) => {
+                html += `
+                <div class="bg-slate-900/50 p-6 rounded-2xl border border-white/5 mb-4 shadow-sm">
+                    <h3 class="text-base font-bold mb-4 flex gap-3"><span class="text-blue-400 mt-0.5">${qIndex + 1}.</span> ${q.question}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                `;
+                q.options.forEach((opt, optIdx) => {
+                    const isCorrect = (optIdx === q.correct);
+                    const styleClass = isCorrect ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-400 font-bold' : 'bg-white/5 border-white/5 text-slate-500';
+                    const icon = isCorrect ? '<i class="fa-solid fa-check-circle"></i>' : '';
+                    html += `<div class="p-3 rounded-xl border ${styleClass} flex justify-between items-center text-sm">
+                        <span>${opt}</span> ${icon}
+                    </div>`;
                 });
-                listContainer.innerHTML = html;
-            } else {
-                listContainer.innerHTML = `<div class="text-center text-red-400 p-10">Failed to load practice questions.</div>`;
-            }
-        };
+                html += `</div></div>`;
+            });
+            listContainer.innerHTML = html;
+        }
 
 
-        // =============== 3. ARCHIVE MODE ===============
-        window.startArchiveMode = () => {
+        // =============== ARCHIVE VIEW ===============
+        window.openArchiveView = () => {
             hideAllViews();
-            archiveContent.classList.remove('hidden');
+            document.getElementById('archive-content').classList.remove('hidden');
             const archiveList = document.getElementById('archive-list');
             
             if(!currentUser) return;
 
             const archiveRef = collection(db, 'artifacts', appId, 'public', 'data', 'exam_archives');
             
-            // Realtime fetch for archives
             onSnapshot(archiveRef, (snapshot) => {
                 let html = '';
                 if(snapshot.empty) {
-                    archiveList.innerHTML = `
-                    <div class="glass p-10 text-center rounded-[2rem] border-dashed border-2 border-white/10">
-                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-500 block"></i>
-                        <p class="text-slate-400 font-medium">No previous question papers found in database.</p>
-                        <p class="text-xs text-slate-500 mt-2">Admins can upload archives from the backend.</p>
-                    </div>`;
+                    archiveList.innerHTML = `<div class="glass p-10 text-center rounded-[2rem] border-dashed border-2 border-white/10"><p class="text-slate-400 font-medium">No previous question papers found.</p></div>`;
                     return;
                 }
 
                 snapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    const date = data.timestamp ? new Date(parseInt(data.timestamp)).toLocaleDateString() : 'Previous Exam';
+                    archiveCache[docSnap.id] = data;
+
+                    const date = data.timestamp ? new Date(parseInt(data.timestamp)).toLocaleDateString() : 'Archive';
+                    
                     html += `
-                    <div class="glass p-6 rounded-2xl border border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 hover:bg-white/5 transition-all cursor-pointer">
-                        <div>
-                            <h3 class="font-bold text-lg text-amber-400">${data.title || 'Archived Paper'}</h3>
-                            <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest"><i class="fa-regular fa-calendar mr-1"></i> ${date}</p>
+                    <div class="bg-slate-900/60 p-6 rounded-2xl border border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 hover:border-pink-500/30 transition-all">
+                        <div class="text-center md:text-left w-full">
+                            <h3 class="font-bold text-lg text-amber-400 leading-tight">${data.title}</h3>
+                            <p class="text-sm text-slate-400 mt-1">${data.subtitle}</p>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md mt-2 inline-block"><i class="fa-regular fa-calendar mr-1"></i> ${date}</span>
                         </div>
-                        <button class="px-5 py-2 rounded-xl bg-amber-600/20 text-amber-400 border border-amber-500/30 hover:bg-amber-600 hover:text-white font-bold text-sm transition-all whitespace-nowrap">
-                            <i class="fa-solid fa-eye mr-1"></i> View Paper
-                        </button>
+                        
+                        <div class="flex gap-2 mt-2 md:mt-0 w-full md:w-auto shrink-0">
+                            <button onclick="loadArchiveExam('${docSnap.id}', 'practice')" class="flex-grow md:flex-grow-0 px-5 py-3 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600 hover:text-white font-bold text-sm transition-all shadow-lg">
+                                <i class="fa-solid fa-book-open-reader mr-1"></i> Practice
+                            </button>
+                            <button onclick="loadArchiveExam('${docSnap.id}', 'exam')" class="flex-grow md:flex-grow-0 px-5 py-3 rounded-xl bg-pink-600/20 text-pink-400 border border-pink-500/30 hover:bg-pink-600 hover:text-white font-bold text-sm transition-all shadow-lg">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i> Test
+                            </button>
+                        </div>
                     </div>`;
                 });
                 archiveList.innerHTML = html;
-            }, (error) => {
-                archiveList.innerHTML = `<div class="text-center text-red-400 p-10">Error loading archives: ${error.message}</div>`;
             });
         };
 
+        window.loadArchiveExam = (docId, mode) => {
+            const data = archiveCache[docId];
+            if(!data) return;
 
-        // =============== 4. LEADERBOARD (MERIT LIST) ===============
+            parsedTitle = data.title;
+            parsedSubtitle = data.subtitle;
+            
+            const lines = data.questions.trim().split('\n').filter(l => l.trim() !== '');
+            questions = lines.map(line => {
+                const parts = line.split('|');
+                return { question: parts[0], options: [parts[1], parts[2], parts[3], parts[4]], correct: parseInt(parts[5]) };
+            });
+
+            if(mode === 'practice') {
+                initPracticeView();
+            } else {
+                initExamView();
+            }
+        };
+
+
+        // =============== MERIT LIST ===============
         window.openLeaderboard = () => {
             document.getElementById('leaderboard-modal').classList.remove('hidden');
             const leaderboardBody = document.getElementById('leaderboard-body');
@@ -571,7 +652,6 @@
                 let allResults = [];
                 snapshot.forEach(docSnap => allResults.push(docSnap.data()));
                 
-                // Sort by highest score, then newest
                 allResults.sort((a, b) => {
                     const scoreA = parseInt(a.score) || 0;
                     const scoreB = parseInt(b.score) || 0;
@@ -586,7 +666,6 @@
                 }
 
                 allResults.forEach((res, index) => {
-                    const date = res.timestamp ? new Date(parseInt(res.timestamp)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'N/A';
                     const rank = index + 1;
                     let rankClass = "bg-slate-800 text-slate-400";
                     if (rank === 1) rankClass = "rank-1";
@@ -606,7 +685,9 @@
                         <td class="p-4 text-center">
                             <span class="bg-pink-600/10 text-pink-400 px-3 py-1 rounded-lg font-black text-sm">${res.score}</span>
                         </td>
-                        <td class="p-4 text-right text-[9px] text-slate-500 font-bold uppercase">${date}</td>
+                        <td class="p-4 text-right">
+                            <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-slate-400 font-bold truncate max-w-[100px] inline-block">${res.examTitle || 'Exam'}</span>
+                        </td>
                     `;
                     leaderboardBody.appendChild(tr);
                 });
@@ -614,9 +695,6 @@
         };
 
         window.closeLeaderboard = () => document.getElementById('leaderboard-modal').classList.add('hidden');
-
-        // Init Flow
-        window.onload = checkLogin;
 
     </script>
 </body>
