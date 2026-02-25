@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- 🔥 Added interactive-widget=resizes-content for Native Android Keyboard Support 🔥 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="theme-color" content="#020617">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,15 +18,12 @@
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
-            overflow: hidden; 
-            height: 100vh; /* Fallback */
+            overflow: hidden; /* Prevent body scroll, only inner containers should scroll */
+            height: 100dvh; /* Dynamic Viewport Height fixes keyboard layout issues natively */
             width: 100vw;
             margin: 0;
             padding: 0;
-            position: fixed; 
-            top: 0;
-            left: 0;
-            touch-action: none;
+            overscroll-behavior-y: none; /* Stops pull-to-refresh but allows internal scrolling */
         }
         
         .chat-bg {
@@ -118,13 +116,13 @@
     </div>
 
     <!-- 2. Main App Container -->
-    <!-- 🔥 Absolute Position used strictly for mobile layout calculation -->
-    <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-6xl mx-auto md:relative md:py-4 md:px-4 flex" style="height: 100%;">
+    <!-- Changed absolute height logic to flex styling suitable for 100dvh -->
+    <div id="app-container" class="hidden absolute top-0 left-0 w-full h-[100dvh] max-w-6xl mx-auto md:relative md:py-4 md:px-4 flex">
         
-        <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden">
+        <div class="w-full h-full flex flex-row bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden">
             
             <!-- LEFT SIDEBAR (Contacts) -->
-            <div id="sidebar" class="w-full md:w-[350px] lg:w-[400px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 bg-slate-950">
+            <div id="sidebar" class="w-full h-full md:w-[350px] lg:w-[400px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 bg-slate-950">
                 <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
                         <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors shrink-0">
@@ -155,7 +153,7 @@
                     </div>
                 </div>
 
-                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative" style="touch-action: pan-y;">
+                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative">
                     <div class="text-center py-3 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
                         <span>Available Users</span>
                         <i class="fa-solid fa-users"></i>
@@ -165,7 +163,7 @@
             </div>
 
             <!-- RIGHT SIDEBAR (Chat Window) -->
-            <div id="chat-area" class="w-full hidden md:flex flex-col bg-slate-950 relative h-full">
+            <div id="chat-area" class="w-full h-full hidden md:flex flex-col bg-slate-950 relative">
                 
                 <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
                     <div class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-6 border border-white/10">
@@ -202,7 +200,7 @@
                     </div>
                 </header>
 
-                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()" style="touch-action: pan-y;">
+                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()">
                     <div class="text-center my-4">
                         <span class="bg-black/40 text-slate-400 text-[11px] px-4 py-1.5 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
                             <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> End-to-end encrypted
@@ -275,33 +273,26 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 CRITICAL FIX FOR ANDROID KEYBOARD OVERLAP 🔥
-        function setRealViewportHeight() {
-            let vh = window.innerHeight;
-            if (window.visualViewport) {
-                vh = window.visualViewport.height;
-            }
-            // Strict height matching applied directly to body and app-container
-            document.body.style.height = vh + 'px';
-            document.documentElement.style.height = vh + 'px';
-            
-            const appContainer = document.getElementById('app-container');
-            if (appContainer) {
-                appContainer.style.height = vh + 'px';
-            }
-
-            // Push to bottom smoothly when keyboard changes layout
+        // 🔥 CRITICAL FIX FOR ANDROID KEYBOARD OVERLAP & SCROLLING 🔥
+        function scrollToBottom() {
             const msgBox = document.getElementById('messages-box');
             if(msgBox) {
-                setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50);
+                msgBox.scrollTop = msgBox.scrollHeight;
             }
         }
 
-        window.addEventListener('resize', setRealViewportHeight);
+        // Adjust scroll smoothly when keyboard appears and changes visual viewport
         if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', setRealViewportHeight);
+            window.visualViewport.addEventListener('resize', () => {
+                setTimeout(scrollToBottom, 50);
+            });
         }
-        setRealViewportHeight();
+        
+        // Push scroll to bottom when user clicks input
+        const msgInput = document.getElementById('msg-input');
+        msgInput.addEventListener('focus', () => {
+            setTimeout(scrollToBottom, 300); // Wait for keyboard animation to finish
+        });
 
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
@@ -352,7 +343,6 @@
         const sidebar = document.getElementById('sidebar');
         const msgBox = document.getElementById('messages-box');
         const chatForm = document.getElementById('chat-form');
-        const msgInput = document.getElementById('msg-input');
         
         const sendBtn = document.getElementById('send-btn');
         const micBtn = document.getElementById('mic-btn');
@@ -542,7 +532,6 @@
             }
         }
 
-        msgInput.addEventListener('focus', () => { setTimeout(() => setRealViewportHeight(), 150); });
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
@@ -847,7 +836,7 @@
                     }
                 });
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); renderContacts();
-                setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
+                setTimeout(scrollToBottom, 100);
             });
         };
 
@@ -908,6 +897,7 @@
                 msgInput.value = ''; clearFile();
                 msgInput.style.height = '48px'; toggleInputButtons();
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
+                setTimeout(scrollToBottom, 100);
             } catch (error) { alert("Message failed."); } 
             finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
