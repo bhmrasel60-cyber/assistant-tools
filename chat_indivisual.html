@@ -12,17 +12,19 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 FIXED FOR MOBILE KEYBOARD & SCROLLING 🔥 */
-        body { 
+        /* 🔥 Android Display & Keyboard Fixes 🔥 */
+        html, body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
             overflow: hidden; 
-            height: 100dvh; 
+            height: 100vh; /* Fallback */
             width: 100vw;
             margin: 0;
             padding: 0;
             position: fixed; 
+            top: 0;
+            left: 0;
             touch-action: none;
         }
         
@@ -116,8 +118,8 @@
     </div>
 
     <!-- 2. Main App Container -->
-    <!-- 🔥 Changed to a more stable structure for mobile keyboards -->
-    <div id="app-container" class="hidden w-full h-[100dvh] max-w-6xl mx-auto md:py-4 md:px-4 flex relative">
+    <!-- 🔥 Absolute Position used strictly for mobile layout calculation -->
+    <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-6xl mx-auto md:relative md:py-4 md:px-4 flex" style="height: 100%;">
         
         <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden">
             
@@ -163,7 +165,6 @@
             </div>
 
             <!-- RIGHT SIDEBAR (Chat Window) -->
-            <!-- 🔥 Hidden on mobile by default using 'hidden md:flex' instead of absolute positioning -->
             <div id="chat-area" class="w-full hidden md:flex flex-col bg-slate-950 relative h-full">
                 
                 <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
@@ -210,7 +211,7 @@
                 </main>
 
                 <!-- Footer with Input & Voice Recording -->
-                <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+                <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
                     
                     <div id="file-preview-container" class="hidden w-full px-1 mb-3">
                         <div class="bg-slate-800 border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-xl">
@@ -274,18 +275,28 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 Fix for Android Keyboard: Set the body height directly based on visualViewport
+        // 🔥 CRITICAL FIX FOR ANDROID KEYBOARD OVERLAP 🔥
         function setRealViewportHeight() {
+            let vh = window.innerHeight;
             if (window.visualViewport) {
-                document.body.style.height = window.visualViewport.height + 'px';
-            } else {
-                document.body.style.height = window.innerHeight + 'px';
+                vh = window.visualViewport.height;
             }
+            // Strict height matching applied directly to body and app-container
+            document.body.style.height = vh + 'px';
+            document.documentElement.style.height = vh + 'px';
+            
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                appContainer.style.height = vh + 'px';
+            }
+
+            // Push to bottom smoothly when keyboard changes layout
             const msgBox = document.getElementById('messages-box');
             if(msgBox) {
                 setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50);
             }
         }
+
         window.addEventListener('resize', setRealViewportHeight);
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', setRealViewportHeight);
@@ -768,7 +779,6 @@
         window.addEventListener('hashchange', () => { if (window.location.hash !== '#chat' && activeContactMobile) closeChatLogic(); });
 
         function closeChatLogic() {
-            // 🔥 Clean hide/show logic replacing translation logic
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('chat-area').classList.add('hidden');
             
@@ -787,7 +797,6 @@
             
             document.getElementById('empty-chat-state').classList.add('hidden');
             
-            // 🔥 Mobile Toggle Logic Fix
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('hidden'); 
                 document.getElementById('chat-area').classList.remove('hidden');
