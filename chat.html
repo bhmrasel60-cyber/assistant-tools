@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- 🔥 Mobile Responsiveness & Keyboard Issue Fix 🔥 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Global Live Chat | Web Tools Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -10,15 +9,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Using dynamic viewport height (dvh) to fix mobile keyboard hiding issue */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
             overflow: hidden; 
-            height: 100dvh; /* Fix for mobile address bar */
+            height: 100dvh; 
             width: 100vw;
-            position: fixed; /* Prevents whole page scrolling */
+            position: fixed; 
         }
         
         .chat-bg {
@@ -40,7 +38,6 @@
         .glass-header { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-top: max(1rem, env(safe-area-inset-top)); }
         .glass-footer { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
         
-        /* Ensures textarea doesn't cause page zoom on iOS/Android */
         textarea { font-size: 16px !important; }
     </style>
 </head>
@@ -66,7 +63,6 @@
     </div>
 
     <!-- 2. Main Chat App Container -->
-    <!-- 🔥 Changed h-screen to h-full to respect parent body's 100dvh 🔥 -->
     <div id="chat-app" class="hidden flex-col h-full w-full max-w-4xl mx-auto relative bg-slate-950 shadow-2xl md:border-x border-white/5">
         
         <header class="glass-header p-4 flex items-center justify-between z-20 shrink-0">
@@ -124,7 +120,7 @@
                 <input type="file" id="file-input" class="hidden">
 
                 <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-2xl flex items-center px-2 py-1 transition-all focus-within:border-pink-500/50">
-                    <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                    <textarea id="msg-input" rows="1" placeholder="Type @all to notify everyone..."
                         class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-28 custom-scroll" style="min-height: 44px;"></textarea>
                 </div>
                 
@@ -160,6 +156,13 @@
 
         let myUsername = localStorage.getItem('chat_username') || '';
         let selectedFile = null;
+        let appStartTime = Date.now(); // 🔥 Notun message track korar jonno
+
+        // Service Worker Register korchi (Android a Push Notification er jonno)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('firebase-messaging-sw.js')
+            .catch(err => console.warn('Service worker not registered:', err));
+        }
 
         const joinModal = document.getElementById('join-modal');
         const chatApp = document.getElementById('chat-app');
@@ -170,7 +173,6 @@
         const fileInput = document.getElementById('file-input');
         const previewContainer = document.getElementById('file-preview-container');
 
-        // Mobile Fix: Scroll to bottom slightly when keyboard appears
         msgInput.addEventListener('focus', () => {
             setTimeout(() => {
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -203,10 +205,7 @@
         });
         
         msgInput.addEventListener('keypress', (e) => {
-            // Prevent enter on mobile if it's just meant to be a simple enter
             if (e.key === 'Enter' && !e.shiftKey) {
-                // Ignore enter for sending on mobile devices if preferred, but here we keep it
-                // To prevent double sending
                 e.preventDefault();
                 if(!sendBtn.disabled) chatForm.dispatchEvent(new Event('submit'));
             }
@@ -238,6 +237,12 @@
         async function startChatApp() {
             chatApp.classList.remove('hidden');
             chatApp.classList.add('flex');
+            
+            // 🔥 User theke Notification er Onumoti neya
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+
             try {
                 await signInAnonymously(auth);
                 listenForMessages();
@@ -288,7 +293,6 @@
                 clearFile();
                 msgInput.style.height = '44px';
                 
-                // Keep focus on input after sending for fast typing
                 msgInput.focus();
             } catch (error) {
                 console.error(error);
@@ -298,6 +302,29 @@
                 sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile;
             }
         };
+
+        // 🔥 Notification Dekhanor Logic
+        function triggerGlobalNotification(sender, text, isFile) {
+            if (Notification.permission === "granted") {
+                let cleanText = text ? text.replace(/@all/ig, '').trim() : '';
+                if (!cleanText && isFile) cleanText = "Sent a file/image to everyone.";
+                
+                const title = `🚨 Global Mention from ${sender}`;
+                const options = {
+                    body: cleanText,
+                    icon: 'developer.jpg', // Aapnar chobi ashbe
+                    vibrate: [200, 100, 200]
+                };
+
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(title, options);
+                    });
+                } else {
+                    new Notification(title, options);
+                }
+            }
+        }
 
         function listenForMessages() {
             const q = query(
@@ -309,7 +336,17 @@
             onSnapshot(q, (snapshot) => {
                 document.getElementById('loading-msgs').style.display = 'none';
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") appendMessageToUI(change.doc.data());
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        appendMessageToUI(data);
+
+                        // 🔥 Jodi notun message hoy, nije send na kore thaki ebong @all thake
+                        if (data.timestamp > appStartTime && data.sender !== myUsername) {
+                            if (data.text && data.text.toLowerCase().includes('@all')) {
+                                triggerGlobalNotification(data.sender, data.text, !!data.fileUrl);
+                            }
+                        }
+                    }
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
@@ -341,12 +378,19 @@
                 }
             }
             
-            const textHtml = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed">${escapeHTML(data.text)}</p>` : '';
+            // 🔥 HTML formatting to highlight @all
+            let finalHtmlText = '';
+            if (data.text) {
+                let safeText = escapeHTML(data.text);
+                // Highlight @all with pink badge
+                safeText = safeText.replace(/@all/ig, '<span class="bg-emerald-500/30 text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest text-[11px] shadow-inner mx-0.5">@ALL</span>');
+                finalHtmlText = `<p class="text-[15px] whitespace-pre-wrap leading-relaxed">${safeText}</p>`;
+            }
             
             msgDiv.innerHTML = `
                 <span class="text-[10px] text-slate-400 mb-1 font-bold">${data.sender}</span>
                 ${content}
-                ${textHtml}
+                ${finalHtmlText}
                 <span class="text-[9px] opacity-60 mt-1 block text-right">${data.timeString}</span>
             `;
             
