@@ -12,13 +12,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        html, body { 
+        /* 🔥 FIXED FOR MOBILE KEYBOARD & SCROLLING 🔥 */
+        body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
             overflow: hidden; 
-            height: 100%; 
-            width: 100%;
+            height: 100dvh; 
+            width: 100vw;
             margin: 0;
             padding: 0;
             position: fixed; 
@@ -37,18 +38,19 @@
         }
         .msg-bubble { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
         
         .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
         
-        textarea { font-size: 16px !important; } 
+        /* Stop auto-zoom on mobile */
+        textarea, input { font-size: 16px !important; } 
         
         .contact-active { background: linear-gradient(to right, rgba(236,72,153,0.1), rgba(168,85,247,0.1)); border-left: 4px solid #ec4899; }
 
-        audio { height: 36px; outline: none; border-radius: 20px; width: 100%; }
+        audio { height: 40px; outline: none; border-radius: 20px; width: 100%; }
         audio::-webkit-media-controls-panel { background-color: rgba(255, 255, 255, 0.9); }
         
         .dropdown-menu { display: none; }
@@ -57,10 +59,10 @@
 </head>
 <body class="flex selection:bg-pink-500/30">
 
-    <!-- 🔥 Notification Sound Effect 🔥 -->
+    <!-- Notification Sound Effect -->
     <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
 
-    <!-- 🔥 Fullscreen Image Lightbox 🔥 -->
+    <!-- Fullscreen Image Lightbox -->
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity opacity-0" onclick="closeLightbox()">
         <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
             <i class="fa-solid fa-xmark"></i>
@@ -70,18 +72,18 @@
 
     <!-- 1. Registration Modal -->
     <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="bg-slate-900 border border-white/10 p-6 md:p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform">
-            <div class="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center mb-4 md:mb-6 mx-auto shadow-lg">
-                <i class="fa-solid fa-lock text-2xl md:text-3xl text-white"></i>
+        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform">
+            <div class="w-20 h-20 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg">
+                <i class="fa-solid fa-lock text-3xl text-white"></i>
             </div>
-            <h2 class="text-xl md:text-2xl font-black mb-2 text-white tracking-tight">Private Messenger</h2>
-            <p class="text-slate-400 text-xs md:text-sm mb-6">Login korar jonno tottho din</p>
+            <h2 class="text-2xl font-black mb-2 text-white tracking-tight">Private Messenger</h2>
+            <p class="text-slate-400 text-sm mb-6">Login korar jonno tottho din</p>
             
-            <form id="join-form" class="space-y-3 md:space-y-4">
-                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/50 border border-white/10 rounded-2xl p-3 md:p-4 text-white text-center focus:outline-none focus:border-pink-500 transition-all font-bold text-sm md:text-base" placeholder="Apnar Nam (e.g. Rasel)">
-                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/50 border border-white/10 rounded-2xl p-3 md:p-4 text-white text-center focus:outline-none focus:border-purple-500 transition-all font-bold tracking-widest text-sm md:text-base" placeholder="Mobile Number (11 digit)">
+            <form id="join-form" class="space-y-4">
+                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 transition-all font-bold text-base" placeholder="Apnar Nam (e.g. Rasel)">
+                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 transition-all font-bold tracking-widest text-base" placeholder="Mobile Number (11 digit)">
                 
-                <button type="submit" id="join-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-3.5 md:py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 text-xs md:text-sm mt-2">Secure Login</button>
+                <button type="submit" id="join-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 text-sm mt-2">Secure Login</button>
             </form>
             <div class="mt-4">
                 <a href="index.html" class="text-xs text-slate-500 hover:text-white underline transition-colors">Back to Home</a>
@@ -91,172 +93,174 @@
 
     <!-- PROFILE SETTINGS MODAL -->
     <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="bg-slate-900 border border-white/10 p-6 md:p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative">
-            <button onclick="closeSettings()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
+        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative">
+            <button onclick="closeSettings()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h2 class="text-lg md:text-xl font-black mb-5 text-white uppercase tracking-wider">Profile Settings</h2>
+            <h2 class="text-xl font-black mb-6 text-white uppercase tracking-wider">Profile Settings</h2>
 
-            <div class="relative w-24 h-24 md:w-28 md:h-28 mx-auto mb-3 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
+            <div class="relative w-28 h-28 mx-auto mb-4 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
                 <img id="settings-avatar-preview" src="" class="w-full h-full rounded-full object-cover border-4 border-slate-700 group-hover:opacity-40 transition-opacity shadow-lg bg-slate-800">
                 <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <i class="fa-solid fa-camera text-2xl md:text-3xl text-white"></i>
+                    <i class="fa-solid fa-camera text-3xl text-white"></i>
                 </div>
             </div>
             <input type="file" id="profile-pic-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
 
-            <p class="text-[10px] md:text-xs text-slate-400 mb-6 font-medium">Click image to upload new avatar</p>
+            <p class="text-xs text-slate-400 mb-6 font-medium">Click image to upload new avatar</p>
 
-            <button id="save-settings-btn" onclick="uploadProfilePic()" disabled class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 py-3 rounded-xl md:rounded-2xl text-white font-bold uppercase tracking-widest transition-all opacity-50 cursor-not-allowed flex items-center justify-center gap-2 text-xs md:text-sm">
+            <button id="save-settings-btn" onclick="uploadProfilePic()" disabled class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 rounded-2xl text-white font-bold uppercase tracking-widest transition-all opacity-50 cursor-not-allowed flex items-center justify-center gap-2 text-sm">
                 <i class="fa-solid fa-cloud-arrow-up"></i> Save Picture
             </button>
         </div>
     </div>
 
     <!-- 2. Main App Container -->
-    <div id="app-container" class="hidden fixed inset-0 md:relative md:w-full md:h-full max-w-6xl mx-auto md:py-4 md:px-4 flex">
+    <!-- 🔥 Changed to a more stable structure for mobile keyboards -->
+    <div id="app-container" class="hidden w-full h-[100dvh] max-w-6xl mx-auto md:py-4 md:px-4 flex relative">
         
-        <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden relative">
+        <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden">
             
-            <!-- LEFT SIDEBAR -->
-            <div id="sidebar" class="w-full md:w-80 lg:w-96 flex flex-col border-r border-white/5 glass-panel z-20 transition-transform duration-300 flex-shrink-0 absolute md:relative inset-0 md:inset-auto bg-slate-950">
-                <header class="p-3 md:p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
-                    <div class="flex items-center gap-2 md:gap-3">
-                        <a href="index.html" class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors shrink-0">
-                            <i class="fa-solid fa-arrow-left text-sm md:text-base"></i>
+            <!-- LEFT SIDEBAR (Contacts) -->
+            <div id="sidebar" class="w-full md:w-[350px] lg:w-[400px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 bg-slate-950">
+                <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                    <div class="flex items-center gap-3">
+                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors shrink-0">
+                            <i class="fa-solid fa-arrow-left text-base"></i>
                         </a>
-                        <div class="flex items-center gap-2 md:gap-3 overflow-hidden">
-                            <img id="my-avatar" src="" class="w-9 h-9 md:w-10 md:h-10 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
                             <div class="truncate">
-                                <h2 id="my-name-display" class="font-bold text-white text-xs md:text-sm truncate">My Name</h2>
-                                <p id="my-mobile-display" class="text-[9px] md:text-[10px] text-emerald-400 font-medium tracking-widest">01700000000</p>
+                                <h2 id="my-name-display" class="font-bold text-white text-base truncate">My Name</h2>
+                                <p id="my-mobile-display" class="text-[11px] text-emerald-400 font-medium tracking-widest">01700000000</p>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1 md:gap-2">
-                        <button onclick="openSettings()" class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors" title="Settings">
+                    <div class="flex items-center gap-2">
+                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors" title="Settings">
                             <i class="fa-solid fa-gear text-sm"></i>
                         </button>
-                        <button onclick="logoutPvtChat()" class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
+                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
                             <i class="fa-solid fa-right-from-bracket text-sm"></i>
                         </button>
                     </div>
                 </header>
 
-                <div class="p-2 md:p-3 shrink-0">
-                    <div class="bg-black/30 rounded-xl flex items-center px-3 py-2 border border-white/5 focus-within:border-pink-500/50 transition-colors">
-                        <i class="fa-solid fa-search text-slate-500 text-xs md:text-sm"></i>
-                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-xs md:text-sm w-full ml-2 md:ml-3 placeholder-slate-600">
+                <div class="p-3 shrink-0">
+                    <div class="bg-black/30 rounded-xl flex items-center px-4 py-3 border border-white/5 focus-within:border-pink-500/50 transition-colors">
+                        <i class="fa-solid fa-search text-slate-500 text-sm"></i>
+                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-600">
                     </div>
                 </div>
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative" style="touch-action: pan-y;">
-                    <div class="text-center py-2 md:py-4 text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-4 md:px-6">
+                    <div class="text-center py-3 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
                         <span>Available Users</span>
                         <i class="fa-solid fa-users"></i>
                     </div>
-                    <div id="contacts-container" class="pb-24 md:pb-20"></div>
+                    <div id="contacts-container" class="pb-6"></div>
                 </div>
             </div>
 
-            <!-- RIGHT SIDEBAR -->
-            <div id="chat-area" class="w-full flex-col hidden md:flex absolute md:relative inset-0 z-30 bg-slate-950 transition-transform duration-300 transform translate-x-full md:translate-x-0">
+            <!-- RIGHT SIDEBAR (Chat Window) -->
+            <!-- 🔥 Hidden on mobile by default using 'hidden md:flex' instead of absolute positioning -->
+            <div id="chat-area" class="w-full hidden md:flex flex-col bg-slate-950 relative h-full">
                 
                 <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
-                    <div class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-4 md:mb-6 border border-white/10">
-                        <i class="fa-brands fa-whatsapp text-3xl md:text-4xl text-slate-400"></i>
+                    <div class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-6 border border-white/10">
+                        <i class="fa-brands fa-whatsapp text-4xl text-slate-400"></i>
                     </div>
-                    <h2 class="text-lg md:text-2xl font-bold text-white mb-2">Web Tools Messenger</h2>
-                    <p class="text-slate-500 text-xs md:text-sm max-w-xs text-center px-4">Select a contact to send messages, videos, audio, and documents with end-to-end encryption.</p>
+                    <h2 class="text-2xl font-bold text-white mb-2">Web Tools Messenger</h2>
+                    <p class="text-slate-500 text-sm max-w-sm text-center px-4">Select a contact to send messages, videos, audio, and documents with end-to-end encryption.</p>
                 </div>
 
-                <header class="p-2 md:p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0 relative" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
-                    <div class="flex items-center gap-2 md:gap-4">
-                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-white active:bg-white/10 shrink-0 transition-colors">
-                            <i class="fa-solid fa-arrow-left text-lg"></i>
+                <header class="p-3 md:p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0 relative" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                    <div class="flex items-center gap-4">
+                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-white active:bg-white/10 hover:bg-white/10 shrink-0 transition-colors">
+                            <i class="fa-solid fa-arrow-left text-xl"></i>
                         </button>
-                        <div class="flex items-center gap-2 md:gap-3">
-                            <img id="active-chat-avatar" src="" class="w-9 h-9 md:w-10 md:h-10 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
+                        <div class="flex items-center gap-3">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
                             <div class="flex flex-col justify-center">
-                                <h2 id="active-chat-name" class="font-bold text-white text-[14px] md:text-[15px] leading-tight">Contact</h2>
-                                <p id="active-chat-status" class="text-[9px] md:text-[10px] text-slate-500 font-medium tracking-widest transition-colors">...</p>
+                                <h2 id="active-chat-name" class="font-bold text-white text-base md:text-lg leading-tight">Contact Name</h2>
+                                <p id="active-chat-status" class="text-[11px] text-slate-500 font-medium tracking-widest transition-colors">...</p>
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-1 md:gap-2 text-slate-400 relative">
-                        <button class="w-9 h-9 md:w-10 md:h-10 rounded-full active:bg-white/10 md:hover:bg-white/5 transition-colors"><i class="fa-solid fa-video text-sm md:text-base"></i></button>
-                        <button class="w-9 h-9 md:w-10 md:h-10 rounded-full active:bg-white/10 md:hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone text-sm md:text-base"></i></button>
+                    <div class="flex gap-2 text-slate-400 relative">
+                        <button class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-video text-lg"></i></button>
+                        <button class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone text-lg"></i></button>
                         
-                        <button onclick="toggleChatMenu()" class="w-9 h-9 md:w-10 md:h-10 rounded-full active:bg-white/10 md:hover:bg-white/5 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-sm md:text-base"></i></button>
+                        <button onclick="toggleChatMenu()" class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
                         
-                        <div id="chat-dropdown" class="dropdown-menu absolute top-10 right-2 bg-slate-800 border border-white/10 rounded-xl shadow-2xl py-2 w-36 md:w-40 z-50">
-                            <button onclick="clearEntireChat()" class="w-full text-left px-4 py-2 text-xs md:text-sm text-red-400 active:bg-white/10 md:hover:bg-white/5 transition-colors flex items-center gap-2">
-                                <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear Chat
+                        <div id="chat-dropdown" class="dropdown-menu absolute top-12 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 w-44 z-50">
+                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 active:bg-white/10 hover:bg-white/5 transition-colors flex items-center gap-3 font-medium">
+                                <i class="fa-solid fa-trash-can w-4 text-center text-lg"></i> Clear Chat
                             </button>
                         </div>
                     </div>
                 </header>
 
-                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-3 md:p-6 flex flex-col gap-2 md:gap-3 custom-scroll relative" onclick="closeAllMenus()" style="touch-action: pan-y;">
-                    <div class="text-center my-2 md:my-4">
-                        <span class="bg-black/40 text-slate-400 text-[9px] md:text-[10px] px-3 py-1 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
+                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()" style="touch-action: pan-y;">
+                    <div class="text-center my-4">
+                        <span class="bg-black/40 text-slate-400 text-[11px] px-4 py-1.5 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
                             <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> End-to-end encrypted
                         </span>
                     </div>
                 </main>
 
                 <!-- Footer with Input & Voice Recording -->
-                <footer class="p-2 md:p-3 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
+                <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
                     
-                    <div id="file-preview-container" class="hidden w-full px-1 mb-2">
-                        <div class="bg-slate-800 border border-white/10 rounded-xl p-2 flex items-center justify-between shadow-xl">
-                            <div class="flex items-center gap-2 overflow-hidden">
-                                <div id="preview-icon-wrapper" class="w-8 h-8 rounded bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
-                                    <i id="preview-icon" class="fa-solid fa-file text-sm"></i>
+                    <div id="file-preview-container" class="hidden w-full px-1 mb-3">
+                        <div class="bg-slate-800 border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div id="preview-icon-wrapper" class="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
+                                    <i id="preview-icon" class="fa-solid fa-file text-xl"></i>
                                     <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
                                 </div>
                                 <div class="overflow-hidden">
-                                    <p id="file-preview-name" class="text-[11px] md:text-xs font-bold text-white truncate w-32 md:w-64">filename</p>
-                                    <p id="file-preview-size" class="text-[8px] md:text-[9px] text-slate-400 uppercase tracking-widest">0 MB</p>
+                                    <p id="file-preview-name" class="text-sm font-bold text-white truncate w-40 md:w-64">filename</p>
+                                    <p id="file-preview-size" class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
                                 </div>
                             </div>
-                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-8 h-8 flex items-center justify-center rounded-full transition-colors">
-                                <i class="fa-solid fa-xmark"></i>
+                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-10 h-10 flex items-center justify-center rounded-full transition-colors active:bg-white/5">
+                                <i class="fa-solid fa-xmark text-xl"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-full p-1.5 mb-1 animate-pulse">
-                        <div class="flex items-center gap-2 text-red-400 pl-3 font-bold text-xs md:text-sm">
-                            <i class="fa-solid fa-microphone-lines animate-bounce"></i> Recording...
+                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-full p-2 mb-2 animate-pulse">
+                        <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
+                            <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording...
                         </div>
-                        <div class="flex gap-1.5">
-                            <button type="button" onclick="cancelRecording()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 text-slate-400 active:text-white flex items-center justify-center transition-colors">
-                                <i class="fa-solid fa-trash-can text-sm"></i>
+                        <div class="flex gap-2 pr-1">
+                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 active:text-white flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
                             </button>
-                            <button type="button" onclick="stopAndSendRecording()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-600 text-white active:bg-emerald-500 flex items-center justify-center shadow-lg transition-colors">
-                                <i class="fa-solid fa-paper-plane text-sm md:text-base"></i>
+                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-emerald-600 text-white active:bg-emerald-500 flex items-center justify-center shadow-lg transition-colors">
+                                <i class="fa-solid fa-paper-plane"></i>
                             </button>
                         </div>
                     </div>
 
-                    <form id="chat-form" class="flex items-end gap-1.5 md:gap-2 w-full relative">
-                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-10 h-10 md:w-12 md:h-12 shrink-0 text-slate-400 active:text-pink-400 bg-slate-800/80 rounded-full flex items-center justify-center transition-all border border-white/10 mb-0.5 md:mb-0">
-                            <i class="fa-solid fa-plus text-lg md:text-xl"></i>
+                    <form id="chat-form" class="flex items-end gap-2 w-full relative">
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 active:text-pink-400 hover:text-pink-400 bg-slate-800/80 rounded-full flex items-center justify-center transition-all border border-white/10 mb-0.5">
+                            <i class="fa-solid fa-plus text-2xl"></i>
                         </button>
                         <input type="file" id="file-input" class="hidden">
 
-                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-[1.25rem] md:rounded-3xl flex items-center px-1 md:px-2 py-0.5 md:py-1 transition-all focus-within:border-pink-500/50 relative">
-                            <textarea id="msg-input" rows="1" placeholder="Message..."
-                                class="w-full bg-transparent p-2.5 md:p-3 text-white focus:outline-none resize-none max-h-24 md:max-h-28 custom-scroll text-sm md:text-base" style="min-height: 40px;"></textarea>
+                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-3xl flex items-center px-2 py-1.5 transition-all focus-within:border-pink-500/50 relative">
+                            <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                                class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-32 custom-scroll text-[15px]" style="min-height: 48px;"></textarea>
                         </div>
                         
-                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-10 h-10 md:w-12 md:h-12 shrink-0 bg-emerald-600 active:bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5 md:mb-0">
-                            <i class="fa-solid fa-microphone text-lg md:text-xl"></i>
+                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-emerald-600 active:bg-emerald-500 hover:bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
+                            <i class="fa-solid fa-microphone text-xl"></i>
                         </button>
                         
-                        <button type="submit" id="send-btn" class="hidden w-10 h-10 md:w-12 md:h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 active:from-pink-500 active:to-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5 md:mb-0">
-                            <i class="fa-solid fa-paper-plane text-base md:text-lg ml-[-2px]"></i>
+                        <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 active:from-pink-500 hover:from-pink-500 hover:to-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
+                            <i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>
                         </button>
                     </form>
                 </footer>
@@ -270,10 +274,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 App Boot Time to prevent notification sound for old messages
-        const appStartTime = Date.now();
-
-        // Android VisualViewport API Fix for Keyboard
+        // 🔥 Fix for Android Keyboard: Set the body height directly based on visualViewport
         function setRealViewportHeight() {
             if (window.visualViewport) {
                 document.body.style.height = window.visualViewport.height + 'px';
@@ -281,10 +282,14 @@
                 document.body.style.height = window.innerHeight + 'px';
             }
             const msgBox = document.getElementById('messages-box');
-            if(msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+            if(msgBox) {
+                setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50);
+            }
         }
         window.addEventListener('resize', setRealViewportHeight);
-        if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealViewportHeight);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', setRealViewportHeight);
+        }
         setRealViewportHeight();
 
         const firebaseConfig = {
@@ -323,6 +328,8 @@
         let audioChunks = [];
         let isRecording = false;
         let settingsSelectedFile = null;
+        
+        const appStartTime = Date.now();
 
         const joinModal = document.getElementById('join-modal');
         const appContainer = document.getElementById('app-container');
@@ -348,7 +355,7 @@
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
 
-        // 🔥 Lightbox Methods
+        // Lightbox Methods
         window.openLightbox = (url, e) => {
             e.stopPropagation();
             const lightbox = document.getElementById('image-lightbox');
@@ -527,7 +534,7 @@
         msgInput.addEventListener('focus', () => { setTimeout(() => setRealViewportHeight(), 150); });
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px';
+            this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
             toggleInputButtons();
 
             if (activeContactMobile) {
@@ -557,7 +564,7 @@
                     reader.onload = (e) => { previewImg.src = e.target.result; previewImg.classList.remove('hidden'); };
                     reader.readAsDataURL(file);
                 } else {
-                    previewIcon.className = "fa-solid text-sm";
+                    previewIcon.className = "fa-solid text-xl";
                     if(file.type.startsWith('video/')) previewIcon.classList.add("fa-video", "text-pink-400");
                     else if(file.type.startsWith('audio/')) previewIcon.classList.add("fa-headphones", "text-emerald-400");
                     else previewIcon.classList.add("fa-file", "text-slate-300");
@@ -665,7 +672,6 @@
                     const newLatest = snapshot.docs[0].data();
                     const oldLatest = latestMessages[contactMobile];
                     
-                    // 🔥 Play Sound if someone sends a new message (background or foreground)
                     if (newLatest.senderMobile !== myMobile && 
                        (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && 
                        newLatest.timestamp > appStartTime) {
@@ -692,12 +698,12 @@
 
             contactsContainer.innerHTML = '';
             if (filteredUsers.length === 0) {
-                contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-xs mt-10 p-4 border border-white/5 rounded-xl bg-black/20 mx-4">Kono contact nei.</p>`; return;
+                contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-sm mt-10 p-6 border border-white/5 rounded-2xl bg-black/20 mx-4">Kono contact nei.</p>`; return;
             }
             
             filteredUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
-                const activeClass = isActive ? 'contact-active' : 'border-l-4 border-transparent active:bg-white/5 md:hover:bg-white/5';
+                const activeClass = isActive ? 'contact-active bg-white/5' : 'border-l-4 border-transparent active:bg-white/5 md:hover:bg-white/5';
                 const isOnline = (Date.now() - user.lastActive) < 120000;
                 const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-600';
 
@@ -710,7 +716,7 @@
                 if (latestMsg) {
                     const isMe = latestMsg.senderMobile === myMobile;
                     let tickClass = latestMsg.read ? "text-blue-400" : "text-slate-400 opacity-60";
-                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[9px] md:text-[10px] mr-1 ${tickClass}'></i> ` : "";
+                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[11px] mr-1 ${tickClass}'></i> ` : "";
                     
                     if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
                     else if (latestMsg.fileUrl) {
@@ -724,31 +730,31 @@
                     if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-emerald-400 font-bold"; }
                 }
 
-                let unreadBadge = isUnread ? `<span class="w-2.5 h-2.5 md:w-3 md:h-3 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] shrink-0 animate-pulse"></span>` : ``;
+                let unreadBadge = isUnread ? `<span class="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] shrink-0 animate-pulse"></span>` : ``;
                 
                 if(user.typingTo === myMobile) {
-                    msgPreview = "<span class='text-emerald-400 font-bold animate-pulse text-[10px] md:text-[11px] italic'>typing...</span>";
+                    msgPreview = "<span class='text-emerald-400 font-bold animate-pulse text-[12px] italic'>typing...</span>";
                     previewClass = ""; unreadBadge = ""; 
                 }
 
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
 
                 const div = document.createElement('div');
-                div.className = `p-2.5 md:p-3 flex items-center gap-3 cursor-pointer transition-colors border-b border-white/5 ${activeClass}`;
+                div.className = `p-4 flex items-center gap-4 cursor-pointer transition-colors border-b border-white/5 ${activeClass}`;
                 div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
                 
                 div.innerHTML = `
                     <div class="relative shrink-0">
-                        <img src="${userAvatar}" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-slate-700 object-cover bg-slate-800">
-                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 ${dotColor} border-2 border-slate-900 rounded-full"></span>
+                        <img src="${userAvatar}" class="w-12 h-12 rounded-full border border-slate-700 object-cover bg-slate-800">
+                        <span class="absolute bottom-0 right-0 w-3.5 h-3.5 ${dotColor} border-2 border-slate-900 rounded-full"></span>
                     </div>
                     <div class="flex-grow overflow-hidden flex flex-col justify-center">
-                        <div class="flex justify-between items-baseline mb-0.5">
-                            <h3 class="text-[14px] md:text-[15px] font-bold text-slate-200 truncate pr-2">${user.name}</h3>
-                            <span class="text-[8px] md:text-[9px] ${isUnread ? 'text-emerald-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
+                        <div class="flex justify-between items-baseline mb-1">
+                            <h3 class="text-base font-bold text-slate-200 truncate pr-2">${user.name}</h3>
+                            <span class="text-[10px] ${isUnread ? 'text-emerald-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
                         </div>
                         <div class="flex justify-between items-center gap-2">
-                            <p class="text-[11px] md:text-[12px] ${previewClass} truncate w-full">${msgPreview}</p>
+                            <p class="text-[13px] ${previewClass} truncate w-full">${msgPreview}</p>
                             ${unreadBadge}
                         </div>
                     </div>
@@ -762,9 +768,10 @@
         window.addEventListener('hashchange', () => { if (window.location.hash !== '#chat' && activeContactMobile) closeChatLogic(); });
 
         function closeChatLogic() {
-            sidebar.classList.remove('-translate-x-full');
-            chatArea.classList.add('translate-x-full');
-            setTimeout(() => chatArea.classList.add('hidden'), 300);
+            // 🔥 Clean hide/show logic replacing translation logic
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('chat-area').classList.add('hidden');
+            
             activeContactMobile = null; renderContacts();
             if(currentChatUnsubscribe) currentChatUnsubscribe();
             if(userStatusUnsubscribe) userStatusUnsubscribe();
@@ -778,12 +785,16 @@
             document.getElementById('active-chat-name').innerText = contactName;
             document.getElementById('active-chat-avatar').src = contactAvatarUrl;
             
-            emptyState.classList.add('hidden');
+            document.getElementById('empty-chat-state').classList.add('hidden');
             
+            // 🔥 Mobile Toggle Logic Fix
             if (window.innerWidth < 768) {
-                sidebar.classList.add('-translate-x-full'); chatArea.classList.remove('hidden', 'translate-x-full');
+                document.getElementById('sidebar').classList.add('hidden'); 
+                document.getElementById('chat-area').classList.remove('hidden');
                 if(window.location.hash !== '#chat') window.location.hash = 'chat';
-            } else { chatArea.classList.remove('hidden'); }
+            } else { 
+                document.getElementById('chat-area').classList.remove('hidden'); 
+            }
 
             renderContacts();
             document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
@@ -796,11 +807,11 @@
                     if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
 
                     if(uData.typingTo === myMobile) {
-                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[9px] md:text-[11px] text-emerald-400 font-bold tracking-widest transition-colors animate-pulse italic';
+                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[11px] text-emerald-400 font-bold tracking-widest transition-colors animate-pulse italic';
                     } else {
                         const isOnline = (Date.now() - uData.lastActive) < 120000;
                         statusElem.innerText = isOnline ? 'Online' : 'Offline';
-                        statusElem.className = isOnline ? 'text-[9px] md:text-[10px] text-emerald-400 font-bold tracking-widest transition-colors' : 'text-[9px] md:text-[10px] text-slate-500 font-medium tracking-widest transition-colors';
+                        statusElem.className = isOnline ? 'text-[11px] text-emerald-400 font-bold tracking-widest transition-colors' : 'text-[11px] text-slate-500 font-medium tracking-widest transition-colors';
                     }
                 }
             });
@@ -886,10 +897,10 @@
                 });
 
                 msgInput.value = ''; clearFile();
-                msgInput.style.height = '40px'; toggleInputButtons();
+                msgInput.style.height = '48px'; toggleInputButtons();
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
             } catch (error) { alert("Message failed."); } 
-            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-base md:text-lg ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
+            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
         function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
@@ -900,50 +911,49 @@
             
             const msgDiv = document.createElement('div');
             msgDiv.id = `msg-${docId}`;
-            const bottomMargin = data.reaction ? 'mb-5' : 'mb-1.5 md:mb-2';
-            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[70%] ${bubbleClasses} p-2 md:p-3 rounded-2xl ${bottomMargin} relative shadow-sm md:shadow-md cursor-pointer select-none group`;
+            const bottomMargin = data.reaction ? 'mb-6' : 'mb-3';
+            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[70%] ${bubbleClasses} p-3 rounded-2xl ${bottomMargin} relative shadow-md cursor-pointer select-none group`;
             msgDiv.onclick = (e) => toggleReactionMenu(docId, e);
             
             let content = '';
             if (data.fileUrl) {
                 if (data.fileType && data.fileType.startsWith('video/')) {
-                    content = `<video controls class="rounded-xl mb-1 md:mb-2 max-h-48 md:max-h-64 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
+                    content = `<video controls class="rounded-xl mb-2 max-h-64 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
                 } else if (data.fileType && data.fileType.startsWith('audio/')) {
-                    content = `<audio controls class="w-full mb-1 md:mb-2" preload="none"><source src="${data.fileUrl}"></audio>`;
+                    content = `<audio controls class="w-full mb-2" preload="none"><source src="${data.fileUrl}"></audio>`;
                 } else if (data.fileType && data.fileType.startsWith('image/')) {
-                    // 🔥 Lightbox logic added here
-                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-1 md:mb-2 max-h-48 md:max-h-64 w-full object-cover cursor-pointer hover:opacity-90 transition-opacity bg-black/20" onclick="openLightbox('${data.fileUrl}', event)">`;
+                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-2 max-h-64 w-full object-cover cursor-pointer hover:opacity-90 transition-opacity bg-black/20" onclick="openLightbox('${data.fileUrl}', event)">`;
                 } else {
                     const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
-                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-black/20 p-2 md:p-3 rounded-xl flex items-center gap-2 md:gap-3 text-[11px] md:text-xs mb-1 md:mb-2 border border-white/5 hover:bg-black/40 transition-colors w-full">
-                        <i class="fa-solid fa-file-arrow-down text-base md:text-xl ${isMe ? 'text-teal-200' : 'text-pink-400'} shrink-0"></i> 
+                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-black/20 p-3 rounded-xl flex items-center gap-3 text-xs mb-2 border border-white/5 hover:bg-black/40 transition-colors w-full">
+                        <i class="fa-solid fa-file-arrow-down text-xl ${isMe ? 'text-teal-200' : 'text-pink-400'} shrink-0"></i> 
                         <span class="truncate font-bold text-white">${data.fileName}</span>
                     </a>`;
                 }
             }
             
-            let finalHtmlText = data.text ? `<p class="text-[14px] md:text-[15px] whitespace-pre-wrap leading-snug md:leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
-            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-800 border border-white/10 rounded-full px-1.5 md:px-2 py-0.5 text-[10px] md:text-xs shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
+            let finalHtmlText = data.text ? `<p class="text-[15px] md:text-base whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
+            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-800 border border-white/10 rounded-full px-2 py-0.5 text-[11px] shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
 
             let popupMenu = `
-                <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-10 md:-top-12 bg-slate-800 border border-white/10 rounded-2xl flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 shadow-2xl z-[60] min-w-max animate-popIn">
-                    <button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-lg md:text-xl">👍</button>
-                    <button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-lg md:text-xl">❤️</button>
-                    <button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-lg md:text-xl">😂</button>
-                    <button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-lg md:text-xl">😢</button>
-                    ${isMe ? `<div class="w-[1px] h-4 md:h-5 bg-white/20 mx-0.5 md:mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-red-500 text-base md:text-lg" title="Delete"><i class="fa-solid fa-trash"></i></button>` : ''}
+                <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-12 bg-slate-800 border border-white/10 rounded-2xl flex items-center gap-2 px-3 py-2 shadow-2xl z-[60] min-w-max animate-popIn">
+                    <button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">👍</button>
+                    <button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">❤️</button>
+                    <button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">😂</button>
+                    <button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">😢</button>
+                    ${isMe ? `<div class="w-[1px] h-5 bg-white/20 mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-red-500 text-lg" title="Delete"><i class="fa-solid fa-trash"></i></button>` : ''}
                 </div>
             `;
 
             let tickColor = data.read ? "text-blue-400" : "text-emerald-100 opacity-70";
-            let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[8px] md:text-[10px] ${tickColor} transition-colors"></i>` : '';
+            let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[10px] ${tickColor} transition-colors"></i>` : '';
 
             msgDiv.innerHTML = `
                 ${popupMenu}
                 ${content}
                 ${finalHtmlText}
-                <div class="flex items-center gap-1 mt-0.5 md:mt-1 justify-end px-1 w-full">
-                    <span class="text-[8px] md:text-[9px] ${isMe ? 'text-teal-100' : 'text-slate-500'} font-medium">${data.timeString}</span>
+                <div class="flex items-center gap-1 mt-1 justify-end px-1 w-full">
+                    <span class="text-[9px] ${isMe ? 'text-teal-100' : 'text-slate-500'} font-medium">${data.timeString}</span>
                     ${ticksHtml}
                 </div>
                 ${reactionBadge}
