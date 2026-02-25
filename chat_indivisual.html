@@ -16,7 +16,9 @@
             overflow: hidden; 
             height: 100dvh; 
             width: 100vw;
-            position: fixed; 
+            margin: 0;
+            padding: 0;
+            overscroll-behavior: none; 
         }
         
         .chat-bg {
@@ -44,10 +46,15 @@
 
         audio { height: 40px; outline: none; border-radius: 20px; }
         audio::-webkit-media-controls-panel { background-color: rgba(255, 255, 255, 0.9); }
+        
+        /* Dropdown Menu Style */
+        .dropdown-menu { display: none; }
+        .dropdown-menu.show { display: block; animation: popIn 0.2s ease-out forwards; }
     </style>
 </head>
 <body class="flex selection:bg-pink-500/30">
 
+    <!-- 1. Registration Modal -->
     <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
         <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform">
             <div class="w-20 h-20 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg">
@@ -68,10 +75,37 @@
         </div>
     </div>
 
+    <!-- 🔥 PROFILE SETTINGS MODAL 🔥 -->
+    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
+        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative">
+            <button onclick="closeSettings()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="text-xl font-black mb-6 text-white uppercase tracking-wider">Profile Settings</h2>
+
+            <!-- Avatar Preview & Upload -->
+            <div class="relative w-28 h-28 mx-auto mb-3 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
+                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-full object-cover border-4 border-slate-700 group-hover:opacity-40 transition-opacity shadow-lg bg-slate-800">
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="fa-solid fa-camera text-3xl text-white"></i>
+                </div>
+            </div>
+            <input type="file" id="profile-pic-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
+
+            <p class="text-xs text-slate-400 mb-6 font-medium">Click image to upload new avatar</p>
+
+            <button id="save-settings-btn" onclick="uploadProfilePic()" disabled class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 py-3.5 rounded-2xl text-white font-bold uppercase tracking-widest transition-all opacity-50 cursor-not-allowed flex items-center justify-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Save Picture
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. Main App Container -->
     <div id="app-container" class="hidden w-full h-full max-w-6xl mx-auto md:py-4 md:px-4 flex">
         
         <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden relative">
             
+            <!-- LEFT SIDEBAR -->
             <div id="sidebar" class="w-full md:w-80 lg:w-96 flex flex-col border-r border-white/5 glass-panel z-20 transition-transform duration-300 flex-shrink-0">
                 <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
@@ -79,12 +113,22 @@
                             <i class="fa-solid fa-arrow-left"></i>
                         </a>
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0">
+                            <!-- 🔥 My Avatar updated dynamically -->
+                            <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
                             <div class="truncate">
                                 <h2 id="my-name-display" class="font-bold text-white text-sm truncate">My Name</h2>
                                 <p id="my-mobile-display" class="text-[10px] text-emerald-400 font-medium tracking-widest">01700000000</p>
                             </div>
                         </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- 🔥 Settings Button added here -->
+                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors" title="Settings">
+                            <i class="fa-solid fa-gear text-sm"></i>
+                        </button>
+                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                        </button>
                     </div>
                 </header>
 
@@ -104,6 +148,7 @@
                 </div>
             </div>
 
+            <!-- RIGHT SIDEBAR -->
             <div id="chat-area" class="w-full flex-col hidden md:flex absolute md:relative inset-0 z-30 bg-slate-950 transition-transform duration-300 transform translate-x-full md:translate-x-0">
                 
                 <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
@@ -114,26 +159,35 @@
                     <p class="text-slate-500 text-sm max-w-xs text-center">Select a contact to send messages, videos, audio, and documents with end-to-end encryption.</p>
                 </div>
 
-                <header class="p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                <header class="p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0 relative" style="padding-top: max(1rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-4">
                         <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white hover:bg-white/10 shrink-0">
                             <i class="fa-solid fa-arrow-left"></i>
                         </button>
                         <div class="flex items-center gap-3">
-                            <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full border border-slate-700 shadow-md">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
                             <div>
                                 <h2 id="active-chat-name" class="font-bold text-white text-[15px] leading-tight">Contact Name</h2>
                                 <p id="active-chat-status" class="text-[10px] text-slate-500 font-medium tracking-widest transition-colors">Checking status...</p>
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-2 text-slate-400">
+                    <div class="flex gap-2 text-slate-400 relative">
                         <button class="w-10 h-10 rounded-full hover:bg-white/5 transition-colors"><i class="fa-solid fa-video"></i></button>
                         <button class="w-10 h-10 rounded-full hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone"></i></button>
+                        
+                        <!-- 🔥 3 Dots Menu for Clear Chat -->
+                        <button onclick="toggleChatMenu()" class="w-10 h-10 rounded-full hover:bg-white/5 transition-colors"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                        
+                        <div id="chat-dropdown" class="dropdown-menu absolute top-12 right-0 bg-slate-800 border border-white/10 rounded-xl shadow-2xl py-2 w-40 z-50">
+                            <button onclick="clearEntireChat()" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear Chat
+                            </button>
+                        </div>
                     </div>
                 </header>
 
-                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative" onclick="closeAllReactionMenus()">
+                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()">
                     <div class="text-center my-4">
                         <span class="bg-black/40 text-slate-400 text-[10px] px-3 py-1 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
                             <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> Messages & calls are end-to-end encrypted
@@ -141,12 +195,15 @@
                     </div>
                 </main>
 
+                <!-- Footer with Input & Voice Recording -->
                 <footer class="p-3 glass-panel shrink-0 border-t border-white/5" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                    
                     <div id="file-preview-container" class="hidden w-full px-1 mb-2">
                         <div class="bg-slate-800/90 border border-white/10 rounded-xl p-2.5 flex items-center justify-between shadow-xl">
                             <div class="flex items-center gap-3 overflow-hidden">
-                                <div class="w-8 h-8 rounded bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30">
+                                <div id="preview-icon-wrapper" class="w-10 h-10 rounded bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
                                     <i id="preview-icon" class="fa-solid fa-file"></i>
+                                    <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
                                 </div>
                                 <div class="overflow-hidden">
                                     <p id="file-preview-name" class="text-xs font-bold text-white truncate w-40 md:w-64">filename</p>
@@ -159,19 +216,37 @@
                         </div>
                     </div>
 
-                    <form id="chat-form" class="flex items-end gap-2 w-full">
-                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 hover:text-pink-400 bg-slate-800/80 rounded-2xl flex items-center justify-center transition-all border border-white/10 hover:border-pink-500/50 mb-0.5">
-                            <i class="fa-solid fa-paperclip text-lg"></i>
+                    <!-- 🔥 Recording UI -->
+                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-2xl p-2 mb-2 animate-pulse">
+                        <div class="flex items-center gap-3 text-red-400 pl-3 font-bold text-sm">
+                            <i class="fa-solid fa-microphone-lines animate-bounce"></i> Recording Audio...
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-emerald-600 text-white hover:bg-emerald-500 flex items-center justify-center shadow-lg transition-colors">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="chat-form" class="flex items-end gap-2 w-full relative">
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 hover:text-pink-400 bg-slate-800/80 rounded-full flex items-center justify-center transition-all border border-white/10 hover:border-pink-500/50 mb-0.5">
+                            <i class="fa-solid fa-plus text-xl"></i>
                         </button>
                         <input type="file" id="file-input" class="hidden">
 
-                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-2xl flex items-center px-2 py-1 transition-all focus-within:border-pink-500/50">
-                            <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-3xl flex items-center px-2 py-1 transition-all focus-within:border-pink-500/50 relative">
+                            <textarea id="msg-input" rows="1" placeholder="Message..."
                                 class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-28 custom-scroll" style="min-height: 44px;"></textarea>
                         </div>
                         
-                        <button type="submit" id="send-btn" disabled
-                            class="w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 mb-0.5">
+                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-emerald-600 hover:bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
+                            <i class="fa-solid fa-microphone text-xl"></i>
+                        </button>
+                        
+                        <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
                             <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
                         </button>
                     </form>
@@ -184,8 +259,20 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // 🔥 getDoc Import kora holo Unique Identity Check korar jonno
-        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        function setRealViewportHeight() {
+            if (window.visualViewport) {
+                document.body.style.height = window.visualViewport.height + 'px';
+            } else {
+                document.body.style.height = window.innerHeight + 'px';
+            }
+            const msgBox = document.getElementById('messages-box');
+            if(msgBox) msgBox.scrollTop = msgBox.scrollHeight;
+        }
+        window.addEventListener('resize', setRealViewportHeight);
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealViewportHeight);
+        setRealViewportHeight();
 
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
@@ -206,8 +293,9 @@
 
         let myName = localStorage.getItem('pvt_chat_name') || '';
         let myMobile = localStorage.getItem('pvt_chat_mobile') || '';
-        let activeContactMobile = null;
+        let myAvatarUrl = localStorage.getItem('pvt_chat_avatar') || ''; // 🔥 Avatar tracking
         
+        let activeContactMobile = null;
         let allUsers = [];
         let latestMessages = {}; 
         let chatListeners = {};  
@@ -216,6 +304,15 @@
         let userStatusUnsubscribe = null;
         let activeTrackingInterval = null;
         let selectedFile = null;
+        let typingTimeout = null; 
+
+        // Audio Recording Variables
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        // Settings Profile Pic logic
+        let settingsSelectedFile = null;
 
         const joinModal = document.getElementById('join-modal');
         const appContainer = document.getElementById('app-container');
@@ -228,17 +325,130 @@
         const msgBox = document.getElementById('messages-box');
         const chatForm = document.getElementById('chat-form');
         const msgInput = document.getElementById('msg-input');
+        
         const sendBtn = document.getElementById('send-btn');
+        const micBtn = document.getElementById('mic-btn');
         const fileInput = document.getElementById('file-input');
         const previewIcon = document.getElementById('preview-icon');
+        const previewImg = document.getElementById('preview-img');
 
-        if (myName && myMobile) {
-            startApp();
-        } else {
-            joinModal.classList.remove('hidden');
+        // Helper function for Avatar
+        function getAvatarUrl(name, customUrl) {
+            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
         }
 
-        // 🔥 UNIQUE IDENTITY & LOGIN LOGIC 🔥
+        if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
+
+        window.logoutPvtChat = () => {
+            if(confirm("Apni ki logout korte chan?")) {
+                localStorage.removeItem('pvt_chat_name');
+                localStorage.removeItem('pvt_chat_mobile');
+                localStorage.removeItem('pvt_chat_avatar');
+                location.reload();
+            }
+        };
+
+        // 🔥 SETTINGS / PROFILE PIC LOGIC 🔥
+        window.openSettings = () => {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl);
+            settingsSelectedFile = null;
+            document.getElementById('save-settings-btn').disabled = true;
+            document.getElementById('save-settings-btn').classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        window.closeSettings = () => {
+            document.getElementById('settings-modal').classList.add('hidden');
+            document.getElementById('profile-pic-input').value = '';
+        }
+
+        window.previewProfilePic = (event) => {
+            const file = event.target.files[0];
+            if(file && file.type.startsWith('image/')) {
+                if(file.size > 5 * 1024 * 1024) { alert("Max size 5MB allowed for profile picture"); return; }
+                settingsSelectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => document.getElementById('settings-avatar-preview').src = e.target.result;
+                reader.readAsDataURL(file);
+                
+                const saveBtn = document.getElementById('save-settings-btn');
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        window.uploadProfilePic = async () => {
+            if(!settingsSelectedFile) return;
+            const saveBtn = document.getElementById('save-settings-btn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', settingsSelectedFile);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                
+                const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const uploadResult = await response.json();
+                
+                if(uploadResult.secure_url) {
+                    const newAvatarUrl = uploadResult.secure_url;
+                    
+                    // Update Firestore
+                    await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
+                        avatarUrl: newAvatarUrl
+                    }, { merge: true });
+
+                    // Update local state
+                    myAvatarUrl = newAvatarUrl;
+                    localStorage.setItem('pvt_chat_avatar', newAvatarUrl);
+                    document.getElementById('my-avatar').src = newAvatarUrl;
+                    
+                    saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+                    setTimeout(() => closeSettings(), 1000);
+                } else throw new Error(uploadResult.error?.message || "Cloudinary failed");
+            } catch(e) {
+                console.error(e);
+                alert("Upload failed. Check connection.");
+                saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Picture';
+                saveBtn.disabled = false;
+            }
+        }
+
+
+        // 3 Dots Menu Logic
+        window.toggleChatMenu = () => {
+            event.stopPropagation();
+            document.getElementById('chat-dropdown').classList.toggle('show');
+        }
+        window.closeAllMenus = () => {
+            document.getElementById('chat-dropdown').classList.remove('show');
+            document.querySelectorAll('.reaction-menu-popup').forEach(el => el.classList.add('hidden'));
+        }
+
+        // CLEAR ENTIRE CHAT LOGIC
+        window.clearEntireChat = async () => {
+            closeAllMenus();
+            if(confirm("WARNING: Eita ei chat-er shob message delete kore dibe! Apni ki nishchit?")) {
+                try {
+                    const chatId = generateChatId(myMobile, activeContactMobile);
+                    const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
+                    
+                    const q = query(msgRef, limit(100)); 
+                    const querySnapshot = await getDocs(q);
+                    
+                    querySnapshot.forEach((document) => {
+                        deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, document.id));
+                    });
+                    
+                    document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
+                    alert("Chat entirely cleared!");
+                } catch(e) {
+                    console.error("Clear Chat Failed:", e);
+                }
+            }
+        }
+
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault();
             const n = document.getElementById('reg-name').value.trim();
@@ -251,56 +461,69 @@
                 joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Identity...';
 
                 try {
-                    // DB theke check korar jonno aage authenticate kora lagbe
                     await signInAnonymously(auth);
-                    
                     const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', m);
                     const userSnap = await getDoc(userRef);
 
-                    // Number jodi DB te theke thake
                     if (userSnap.exists()) {
                         const existingName = userSnap.data().name;
-                        // Name jodi na mele (lower/uppercase bad diye)
                         if (existingName.toLowerCase() !== n.toLowerCase()) {
                             alert(`🚨 OOPS! Ei number ti aage thekei "${existingName}" nam-e register kora achhe!\n\nDoyakore sothik nam din ba onno number bebohar korun.`);
-                            joinBtn.disabled = false;
-                            joinBtn.innerHTML = originalText;
-                            return; // Stop login process
+                            joinBtn.disabled = false; joinBtn.innerHTML = originalText;
+                            return; 
+                        }
+                        // Restore avatar if exists in DB
+                        if(userSnap.data().avatarUrl) {
+                            myAvatarUrl = userSnap.data().avatarUrl;
+                            localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
                         }
                     } else {
-                        // Notun user hole DB te toiri kora hobe
-                        await setDoc(userRef, {
-                            name: n,
-                            mobile: m,
-                            lastActive: Date.now()
-                        });
+                        await setDoc(userRef, { name: n, mobile: m, lastActive: Date.now(), typingTo: null, avatarUrl: '' });
                     }
 
-                    // Shob thik thakle login success
-                    myName = n; 
-                    myMobile = m;
-                    localStorage.setItem('pvt_chat_name', n);
-                    localStorage.setItem('pvt_chat_mobile', m);
-                    joinModal.classList.add('hidden');
-                    startApp();
+                    myName = n; myMobile = m;
+                    localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m);
+                    joinModal.classList.add('hidden'); startApp();
 
                 } catch (err) {
-                    console.error(err);
                     alert("Database connection error! Abar cheshta korun.");
-                    joinBtn.disabled = false;
-                    joinBtn.innerHTML = originalText;
+                    joinBtn.disabled = false; joinBtn.innerHTML = originalText;
                 }
             } else {
                 alert("Doyakore sothik nam ebong 11-digit mobile number din.");
             }
         };
 
-        msgInput.addEventListener('focus', () => { setTimeout(() => { msgBox.scrollTop = msgBox.scrollHeight; window.scrollTo(0, document.body.scrollHeight); }, 300); });
+        // UI & Button Toggle Logic
+        function toggleInputButtons() {
+            const hasText = msgInput.value.trim().length > 0;
+            const hasFile = !!selectedFile;
+            
+            if (hasText || hasFile) {
+                micBtn.classList.add('hidden');
+                sendBtn.classList.remove('hidden');
+                sendBtn.disabled = false;
+            } else {
+                micBtn.classList.remove('hidden');
+                sendBtn.classList.add('hidden');
+            }
+        }
+
+        msgInput.addEventListener('focus', () => { setTimeout(() => setRealViewportHeight(), 150); });
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px';
-            sendBtn.disabled = this.value.trim() === '' && !selectedFile;
+            toggleInputButtons();
+
+            if (activeContactMobile) {
+                setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: activeContactMobile }, { merge: true });
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: null }, { merge: true });
+                }, 2000);
+            }
         });
+
         msgInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if(!sendBtn.disabled) chatForm.dispatchEvent(new Event('submit')); }
         });
@@ -313,22 +536,71 @@
                 document.getElementById('file-preview-name').innerText = file.name;
                 document.getElementById('file-preview-size').innerText = (file.size / 1024 / 1024).toFixed(2) + " MB";
                 
-                if(file.type.startsWith('video/')) previewIcon.className = "fa-solid fa-video text-pink-400";
-                else if(file.type.startsWith('audio/')) previewIcon.className = "fa-solid fa-headphones text-emerald-400";
-                else if(file.type.startsWith('image/')) previewIcon.className = "fa-solid fa-image text-blue-400";
-                else previewIcon.className = "fa-solid fa-file text-slate-300";
-
+                previewIcon.className = "hidden"; previewImg.classList.add("hidden");
+                if(file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { previewImg.src = e.target.result; previewImg.classList.remove('hidden'); };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewIcon.className = "";
+                    if(file.type.startsWith('video/')) previewIcon.className = "fa-solid fa-video text-pink-400";
+                    else if(file.type.startsWith('audio/')) previewIcon.className = "fa-solid fa-headphones text-emerald-400";
+                    else previewIcon.className = "fa-solid fa-file text-slate-300";
+                }
                 document.getElementById('file-preview-container').classList.remove('hidden');
-                sendBtn.disabled = false;
+                toggleInputButtons();
             }
         });
 
         window.clearFile = () => {
-            selectedFile = null;
-            fileInput.value = '';
+            selectedFile = null; fileInput.value = '';
             document.getElementById('file-preview-container').classList.add('hidden');
-            sendBtn.disabled = msgInput.value.trim() === '';
+            previewImg.src = ''; toggleInputButtons();
         };
+
+        // AUDIO RECORDING LOGIC
+        window.startRecording = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.addEventListener("dataavailable", event => { audioChunks.push(event.data); });
+                mediaRecorder.start();
+                isRecording = true;
+
+                document.getElementById('recording-ui').classList.remove('hidden');
+                msgInput.parentElement.classList.add('hidden');
+                micBtn.classList.add('hidden');
+            } catch (err) {
+                alert("Microphone permission denied! Please allow access to send voice notes.");
+            }
+        }
+
+        window.cancelRecording = () => {
+            if(mediaRecorder && isRecording) { mediaRecorder.stop(); }
+            isRecording = false; audioChunks = [];
+            
+            document.getElementById('recording-ui').classList.add('hidden');
+            msgInput.parentElement.classList.remove('hidden');
+            toggleInputButtons();
+        }
+
+        window.stopAndSendRecording = () => {
+            if(mediaRecorder && isRecording) {
+                mediaRecorder.addEventListener("stop", () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' }); 
+                    const audioFile = new File([audioBlob], `VoiceNote_${Date.now()}.mp3`, { type: 'audio/mp3' });
+                    selectedFile = audioFile; 
+                    chatForm.dispatchEvent(new Event('submit')); 
+                });
+                mediaRecorder.stop();
+            }
+            isRecording = false;
+            document.getElementById('recording-ui').classList.add('hidden');
+            msgInput.parentElement.classList.remove('hidden');
+        }
+
 
         function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
 
@@ -336,10 +608,22 @@
             appContainer.classList.remove('hidden');
             document.getElementById('my-name-display').innerText = myName;
             document.getElementById('my-mobile-display').innerText = myMobile;
-            document.getElementById('my-avatar').src = `https://ui-avatars.com/api/?name=${myName}&background=random&color=fff`;
+            
+            // Set Initial Avatar
+            document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
 
             try {
                 await signInAnonymously(auth);
+                
+                // Fetch my latest avatar from DB just in case it was updated elsewhere
+                const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile);
+                const mySnap = await getDoc(myRef);
+                if(mySnap.exists() && mySnap.data().avatarUrl) {
+                    myAvatarUrl = mySnap.data().avatarUrl;
+                    localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
+                    document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
+                }
+
                 const updateMyStatus = async () => {
                     await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
                         name: myName, mobile: myMobile, lastActive: Date.now()
@@ -348,10 +632,7 @@
                 updateMyStatus();
                 activeTrackingInterval = setInterval(updateMyStatus, 60000);
                 listenForUsers();
-            } catch (err) {
-                console.error("Auth Error", err);
-                alert("Connection problem. Refresh page.");
-            }
+            } catch (err) { alert("Connection problem. Refresh page."); }
         }
 
         function listenForUsers() {
@@ -360,9 +641,10 @@
                 allUsers = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    if (data.mobile !== myMobile) {
-                        allUsers.push(data);
-                        setupLastMessageListener(data.mobile);
+                    if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); }
+                    else if (data.mobile === myMobile && data.avatarUrl) {
+                        // Dynamically update my own avatar if I change it
+                        document.getElementById('my-avatar').src = getAvatarUrl(data.name, data.avatarUrl);
                     }
                 });
                 renderContacts();
@@ -376,11 +658,8 @@
             const q = query(msgRef, orderBy('timestamp', 'desc'), limit(1));
             
             chatListeners[contactMobile] = onSnapshot(q, (snapshot) => {
-                if (!snapshot.empty) {
-                    latestMessages[contactMobile] = snapshot.docs[0].data();
-                } else {
-                    latestMessages[contactMobile] = null;
-                }
+                if (!snapshot.empty) latestMessages[contactMobile] = snapshot.docs[0].data();
+                else latestMessages[contactMobile] = null;
                 renderContacts();
             });
         }
@@ -397,14 +676,12 @@
 
             contactsContainer.innerHTML = '';
             if (filteredUsers.length === 0) {
-                contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-xs mt-10 p-4 border border-white/5 rounded-xl bg-black/20 mx-4">Kono contact nei.</p>`;
-                return;
+                contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-xs mt-10 p-4 border border-white/5 rounded-xl bg-black/20 mx-4">Kono contact nei.</p>`; return;
             }
             
             filteredUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
                 const activeClass = isActive ? 'contact-active' : 'border-l-4 border-transparent hover:bg-white/5';
-                
                 const isOnline = (Date.now() - user.lastActive) < 120000;
                 const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-600';
 
@@ -416,35 +693,37 @@
 
                 if (latestMsg) {
                     const isMe = latestMsg.senderMobile === myMobile;
-                    const prefix = isMe ? "<i class='fa-solid fa-check-double text-[10px] mr-1 opacity-60'></i> " : "";
+                    let tickClass = latestMsg.read ? "text-blue-400" : "text-slate-400 opacity-60";
+                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[10px] mr-1 ${tickClass}'></i> ` : "";
                     
-                    if (latestMsg.text) {
-                        msgPreview = prefix + escapeHTML(latestMsg.text);
-                    } else if (latestMsg.fileUrl) {
+                    if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
+                    else if (latestMsg.fileUrl) {
                         if (latestMsg.fileType?.startsWith('image/')) msgPreview = prefix + "📷 Photo";
                         else if (latestMsg.fileType?.startsWith('video/')) msgPreview = prefix + "🎥 Video";
-                        else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "🎵 Audio";
+                        else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "🎙️ Voice/Audio";
                         else msgPreview = prefix + "📁 Document";
                     }
-
                     timeString = latestMsg.timeString || "";
-
                     const lastReadTime = parseInt(localStorage.getItem(`read_${user.mobile}`) || '0');
-                    if (!isMe && latestMsg.timestamp > lastReadTime) {
-                        isUnread = true;
-                        previewClass = "text-emerald-400 font-bold";
-                    }
+                    if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-emerald-400 font-bold"; }
                 }
 
-                const unreadBadge = isUnread ? `<span class="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] shrink-0 animate-pulse"></span>` : ``;
+                let unreadBadge = isUnread ? `<span class="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] shrink-0 animate-pulse"></span>` : ``;
+                
+                if(user.typingTo === myMobile) {
+                    msgPreview = "<span class='text-emerald-400 font-bold animate-pulse text-[11px] italic'>typing...</span>";
+                    previewClass = ""; unreadBadge = ""; 
+                }
+
+                const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
 
                 const div = document.createElement('div');
                 div.className = `p-3 flex items-center gap-3 cursor-pointer transition-colors border-b border-white/5 ${activeClass}`;
-                div.onclick = () => openPrivateChat(user.name, user.mobile);
+                div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
                 
                 div.innerHTML = `
                     <div class="relative shrink-0">
-                        <img src="https://ui-avatars.com/api/?name=${user.name}&background=random&color=fff" class="w-12 h-12 rounded-full border border-slate-700">
+                        <img src="${userAvatar}" class="w-12 h-12 rounded-full border border-slate-700 object-cover bg-slate-800">
                         <span class="absolute bottom-0 right-0 w-3 h-3 ${dotColor} border-2 border-slate-900 rounded-full"></span>
                     </div>
                     <div class="flex-grow overflow-hidden flex flex-col justify-center">
@@ -464,41 +743,32 @@
 
         searchInput.addEventListener('input', () => renderContacts());
 
-        window.addEventListener('hashchange', () => {
-            if (window.location.hash !== '#chat' && activeContactMobile) {
-                closeChatLogic();
-            }
-        });
+        window.addEventListener('hashchange', () => { if (window.location.hash !== '#chat' && activeContactMobile) closeChatLogic(); });
 
         function closeChatLogic() {
             sidebar.classList.remove('-translate-x-full');
             chatArea.classList.add('translate-x-full');
             setTimeout(() => chatArea.classList.add('hidden'), 300);
-            activeContactMobile = null;
-            renderContacts();
+            activeContactMobile = null; renderContacts();
             if(currentChatUnsubscribe) currentChatUnsubscribe();
             if(userStatusUnsubscribe) userStatusUnsubscribe();
-            closeAllReactionMenus();
+            closeAllMenus();
         }
 
-        window.openPrivateChat = (contactName, contactMobile) => {
+        // 🔥 Added Avatar support here
+        window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
             activeContactMobile = contactMobile;
             localStorage.setItem(`read_${contactMobile}`, Date.now());
             
             document.getElementById('active-chat-name').innerText = contactName;
-            document.getElementById('active-chat-avatar').src = `https://ui-avatars.com/api/?name=${contactName}&background=random&color=fff`;
+            document.getElementById('active-chat-avatar').src = contactAvatarUrl;
             
             emptyState.classList.add('hidden');
             
             if (window.innerWidth < 768) {
-                sidebar.classList.add('-translate-x-full');
-                chatArea.classList.remove('hidden', 'translate-x-full');
-                if(window.location.hash !== '#chat') {
-                    window.location.hash = 'chat';
-                }
-            } else {
-                chatArea.classList.remove('hidden');
-            }
+                sidebar.classList.add('-translate-x-full'); chatArea.classList.remove('hidden', 'translate-x-full');
+                if(window.location.hash !== '#chat') window.location.hash = 'chat';
+            } else { chatArea.classList.remove('hidden'); }
 
             renderContacts();
             document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
@@ -507,9 +777,20 @@
             userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
                 const statusElem = document.getElementById('active-chat-status');
                 if(docSnap.exists()){
-                    const isOnline = (Date.now() - docSnap.data().lastActive) < 120000;
-                    statusElem.innerText = isOnline ? 'Online' : 'Offline';
-                    statusElem.className = isOnline ? 'text-[10px] text-emerald-400 font-bold tracking-widest transition-colors' : 'text-[10px] text-slate-500 font-medium tracking-widest transition-colors';
+                    const uData = docSnap.data();
+                    
+                    // Update header avatar globally if they changed it while chatting
+                    if(uData.avatarUrl) {
+                        document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
+                    }
+
+                    if(uData.typingTo === myMobile) {
+                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[11px] text-emerald-400 font-bold tracking-widest transition-colors animate-pulse italic';
+                    } else {
+                        const isOnline = (Date.now() - uData.lastActive) < 120000;
+                        statusElem.innerText = isOnline ? 'Online' : 'Offline';
+                        statusElem.className = isOnline ? 'text-[10px] text-emerald-400 font-bold tracking-widest transition-colors' : 'text-[10px] text-slate-500 font-medium tracking-widest transition-colors';
+                    }
                 }
             });
 
@@ -520,74 +801,53 @@
 
             currentChatUnsubscribe = onSnapshot(q, (snapshot) => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        msgBox.appendChild(createMessageElement(change.doc.id, change.doc.data()));
-                    } else if (change.type === "modified") {
+                    const mData = change.doc.data();
+                    if (!mData.read && mData.senderMobile !== myMobile) {
+                        updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
+                    }
+                    if (change.type === "added") msgBox.appendChild(createMessageElement(change.doc.id, mData));
+                    else if (change.type === "modified") {
                         const oldNode = document.getElementById(`msg-${change.doc.id}`);
-                        if(oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, change.doc.data()));
-                    } else if (change.type === "removed") {
+                        if(oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData));
+                    } 
+                    else if (change.type === "removed") {
                         const msgDiv = document.getElementById(`msg-${change.doc.id}`);
                         if(msgDiv) msgDiv.remove();
                     }
                 });
-                
-                localStorage.setItem(`read_${activeContactMobile}`, Date.now());
-                renderContacts();
+                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); renderContacts();
                 setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
             });
         };
 
-        window.closeChatMobile = () => {
-            if(window.location.hash === '#chat') {
-                history.back(); 
-            } else {
-                closeChatLogic();
-            }
-        };
-
-        window.closeAllReactionMenus = () => {
-            document.querySelectorAll('.reaction-menu-popup').forEach(el => el.classList.add('hidden'));
-        };
-
+        window.closeChatMobile = () => { if(window.location.hash === '#chat') history.back(); else closeChatLogic(); };
+        
         window.toggleReactionMenu = (docId, e) => {
-            e.stopPropagation();
-            if(e.target.closest('button')) return; 
-            
+            e.stopPropagation(); if(e.target.closest('button')) return; 
             const menu = document.getElementById(`react-menu-${docId}`);
             const isHidden = menu.classList.contains('hidden');
-            
-            closeAllReactionMenus();
+            closeAllMenus();
             if(isHidden) menu.classList.remove('hidden');
         };
 
         window.addReaction = async (docId, emoji, e) => {
-            if(e) e.stopPropagation();
-            closeAllReactionMenus();
-            try {
-                const chatId = generateChatId(myMobile, activeContactMobile);
-                await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, docId), { reaction: emoji });
-            } catch(e) { console.error("Reaction err:", e); }
+            if(e) e.stopPropagation(); closeAllMenus();
+            try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: emoji }); } catch(e){}
         };
 
         window.removeReaction = async (docId, e) => {
             if(e) e.stopPropagation();
-            try {
-                const chatId = generateChatId(myMobile, activeContactMobile);
-                await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, docId), { reaction: null });
-            } catch(e) { console.error(e); }
+            try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: null }); } catch(e){}
         };
 
         window.deleteMsg = async (docId, e) => {
-            if(e) e.stopPropagation();
-            closeAllReactionMenus();
-            if(confirm("Ei message-ti ki apni shobar theke delete korte chan?")) {
-                try {
-                    const chatId = generateChatId(myMobile, activeContactMobile);
-                    await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, docId));
-                } catch(e) { alert("Delete failed."); }
+            if(e) e.stopPropagation(); closeAllMenus();
+            if(confirm("Delete message for everyone?")) {
+                try { await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId)); } catch(e){}
             }
         };
 
+        // Main Send Logic
         chatForm.onsubmit = async (e) => {
             e.preventDefault();
             const text = msgInput.value.trim();
@@ -595,6 +855,7 @@
 
             sendBtn.disabled = true;
             sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: null }, { merge: true });
 
             try {
                 let fileUrl = null, fileName = null, fileType = null;
@@ -604,33 +865,24 @@
                     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
                     const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
                     const uploadResult = await response.json();
-                    if(uploadResult.secure_url) {
-                        fileUrl = uploadResult.secure_url; fileName = selectedFile.name; fileType = selectedFile.type;
-                    } else throw new Error(uploadResult.error?.message || "Cloudinary failed");
+                    if(uploadResult.secure_url) { fileUrl = uploadResult.secure_url; fileName = selectedFile.name; fileType = selectedFile.type || 'audio/mp3'; } 
+                    else throw new Error("Cloudinary failed");
                 }
 
-                const chatId = generateChatId(myMobile, activeContactMobile);
-                await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), {
+                await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`), {
                     text: text, senderMobile: myMobile, timestamp: Date.now(),
                     timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    fileUrl: fileUrl, fileName: fileName, fileType: fileType, reaction: null
+                    fileUrl: fileUrl, fileName: fileName, fileType: fileType, reaction: null, read: false 
                 });
 
                 msgInput.value = ''; clearFile();
-                msgInput.style.height = '44px';
-                localStorage.setItem(`read_${activeContactMobile}`, Date.now());
-                msgInput.focus();
-            } catch (error) {
-                alert("Message failed.");
-            } finally {
-                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>';
-                sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile;
-            }
+                msgInput.style.height = '44px'; toggleInputButtons();
+                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
+            } catch (error) { alert("Message failed."); } 
+            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
-        function getDownloadableUrl(originalUrl) {
-            return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl;
-        }
+        function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
 
         function createMessageElement(docId, data) {
             const isMe = data.senderMobile === myMobile;
@@ -660,11 +912,7 @@
             }
             
             let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
-            
-            let reactionBadge = '';
-            if (data.reaction) {
-                reactionBadge = `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-800 border border-white/10 rounded-full px-2 py-0.5 text-xs shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>`;
-            }
+            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-800 border border-white/10 rounded-full px-2 py-0.5 text-xs shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
 
             let popupMenu = `
                 <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-12 bg-slate-800 border border-white/10 rounded-2xl flex items-center gap-2 px-3 py-1.5 shadow-2xl z-[60] min-w-max animate-popIn">
@@ -676,23 +924,23 @@
                 </div>
             `;
 
+            let tickColor = data.read ? "text-blue-400" : "text-emerald-100 opacity-70";
+            let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[10px] ${tickColor} transition-colors"></i>` : '';
+
             msgDiv.innerHTML = `
                 ${popupMenu}
                 ${content}
                 ${finalHtmlText}
                 <div class="flex items-center gap-1 mt-1 justify-end px-1 w-full">
                     <span class="text-[9px] ${isMe ? 'text-teal-100' : 'text-slate-500'} font-medium">${data.timeString}</span>
-                    ${isMe ? '<i class="fa-solid fa-check-double text-[9px] text-teal-200 opacity-80"></i>' : ''}
+                    ${ticksHtml}
                 </div>
                 ${reactionBadge}
             `;
-            
             return msgDiv;
         }
 
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
-        }
+        function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
     </script>
 </body>
 </html>
