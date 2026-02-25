@@ -286,15 +286,6 @@
             });
         }
 
-        // 🔥 URL Helper to force download for Cloudinary links
-        function getDownloadableUrl(originalUrl) {
-            if (originalUrl && originalUrl.includes('/upload/')) {
-                // Inserts fl_attachment to force browser download instead of redirecting
-                return originalUrl.replace('/upload/', '/upload/fl_attachment/');
-            }
-            return originalUrl;
-        }
-
         function appendMessageToUI(data) {
             const isMe = data.sender === myUsername;
             const bubbleClasses = isMe ? 'bg-gradient-to-br from-pink-600 to-purple-600 self-end items-end' : 'bg-slate-800 self-start items-start';
@@ -306,10 +297,9 @@
                 if (data.fileType && data.fileType.startsWith('image/')) {
                     content = `<img src="${data.fileUrl}" class="rounded-xl mb-2 max-h-64 w-full object-cover cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${data.fileUrl}')">`;
                 } else {
-                    // 🔥 Fix: Forced Download URL applied here
-                    const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
-                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-black/20 p-3 rounded-xl flex items-center gap-3 text-xs mb-2 border border-white/5 hover:bg-black/40 transition-colors w-full">
-                        <i class="fa-solid fa-file-arrow-down text-xl text-pink-400"></i> 
+                    // 🔥 PDF Delivery Conflict theke bachar jonno normal URL use kora holo
+                    content = `<a href="${data.fileUrl}" target="_blank" class="bg-black/20 p-3 rounded-xl flex items-center gap-3 text-xs mb-2 border border-white/5 hover:bg-black/40 transition-colors w-full">
+                        <i class="fa-solid fa-file-pdf text-xl text-pink-400"></i> 
                         <span class="truncate font-bold text-white">${data.fileName}</span>
                     </a>`;
                 }
