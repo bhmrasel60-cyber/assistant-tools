@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Private Messenger | Web Tools Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #020617; 
+            color: #f8fafc; 
+            overflow: hidden; 
+            height: 100dvh; 
+            width: 100vw;
+            position: fixed; 
+        }
+        
+        .chat-bg {
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            background-color: #0f172a;
+            background-blend-mode: overlay;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .msg-bubble { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        
+        .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
+        
+        textarea { font-size: 16px !important; }
+        
+        /* Contact List Active State */
+        .contact-active { background: linear-gradient(to right, rgba(236,72,153,0.1), rgba(168,85,247,0.1)); border-left: 4px solid #ec4899; }
+
+        /* Audio Player Styling */
+        audio { height: 40px; outline: none; border-radius: 20px; }
+        audio::-webkit-media-controls-panel { background-color: rgba(255, 255, 255, 0.9); }
+    </style>
+</head>
+<body class="flex selection:bg-pink-500/30">
+
+    <!-- 1. Registration Modal -->
+    <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
+        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform">
+            <div class="w-20 h-20 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg">
+                <i class="fa-solid fa-lock text-3xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-2 text-white tracking-tight">Private Messenger</h2>
+            <p class="text-slate-400 text-sm mb-6">Login korar jonno tottho din</p>
+            
+            <form id="join-form" class="space-y-4">
+                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 transition-all font-bold" placeholder="Apnar Nam (e.g. Rasel)">
+                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 transition-all font-bold tracking-widest" placeholder="Mobile Number (11 digit)">
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg active:scale-95">Secure Login</button>
+            </form>
+            <div class="mt-4">
+                <a href="index.html" class="text-xs text-slate-500 hover:text-white underline transition-colors">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Main App Container -->
+    <div id="app-container" class="hidden w-full h-full max-w-6xl mx-auto md:py-4 md:px-4 flex">
+        
+        <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden relative">
+            
+            <!-- LEFT SIDEBAR: Contacts List -->
+            <div id="sidebar" class="w-full md:w-80 lg:w-96 flex flex-col border-r border-white/5 glass-panel z-20 transition-transform duration-300 flex-shrink-0">
+                
+                <!-- My Profile Header -->
+                <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                    <div class="flex items-center gap-3">
+                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors shrink-0">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0">
+                            <div class="truncate">
+                                <h2 id="my-name-display" class="font-bold text-white text-sm truncate">My Name</h2>
+                                <p id="my-mobile-display" class="text-[10px] text-emerald-400 font-medium tracking-widest">01700000000</p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Search Box -->
+                <div class="p-3 shrink-0">
+                    <div class="bg-black/30 rounded-xl flex items-center px-3 py-2 border border-white/5 focus-within:border-pink-500/50 transition-colors">
+                        <i class="fa-solid fa-search text-slate-500 text-sm"></i>
+                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-600">
+                    </div>
+                </div>
+
+                <!-- Contacts Area -->
+                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative">
+                    <div class="text-center p-4 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/90 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
+                        <span>Available Users</span>
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div id="contacts-container" class="pb-20"></div>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDEBAR: Chat Area -->
+            <div id="chat-area" class="w-full flex-col hidden md:flex absolute md:relative inset-0 z-30 bg-slate-950 transition-transform duration-300 transform translate-x-full md:translate-x-0">
+                
+                <!-- Empty State -->
+                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
+                    <div class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-6 border border-white/10">
+                        <i class="fa-brands fa-whatsapp text-4xl text-slate-400"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Web Tools Messenger</h2>
+                    <p class="text-slate-500 text-sm max-w-xs text-center">Select a contact to send messages, videos, audio, and documents with end-to-end encryption.</p>
+                </div>
+
+                <!-- Active Chat Header -->
+                <header class="p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                    <div class="flex items-center gap-4">
+                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white hover:bg-white/10 shrink-0">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div class="flex items-center gap-3">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full border border-slate-700 shadow-md">
+                            <div>
+                                <h2 id="active-chat-name" class="font-bold text-white text-[15px] leading-tight">Contact Name</h2>
+                                <p id="active-chat-status" class="text-[10px] text-slate-500 font-medium tracking-widest transition-colors">Checking status...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-slate-400">
+                        <button class="w-10 h-10 rounded-full hover:bg-white/5 transition-colors"><i class="fa-solid fa-video"></i></button>
+                        <button class="w-10 h-10 rounded-full hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone"></i></button>
+                    </div>
+                </header>
+
+                <!-- Messages Area -->
+                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative">
+                    <div class="text-center my-4">
+                        <span class="bg-black/40 text-slate-400 text-[10px] px-3 py-1 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
+                            <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> Messages & calls are end-to-end encrypted
+                        </span>
+                    </div>
+                </main>
+
+                <!-- Input Footer -->
+                <footer class="p-3 glass-panel shrink-0 border-t border-white/5" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                    
+                    <!-- File Preview -->
+                    <div id="file-preview-container" class="hidden w-full px-1 mb-2">
+                        <div class="bg-slate-800/90 border border-white/10 rounded-xl p-2.5 flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="w-8 h-8 rounded bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30">
+                                    <i id="preview-icon" class="fa-solid fa-file"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p id="file-preview-name" class="text-xs font-bold text-white truncate w-40 md:w-64">filename</p>
+                                    <p id="file-preview-size" class="text-[9px] text-slate-400 uppercase tracking-widest">0 MB</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="chat-form" class="flex items-end gap-2 w-full">
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 hover:text-pink-400 bg-slate-800/80 rounded-2xl flex items-center justify-center transition-all border border-white/10 hover:border-pink-500/50 mb-0.5">
+                            <i class="fa-solid fa-paperclip text-lg"></i>
+                        </button>
+                        <input type="file" id="file-input" class="hidden">
+
+                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-2xl flex items-center px-2 py-1 transition-all focus-within:border-pink-500/50">
+                            <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                                class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-28 custom-scroll" style="min-height: 44px;"></textarea>
+                        </div>
+                        
+                        <button type="submit" id="send-btn" disabled
+                            class="w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 mb-0.5">
+                            <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
+                        </button>
+                    </form>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase & Chat Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+        
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
+        const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
+        const SYNC_APP_ID = "rasel-mia-universal-sync";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State Variables
+        let myName = localStorage.getItem('pvt_chat_name') || '';
+        let myMobile = localStorage.getItem('pvt_chat_mobile') || '';
+        let activeContactMobile = null;
+        
+        let allUsers = [];
+        let latestMessages = {}; // 🔥 Noto message preview rakhar jonno
+        let chatListeners = {};  // 🔥 Prottek chat-er live update dhore rakhar jonno
+
+        let currentChatUnsubscribe = null;
+        let userStatusUnsubscribe = null;
+        let activeTrackingInterval = null;
+        let selectedFile = null;
+
+        // DOM Elements
+        const joinModal = document.getElementById('join-modal');
+        const appContainer = document.getElementById('app-container');
+        const contactsContainer = document.getElementById('contacts-container');
+        const searchInput = document.getElementById('search-input');
+        const emptyState = document.getElementById('empty-chat-state');
+        
+        const chatArea = document.getElementById('chat-area');
+        const sidebar = document.getElementById('sidebar');
+        const msgBox = document.getElementById('messages-box');
+        const chatForm = document.getElementById('chat-form');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+        const fileInput = document.getElementById('file-input');
+        const previewIcon = document.getElementById('preview-icon');
+
+        // Initial setup
+        if (myName && myMobile) {
+            startApp();
+        } else {
+            joinModal.classList.remove('hidden');
+        }
+
+        document.getElementById('join-form').onsubmit = (e) => {
+            e.preventDefault();
+            const n = document.getElementById('reg-name').value.trim();
+            const m = document.getElementById('reg-mobile').value.trim();
+            if (n && m.length === 11) {
+                myName = n; myMobile = m;
+                localStorage.setItem('pvt_chat_name', n);
+                localStorage.setItem('pvt_chat_mobile', m);
+                joinModal.classList.add('hidden');
+                startApp();
+            } else {
+                alert("Please enter valid name and 11-digit mobile number.");
+            }
+        };
+
+        msgInput.addEventListener('focus', () => { setTimeout(() => { msgBox.scrollTop = msgBox.scrollHeight; window.scrollTo(0, document.body.scrollHeight); }, 300); });
+        msgInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px';
+            sendBtn.disabled = this.value.trim() === '' && !selectedFile;
+        });
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if(!sendBtn.disabled) chatForm.dispatchEvent(new Event('submit')); }
+        });
+
+        // File Selection Logic
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 30 * 1024 * 1024) { alert("File size limit is 30MB!"); fileInput.value = ''; return; }
+                selectedFile = file;
+                document.getElementById('file-preview-name').innerText = file.name;
+                document.getElementById('file-preview-size').innerText = (file.size / 1024 / 1024).toFixed(2) + " MB";
+                
+                if(file.type.startsWith('video/')) previewIcon.className = "fa-solid fa-video text-pink-400";
+                else if(file.type.startsWith('audio/')) previewIcon.className = "fa-solid fa-headphones text-emerald-400";
+                else if(file.type.startsWith('image/')) previewIcon.className = "fa-solid fa-image text-blue-400";
+                else previewIcon.className = "fa-solid fa-file text-slate-300";
+
+                document.getElementById('file-preview-container').classList.remove('hidden');
+                sendBtn.disabled = false;
+            }
+        });
+
+        window.clearFile = () => {
+            selectedFile = null;
+            fileInput.value = '';
+            document.getElementById('file-preview-container').classList.add('hidden');
+            sendBtn.disabled = msgInput.value.trim() === '';
+        };
+
+        function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
+
+        async function startApp() {
+            appContainer.classList.remove('hidden');
+            document.getElementById('my-name-display').innerText = myName;
+            document.getElementById('my-mobile-display').innerText = myMobile;
+            document.getElementById('my-avatar').src = `https://ui-avatars.com/api/?name=${myName}&background=random&color=fff`;
+
+            try {
+                await signInAnonymously(auth);
+                
+                const updateMyStatus = async () => {
+                    await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
+                        name: myName, mobile: myMobile, lastActive: Date.now()
+                    }, { merge: true });
+                };
+                updateMyStatus();
+                activeTrackingInterval = setInterval(updateMyStatus, 60000);
+
+                listenForUsers();
+            } catch (err) {
+                console.error("Auth Error", err);
+                alert("Connection problem. Refresh page.");
+            }
+        }
+
+        // 🔥 Contact List Listner & Fetching Users
+        function listenForUsers() {
+            const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
+            onSnapshot(usersRef, (snapshot) => {
+                allUsers = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.mobile !== myMobile) {
+                        allUsers.push(data);
+                        // Start tracking last message for this user to show preview
+                        setupLastMessageListener(data.mobile);
+                    }
+                });
+                renderContacts();
+            });
+        }
+
+        // 🔥 Track Latest Message for Unread Badge & Snippet
+        function setupLastMessageListener(contactMobile) {
+            if (chatListeners[contactMobile]) return; // Ager thekei track korle bad dibe
+            
+            const chatId = generateChatId(myMobile, contactMobile);
+            const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
+            const q = query(msgRef, orderBy('timestamp', 'desc'), limit(1)); // Fetch shudhu last msg
+            
+            chatListeners[contactMobile] = onSnapshot(q, (snapshot) => {
+                if (!snapshot.empty) {
+                    latestMessages[contactMobile] = snapshot.docs[0].data();
+                } else {
+                    latestMessages[contactMobile] = null;
+                }
+                renderContacts(); // Message ashle contact list auto update hobe
+            });
+        }
+
+        // 🔥 Render Contact List (WhatsApp Style Sorting & Preview)
+        function renderContacts() {
+            const term = searchInput.value.toLowerCase();
+            let filteredUsers = allUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
+
+            // Auto Sorting: Notun message jar theke ashbe she ekdom upore (Top) jabe
+            filteredUsers.sort((a, b) => {
+                const timeA = latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0;
+                const timeB = latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0;
+                return timeB - timeA;
+            });
+
+            contactsContainer.innerHTML = '';
+            if (filteredUsers.length === 0) {
+                contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-xs mt-10 p-4 border border-white/5 rounded-xl bg-black/20 mx-4">Kono contact nei.</p>`;
+                return;
+            }
+            
+            filteredUsers.forEach(user => {
+                const isActive = activeContactMobile === user.mobile;
+                const activeClass = isActive ? 'contact-active' : 'border-l-4 border-transparent hover:bg-white/5';
+                
+                const isOnline = (Date.now() - user.lastActive) < 120000;
+                const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-600';
+
+                // Message Preview Logic
+                const latestMsg = latestMessages[user.mobile];
+                let msgPreview = "Kono message nei";
+                let timeString = "";
+                let isUnread = false;
+                let previewClass = "text-slate-500";
+
+                if (latestMsg) {
+                    const isMe = latestMsg.senderMobile === myMobile;
+                    const prefix = isMe ? "<i class='fa-solid fa-check-double text-[10px] mr-1 opacity-60'></i> " : "";
+                    
+                    if (latestMsg.text) {
+                        msgPreview = prefix + escapeHTML(latestMsg.text);
+                    } else if (latestMsg.fileUrl) {
+                        if (latestMsg.fileType?.startsWith('image/')) msgPreview = prefix + "📷 Photo";
+                        else if (latestMsg.fileType?.startsWith('video/')) msgPreview = prefix + "🎥 Video";
+                        else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "🎵 Audio";
+                        else msgPreview = prefix + "📁 Document";
+                    }
+
+                    timeString = latestMsg.timeString || "";
+
+                    // Unread check (Amar read time er theke message er time beshi hole unread)
+                    const lastReadTime = parseInt(localStorage.getItem(`read_${user.mobile}`) || '0');
+                    if (!isMe && latestMsg.timestamp > lastReadTime) {
+                        isUnread = true;
+                        previewClass = "text-emerald-400 font-bold";
+                    }
+                }
+
+                // WhatsApp style green badge
+                const unreadBadge = isUnread ? `<span class="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] shrink-0 animate-pulse"></span>` : ``;
+
+                const div = document.createElement('div');
+                div.className = `p-3 flex items-center gap-3 cursor-pointer transition-colors border-b border-white/5 ${activeClass}`;
+                div.onclick = () => openPrivateChat(user.name, user.mobile);
+                
+                div.innerHTML = `
+                    <div class="relative shrink-0">
+                        <img src="https://ui-avatars.com/api/?name=${user.name}&background=random&color=fff" class="w-12 h-12 rounded-full border border-slate-700">
+                        <span class="absolute bottom-0 right-0 w-3 h-3 ${dotColor} border-2 border-slate-900 rounded-full"></span>
+                    </div>
+                    <div class="flex-grow overflow-hidden flex flex-col justify-center">
+                        <div class="flex justify-between items-baseline mb-0.5">
+                            <h3 class="text-[15px] font-bold text-slate-200 truncate pr-2">${user.name}</h3>
+                            <span class="text-[9px] ${isUnread ? 'text-emerald-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-[12px] ${previewClass} truncate w-full">${msgPreview}</p>
+                            ${unreadBadge}
+                        </div>
+                    </div>
+                `;
+                contactsContainer.appendChild(div);
+            });
+        }
+
+        searchInput.addEventListener('input', () => renderContacts());
+
+        // Chat Opening
+        window.openPrivateChat = (contactName, contactMobile) => {
+            activeContactMobile = contactMobile;
+            
+            // Mark chat as read locally
+            localStorage.setItem(`read_${contactMobile}`, Date.now());
+            
+            document.getElementById('active-chat-name').innerText = contactName;
+            document.getElementById('active-chat-avatar').src = `https://ui-avatars.com/api/?name=${contactName}&background=random&color=fff`;
+            
+            emptyState.classList.add('hidden');
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+                chatArea.classList.remove('hidden', 'translate-x-full');
+            }
+
+            renderContacts(); // Clear the unread badge
+            
+            document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
+
+            if(userStatusUnsubscribe) userStatusUnsubscribe();
+            userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
+                const statusElem = document.getElementById('active-chat-status');
+                if(docSnap.exists()){
+                    const isOnline = (Date.now() - docSnap.data().lastActive) < 120000;
+                    statusElem.innerText = isOnline ? 'Online' : 'Offline';
+                    statusElem.className = isOnline ? 'text-[10px] text-emerald-400 font-bold tracking-widest transition-colors' : 'text-[10px] text-slate-500 font-medium tracking-widest transition-colors';
+                }
+            });
+
+            if (currentChatUnsubscribe) currentChatUnsubscribe();
+            
+            const chatId = generateChatId(myMobile, contactMobile);
+            const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
+            const q = query(msgRef, orderBy('timestamp', 'asc'), limit(200));
+
+            currentChatUnsubscribe = onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        appendMessageToUI(change.doc.id, change.doc.data());
+                    } else if (change.type === "removed") {
+                        const msgDiv = document.getElementById(`msg-${change.doc.id}`);
+                        if(msgDiv) msgDiv.remove();
+                    }
+                });
+                
+                // Keep marking as read if we are actively looking at this chat
+                localStorage.setItem(`read_${activeContactMobile}`, Date.now());
+                renderContacts();
+
+                setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
+            });
+        };
+
+        window.closeChatMobile = () => {
+            sidebar.classList.remove('-translate-x-full');
+            chatArea.classList.add('translate-x-full');
+            setTimeout(() => chatArea.classList.add('hidden'), 300);
+            activeContactMobile = null;
+            renderContacts();
+            if(currentChatUnsubscribe) currentChatUnsubscribe();
+            if(userStatusUnsubscribe) userStatusUnsubscribe();
+        };
+
+        window.deleteMsg = async (docId) => {
+            if(confirm("Ei message-ti ki apni shobar theke delete korte chan?")) {
+                try {
+                    const chatId = generateChatId(myMobile, activeContactMobile);
+                    await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, docId));
+                } catch(e) {
+                    console.error("Delete failed:", e);
+                    alert("Delete kora jayni.");
+                }
+            }
+        };
+
+        chatForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const text = msgInput.value.trim();
+            if ((!text && !selectedFile) || !activeContactMobile) return;
+
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            try {
+                let fileUrl = null, fileName = null, fileType = null;
+                
+                if (selectedFile) {
+                    const formData = new FormData();
+                    formData.append('file', selectedFile);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                    const uploadResult = await response.json();
+                    if(uploadResult.secure_url) {
+                        fileUrl = uploadResult.secure_url; fileName = selectedFile.name; fileType = selectedFile.type;
+                    } else throw new Error(uploadResult.error?.message || "Cloudinary failed");
+                }
+
+                const chatId = generateChatId(myMobile, activeContactMobile);
+                const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
+                
+                await addDoc(msgRef, {
+                    text: text,
+                    senderMobile: myMobile,
+                    timestamp: Date.now(),
+                    timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    fileUrl: fileUrl,
+                    fileName: fileName,
+                    fileType: fileType
+                });
+
+                msgInput.value = '';
+                clearFile();
+                msgInput.style.height = '44px';
+                
+                // Chat send korar por read update
+                localStorage.setItem(`read_${activeContactMobile}`, Date.now());
+                msgInput.focus();
+            } catch (error) {
+                console.error(error);
+                alert("Message failed to send.");
+            } finally {
+                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>';
+                sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile;
+            }
+        };
+
+        function getDownloadableUrl(originalUrl) {
+            return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl;
+        }
+
+        function appendMessageToUI(docId, data) {
+            const isMe = data.senderMobile === myMobile;
+            const bubbleClasses = isMe ? 'bg-gradient-to-br from-emerald-600 to-teal-600 self-end items-end rounded-br-sm' : 'bg-slate-800 border border-white/5 self-start items-start rounded-bl-sm';
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.id = `msg-${docId}`;
+            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[70%] ${bubbleClasses} p-2 md:p-3 rounded-2xl mb-2 relative shadow-md group`;
+            
+            let content = '';
+            if (data.fileUrl) {
+                if (data.fileType && data.fileType.startsWith('video/')) {
+                    content = `<video controls class="rounded-xl mb-2 max-h-64 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
+                } else if (data.fileType && data.fileType.startsWith('audio/')) {
+                    content = `<audio controls class="w-full mb-2"><source src="${data.fileUrl}"></audio>`;
+                } else if (data.fileType && data.fileType.startsWith('image/')) {
+                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-2 max-h-64 w-full object-cover cursor-pointer hover:opacity-90 transition-opacity bg-black/20" onclick="window.open('${data.fileUrl}')">`;
+                } else {
+                    const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
+                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-black/20 p-3 rounded-xl flex items-center gap-3 text-xs mb-2 border border-white/5 hover:bg-black/40 transition-colors w-full">
+                        <i class="fa-solid fa-file-arrow-down text-xl ${isMe ? 'text-teal-200' : 'text-pink-400'} shrink-0"></i> 
+                        <span class="truncate font-bold text-white">${data.fileName}</span>
+                    </a>`;
+                }
+            }
+            
+            let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
+            
+            let deleteBtnHtml = isMe ? `<button onclick="deleteMsg('${docId}')" class="absolute -left-8 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center pointer-events-auto shadow-lg" title="Delete Message"><i class="fa-solid fa-trash text-xs"></i></button>` : '';
+
+            msgDiv.innerHTML = `
+                ${deleteBtnHtml}
+                ${content}
+                ${finalHtmlText}
+                <div class="flex items-center gap-1 mt-1 justify-end px-1 w-full">
+                    <span class="text-[9px] ${isMe ? 'text-teal-100' : 'text-slate-500'} font-medium">${data.timeString}</span>
+                    ${isMe ? '<i class="fa-solid fa-check-double text-[9px] text-teal-200 opacity-80"></i>' : ''}
+                </div>
+            `;
+            
+            msgBox.appendChild(msgDiv);
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+        }
+    </script>
+</body>
+</html>
