@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- 🔥 Added interactive-widget=resizes-content for Native Android Keyboard Support 🔥 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#020617">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,17 +12,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Android Display & Keyboard Fixes 🔥 */
+        /* 🔥 Strict Android Layout Fixes 🔥 */
         html, body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
-            overflow: hidden; /* Prevent body scroll, only inner containers should scroll */
-            height: 100dvh; /* Dynamic Viewport Height fixes keyboard layout issues natively */
+            overflow: hidden; /* Prevent native body scroll */
             width: 100vw;
             margin: 0;
             padding: 0;
-            overscroll-behavior-y: none; /* Stops pull-to-refresh but allows internal scrolling */
+            position: fixed; /* Keep body fixed to prevent jumping */
+            top: 0;
+            left: 0;
         }
         
         .chat-bg {
@@ -55,6 +55,12 @@
         
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; animation: popIn 0.2s ease-out forwards; }
+
+        /* Ensure scrollable areas work smoothly */
+        #messages-box, #contacts-list {
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body class="flex selection:bg-pink-500/30">
@@ -116,8 +122,8 @@
     </div>
 
     <!-- 2. Main App Container -->
-    <!-- Changed absolute height logic to flex styling suitable for 100dvh -->
-    <div id="app-container" class="hidden absolute top-0 left-0 w-full h-[100dvh] max-w-6xl mx-auto md:relative md:py-4 md:px-4 flex">
+    <!-- 🔥 Absolute container managed by JS for dynamic height calculation -->
+    <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-6xl mx-auto md:relative md:py-4 md:px-4 flex">
         
         <div class="w-full h-full flex flex-row bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden">
             
@@ -273,7 +279,23 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 CRITICAL FIX FOR ANDROID KEYBOARD OVERLAP & SCROLLING 🔥
+        // 🔥 Dynamic Screen Resizer (Forces Screen to shrink for Android Keyboard) 🔥
+        function adjustAppHeight() {
+            const viewportHeight = window.innerHeight;
+            document.body.style.height = `${viewportHeight}px`;
+            const appBox = document.getElementById('app-container');
+            if (appBox) {
+                appBox.style.height = `${viewportHeight}px`;
+            }
+        }
+
+        // Call immediately and on every resize
+        adjustAppHeight();
+        window.addEventListener('resize', () => {
+            adjustAppHeight();
+            setTimeout(scrollToBottom, 50);
+        });
+
         function scrollToBottom() {
             const msgBox = document.getElementById('messages-box');
             if(msgBox) {
@@ -281,17 +303,13 @@
             }
         }
 
-        // Adjust scroll smoothly when keyboard appears and changes visual viewport
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                setTimeout(scrollToBottom, 50);
-            });
-        }
-        
         // Push scroll to bottom when user clicks input
         const msgInput = document.getElementById('msg-input');
         msgInput.addEventListener('focus', () => {
-            setTimeout(scrollToBottom, 300); // Wait for keyboard animation to finish
+            setTimeout(() => {
+                adjustAppHeight();
+                scrollToBottom();
+            }, 300); // Wait for keyboard animation to finish
         });
 
         const firebaseConfig = {
@@ -796,6 +814,9 @@
 
             renderContacts();
             document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
+
+            // 🔥 Run height fixer right when opening chat 🔥
+            adjustAppHeight();
 
             if(userStatusUnsubscribe) userStatusUnsubscribe();
             userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
