@@ -134,19 +134,230 @@
                 </div>
             </div>
 
-            <!-- 5. PDF to High Quality PNG (NEW) -->
-            <div class="tool-card border-t-4 border-teal-500">
-                <div>
-                    <div class="icon-box bg-teal-100 text-teal-600">🖼️</div>
-                    <h3 class="text-lg font-bold text-slate-800">PDF to HQ PNG</h3>
-                    <p class="text-slate-500 text-sm mb-3">Convert PDF page to Image.</p>
-                </div>
-                <div>
-                    <input type="file" id="pdf-to-img-file" accept=".pdf" class="text-sm">
-                    <input type="number" id="pdf-page-num" placeholder="Page No (Default 1)" min="1" value="1">
-                    <button onclick="convertPdfToPng()" class="btn-action bg-teal-600">Convert to PNG</button>
-                </div>
+           <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced PDF Merger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF-Lib import kora holo PDF merge korar ashol kajer jonno -->
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <style>
+        .drag-over {
+            border: 2px dashed #4b5563; /* tailwind gray-600 */
+            background-color: #f3f4f6; /* tailwind gray-100 */
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 p-10 flex justify-center">
+
+    <!-- 7. Advanced PDF Merger Tool Card -->
+    <div class="tool-card bg-white p-6 rounded-xl shadow-lg border-t-4 border-gray-600 w-full max-w-md">
+        <div class="mb-4 flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-2xl shadow-inner">
+                <i class="fa-solid fa-file-pdf"></i>
             </div>
+            <div>
+                <h3 class="text-xl font-bold text-slate-800">Advanced PDF Merger</h3>
+                <p class="text-slate-500 text-sm">Combine & reorder multiple PDFs.</p>
+            </div>
+        </div>
+
+        <div>
+            <!-- Custom File Input Button -->
+            <input type="file" id="merge-files" multiple accept=".pdf" class="hidden" onchange="handlePDFSelection(event)">
+            <label for="merge-files" class="w-full cursor-pointer flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl text-sm mb-4 transition-all border border-gray-300 border-dashed">
+                <i class="fa-solid fa-plus-circle text-gray-500"></i> Select PDFs
+            </label>
+
+            <!-- Selected Files List Container -->
+            <ul id="pdf-list" class="mb-4 space-y-2 max-h-60 overflow-y-auto pr-1">
+                <!-- JavaScript theke list generate hobe -->
+            </ul>
+
+            <!-- Action Button -->
+            <button id="merge-btn" onclick="executeMerge()" class="hidden w-full bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                <i class="fa-solid fa-layer-group"></i> Merge PDFs Now
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // PDF file gulo store korar jonno global array
+        let selectedPDFs = [];
+        let dragStartIndex = -1;
+
+        // 1. File Select korle Array te push kora
+        function handlePDFSelection(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                    selectedPDFs.push(files[i]);
+                }
+                renderPDFList();
+            }
+            // Input clear kore dicchi jate same file abar select kora jay dorkar hole
+            event.target.value = ''; 
+        }
+
+        // 2. UI te list generate kora (With Drag & Drop & Action Buttons)
+        function renderPDFList() {
+            const listContainer = document.getElementById('pdf-list');
+            const mergeBtn = document.getElementById('merge-btn');
+            listContainer.innerHTML = '';
+
+            if (selectedPDFs.length === 0) {
+                mergeBtn.classList.add('hidden');
+                listContainer.innerHTML = '<p class="text-xs text-center text-gray-400 py-4 italic">No files selected yet.</p>';
+                return;
+            }
+
+            // Dui ba tar beshi file thaklei merge button dekhabo
+            if (selectedPDFs.length >= 2) {
+                mergeBtn.classList.remove('hidden');
+            } else {
+                mergeBtn.classList.add('hidden');
+            }
+
+            selectedPDFs.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3 shadow-sm cursor-grab transition-all group';
+                li.draggable = true;
+                
+                // Drag and Drop Events
+                li.ondragstart = (e) => dragStart(e, index);
+                li.ondragover = (e) => dragOver(e);
+                li.ondragleave = (e) => dragLeave(e);
+                li.ondrop = (e) => drop(e, index);
+
+                // File name choto kora
+                let fileName = file.name;
+                if(fileName.length > 25) fileName = fileName.substring(0, 22) + '...';
+
+                li.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <i class="fa-solid fa-grip-vertical text-gray-300 group-hover:text-gray-500 cursor-grab"></i>
+                        <span class="text-sm font-semibold text-gray-700 truncate" title="${file.name}">${fileName}</span>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="moveUp(${index})" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed" ${index === 0 ? 'disabled' : ''}>
+                            <i class="fa-solid fa-caret-up"></i>
+                        </button>
+                        <button onclick="moveDown(${index})" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed" ${index === selectedPDFs.length - 1 ? 'disabled' : ''}>
+                            <i class="fa-solid fa-caret-down"></i>
+                        </button>
+                        <button onclick="removeFile(${index})" class="w-7 h-7 rounded bg-red-50 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-colors ml-1">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(li);
+            });
+        }
+
+        // --- Drag and Drop Logic ---
+        function dragStart(e, index) {
+            dragStartIndex = index;
+            e.dataTransfer.effectAllowed = 'move';
+            // Ghost image set kora jete pare, tobe default tai bhalo
+        }
+
+        function dragOver(e) {
+            e.preventDefault(); // Drop allow korar jonno
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function dragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function drop(e, targetIndex) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            if (dragStartIndex === targetIndex) return;
+
+            // Array theke dragged item ti kete target index e boshan
+            const draggedItem = selectedPDFs.splice(dragStartIndex, 1)[0];
+            selectedPDFs.splice(targetIndex, 0, draggedItem);
+            
+            renderPDFList();
+        }
+
+        // --- Button Controls Logic (Mobile er jonno bhalo) ---
+        window.moveUp = (index) => {
+            if (index === 0) return;
+            const item = selectedPDFs.splice(index, 1)[0];
+            selectedPDFs.splice(index - 1, 0, item);
+            renderPDFList();
+        }
+
+        window.moveDown = (index) => {
+            if (index === selectedPDFs.length - 1) return;
+            const item = selectedPDFs.splice(index, 1)[0];
+            selectedPDFs.splice(index + 1, 0, item);
+            renderPDFList();
+        }
+
+        window.removeFile = (index) => {
+            selectedPDFs.splice(index, 1);
+            renderPDFList();
+        }
+
+        // --- PDF Merging Logic (Using pdf-lib) ---
+        window.executeMerge = async () => {
+            const btn = document.getElementById('merge-btn');
+            
+            if (selectedPDFs.length < 2) {
+                alert("Please select at least 2 PDFs to merge.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+            try {
+                const { PDFDocument } = PDFLib;
+                const mergedPdf = await PDFDocument.create();
+
+                // Sequence onujayi protita PDF theke page niye asha
+                for (let file of selectedPDFs) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdfDoc = await PDFDocument.load(arrayBuffer);
+                    const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+                    copiedPages.forEach((page) => mergedPdf.addPage(page));
+                }
+
+                // Notun PDF save kora
+                const mergedPdfFile = await mergedPdf.save();
+                
+                // Download trigger kora
+                const blob = new Blob([mergedPdfFile], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'Merged_Document_RaselTools.pdf';
+                link.click();
+                
+                // Reset korchi na jate user chaile abar sequence change kore download korte pare
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Merged Successfully!';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-layer-group"></i> Merge PDFs Now';
+                }, 2000);
+
+            } catch (error) {
+                console.error("Merging error:", error);
+                alert("Error merging PDFs. Ensure they are valid PDF files without passwords.");
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-layer-group"></i> Merge PDFs Now';
+            }
+        };
+    </script>
+</body>
+</html>
 
             <!-- 6. Photo to High Quality PDF -->
             <div class="tool-card border-t-4 border-green-500">
@@ -522,3 +733,4 @@
 </body>
 
 </html>
+
