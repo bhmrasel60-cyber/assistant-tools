@@ -3,19 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#111b21">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Private Messenger | Web Tools Suite</title>
+    <title>WhatsApp Web Clone | Web Tools Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap');
         
+        /* 🔥 WhatsApp Dark Mode Variables & Fixes 🔥 */
+        :root {
+            --wa-bg: #111b21;
+            --wa-panel: #202c33;
+            --wa-sent: #005c4b;
+            --wa-received: #202c33;
+            --wa-text: #e9edef;
+            --wa-muted: #8696a0;
+            --wa-green: #00a884;
+            --wa-blue-tick: #53bdeb;
+            --wa-border: #222d34;
+        }
+
         html, body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #020617; 
-            color: #f8fafc; 
+            font-family: 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            background-color: var(--wa-bg); 
+            color: var(--wa-text); 
             overflow: hidden; 
             height: 100vh; 
             width: 100vw;
@@ -28,281 +41,301 @@
         }
         
         .chat-bg {
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-            background-color: #0f172a;
+            background-color: #0b141a;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
             background-blend-mode: overlay;
+            background-size: contain;
         }
 
         @keyframes popIn {
             0% { opacity: 0; transform: scale(0.95) translateY(10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .msg-bubble { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .msg-bubble { animation: popIn 0.2s ease-out forwards; }
 
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
-        
-        .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #374045; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #51585c; }
         
         textarea, input { font-size: 16px !important; } 
         
-        .contact-active { background: linear-gradient(to right, rgba(236,72,153,0.1), rgba(168,85,247,0.1)); border-left: 4px solid #ec4899; }
+        .contact-active { background-color: #2a3942; }
 
-        audio { height: 44px; outline: none; border-radius: 20px; width: 100%; }
-        audio::-webkit-media-controls-panel { background-color: rgba(255, 255, 255, 0.9); }
-        
         .dropdown-menu { display: none; }
-        .dropdown-menu.show { display: block; animation: popIn 0.2s ease-out forwards; }
+        .dropdown-menu.show { display: block; animation: popIn 0.15s ease-out forwards; }
+
+        /* 🔥 Custom Audio Player Styles 🔥 */
+        .audio-slider {
+            -webkit-appearance: none;
+            background: #4a5d66;
+            height: 4px;
+            border-radius: 5px;
+            outline: none;
+        }
+        .audio-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--wa-green);
+            cursor: pointer;
+        }
     </style>
 </head>
-<body class="flex selection:bg-pink-500/30">
+<body class="flex selection:bg-[#00a884]/30">
 
-    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
+    <!-- 🔥 Telegram Style Soft Pop Sound for Notification 🔥 -->
+    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <audio id="ringtone-sound" src="https://assets.mixkit.co/active_storage/sfx/2803/2803-preview.mp3" preload="auto" loop></audio>
 
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity opacity-0" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-gray-800 transition-colors z-50">
             <i class="fa-solid fa-xmark"></i>
         </button>
         <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl">
     </div>
 
     <!-- Registration Modal -->
-    <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform">
-            <div class="w-20 h-20 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg">
-                <i class="fa-solid fa-lock text-3xl text-white"></i>
+    <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#111b21] transition-opacity">
+        <div class="bg-[#202c33] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center">
+            <div class="w-16 h-16 bg-[#00a884] rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg">
+                <i class="fa-brands fa-whatsapp text-3xl text-white"></i>
             </div>
-            <h2 class="text-2xl font-black mb-2 text-white tracking-tight">Private Messenger</h2>
-            <p class="text-slate-400 text-sm mb-6">Login korar jonno tottho din</p>
+            <h2 class="text-2xl font-semibold mb-2 text-[#e9edef]">WhatsApp Web</h2>
+            <p class="text-[#8696a0] text-sm mb-8">Enter your details to connect</p>
             
             <form id="join-form" class="space-y-4">
-                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 transition-all font-bold text-base" placeholder="Apnar Nam (e.g. Rasel)">
-                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 transition-all font-bold tracking-widest text-base" placeholder="Mobile Number (11 digit)">
+                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-[#e9edef] text-center focus:outline-none focus:border-[#00a884] transition-all" placeholder="Your Name">
+                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-[#e9edef] text-center focus:outline-none focus:border-[#00a884] transition-all tracking-widest" placeholder="Phone Number (11 digits)">
                 
-                <button type="submit" id="join-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 text-base mt-2">Secure Login</button>
+                <button type="submit" id="join-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wider transition-all shadow-lg active:scale-95 mt-4">Connect</button>
             </form>
-            <div class="mt-4">
-                <a href="index.html" class="text-xs text-slate-500 hover:text-white underline transition-colors">Back to Home</a>
-            </div>
         </div>
     </div>
 
     <!-- PROFILE SETTINGS MODAL -->
-    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative">
-            <button onclick="closeSettings()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
+    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity">
+        <div class="bg-[#202c33] p-8 rounded-2xl w-full max-w-sm shadow-2xl relative">
+            <button onclick="closeSettings()" class="absolute top-4 right-4 w-8 h-8 rounded-full text-[#8696a0] hover:bg-white/10 flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h2 class="text-xl font-black mb-6 text-white uppercase tracking-wider">Profile Settings</h2>
+            <h2 class="text-xl font-semibold mb-6 text-[#e9edef]">Profile Settings</h2>
 
-            <div class="relative w-28 h-28 mx-auto mb-4 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
-                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-full object-cover border-4 border-slate-700 group-hover:opacity-40 transition-opacity shadow-lg bg-slate-800">
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="relative w-32 h-32 mx-auto mb-6 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
+                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-full object-cover group-hover:opacity-60 transition-opacity bg-[#111b21]">
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-black/40">
                     <i class="fa-solid fa-camera text-3xl text-white"></i>
                 </div>
             </div>
             <input type="file" id="profile-pic-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
 
-            <p class="text-xs text-slate-400 mb-6 font-medium">Click image to upload new avatar</p>
+            <div class="mb-6 text-left">
+                <label class="text-[#00a884] text-sm font-semibold mb-1 block">Your Name</label>
+                <div class="flex items-center bg-[#111b21] rounded-lg border-b-2 border-[#00a884] px-2 py-1">
+                    <input type="text" id="settings-name-input" class="w-full bg-transparent p-2 text-[#e9edef] focus:outline-none text-lg" placeholder="Enter your name">
+                    <i class="fa-solid fa-pen text-[#8696a0] text-sm pr-2"></i>
+                </div>
+                <p class="text-[#8696a0] text-xs mt-2">This is not your username or pin. This name will be visible to your contacts.</p>
+            </div>
 
-            <button id="save-settings-btn" onclick="uploadProfilePic()" disabled class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 py-4 rounded-2xl text-white font-bold uppercase tracking-widest transition-all opacity-50 cursor-not-allowed flex items-center justify-center gap-2 text-sm">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Save Picture
+            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check"></i> Save Details
             </button>
         </div>
     </div>
 
     <!-- Main App Container -->
-    <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-6xl mx-auto md:relative md:py-4 md:px-4" style="height: 100%;">
-        <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden relative">
+    <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-[1600px] mx-auto md:py-5 md:px-5" style="height: 100%;">
+        <div class="w-full h-full flex bg-[#111b21] shadow-2xl md:rounded-lg overflow-hidden relative">
             
             <!-- LEFT SIDEBAR (Contacts) -->
-            <div id="sidebar" class="w-full md:w-[350px] lg:w-[400px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 bg-slate-950 absolute md:relative inset-0 md:inset-auto">
-                <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
+            <div id="sidebar" class="w-full md:w-[400px] flex flex-col border-r border-[#222d34] z-20 flex-shrink-0 bg-[#111b21] absolute md:relative inset-0 md:inset-auto">
+                <!-- Top Header -->
+                <header class="p-3 bg-[#202c33] flex items-center justify-between shrink-0" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
-                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors shrink-0">
-                            <i class="fa-solid fa-arrow-left text-lg"></i>
-                        </a>
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="my-avatar" src="" class="w-11 h-11 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
-                            <div class="truncate">
-                                <h2 id="my-name-display" class="font-bold text-white text-lg truncate">My Name</h2>
-                                <p id="my-mobile-display" class="text-[12px] text-emerald-400 font-medium tracking-widest">01700000000</p>
+                        <img id="my-avatar" src="" onclick="openSettings()" class="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity" title="Profile Settings">
+                    </div>
+                    <div class="flex items-center gap-4 text-[#aebac1] text-xl">
+                        <i class="fa-solid fa-users cursor-pointer hover:text-[#e9edef] hidden md:block"></i>
+                        <i class="fa-solid fa-circle-notch cursor-pointer hover:text-[#e9edef] hidden md:block"></i>
+                        <i class="fa-solid fa-message cursor-pointer hover:text-[#e9edef]"></i>
+                        
+                        <div class="relative">
+                            <button onclick="toggleSidebarMenu(event)" class="focus:outline-none hover:text-[#e9edef]"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                            <div id="sidebar-dropdown" class="dropdown-menu absolute top-10 right-0 bg-[#233138] rounded shadow-2xl py-2 w-40 z-50 text-[#e9edef] text-sm">
+                                <button onclick="openSettings()" class="w-full text-left px-5 py-3 hover:bg-[#111b21] transition-colors">Settings</button>
+                                <button onclick="logoutPvtChat()" class="w-full text-left px-5 py-3 hover:bg-[#111b21] transition-colors text-red-400">Log out</button>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors" title="Settings">
-                            <i class="fa-solid fa-gear text-base"></i>
-                        </button>
-                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
-                            <i class="fa-solid fa-right-from-bracket text-base"></i>
-                        </button>
-                    </div>
                 </header>
 
-                <div class="p-3 shrink-0">
-                    <div class="bg-black/30 rounded-xl flex items-center px-4 py-3 border border-white/5 focus-within:border-pink-500/50 transition-colors">
-                        <i class="fa-solid fa-search text-slate-500 text-base"></i>
-                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-base w-full ml-3 placeholder-slate-600">
+                <!-- Search Bar -->
+                <div class="p-2 bg-[#111b21] border-b border-[#222d34] shrink-0">
+                    <div class="bg-[#202c33] rounded-lg flex items-center px-3 py-1.5 transition-colors">
+                        <button class="text-[#8696a0] hover:text-[#00a884]"><i class="fa-solid fa-arrow-left text-sm hidden"></i><i class="fa-solid fa-magnifying-glass text-sm" id="search-icon"></i></button>
+                        <input type="text" id="search-input" placeholder="Search or start new chat" class="bg-transparent border-none outline-none text-[#e9edef] text-sm w-full ml-4 placeholder-[#8696a0]">
                     </div>
                 </div>
 
-                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative" style="touch-action: pan-y;">
-                    <div class="text-center py-3 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
-                        <span>Available Users</span>
-                        <i class="fa-solid fa-users"></i>
-                    </div>
+                <!-- Contacts List -->
+                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
                     <div id="contacts-container" class="pb-6"></div>
                 </div>
             </div>
 
             <!-- RIGHT SIDEBAR (Chat Window) -->
-            <div id="chat-area" class="w-full hidden flex-col bg-slate-950 relative h-full">
+            <div id="chat-area" class="w-full hidden flex-col relative h-full bg-[#222eb]">
                 
-                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
-                    <div class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-6 border border-white/10">
-                        <i class="fa-brands fa-whatsapp text-4xl text-slate-400"></i>
+                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#222eb] border-l border-[#222d34]">
+                    <div class="text-center">
+                        <img src="https://static.whatsapp.net/rsrc.php/v3/y6/r/wa669aeJeom.png" alt="WhatsApp Web" class="w-80 mb-6 mx-auto opacity-80">
+                        <h2 class="text-3xl font-light text-[#e9edef] mb-4">WhatsApp Web</h2>
+                        <p class="text-[#8696a0] text-sm mb-8 max-w-md mx-auto leading-relaxed">Send and receive messages without keeping your phone online.<br>Use WhatsApp on up to 4 linked devices and 1 phone at the same time.</p>
+                        <p class="text-[#8696a0] text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-lock text-[10px]"></i> End-to-end encrypted</p>
                     </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Web Tools Messenger</h2>
-                    <p class="text-slate-500 text-base max-w-sm text-center px-4">Select a contact to send messages, videos, audio, and documents with end-to-end encryption.</p>
                 </div>
 
-                <header class="p-3 md:p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0 relative" style="padding-top: max(1rem, env(safe-area-inset-top));">
-                    <div class="flex items-center gap-4">
-                        <button onclick="closeChatMobile()" class="md:hidden w-11 h-11 flex items-center justify-center rounded-full text-white active:bg-white/10 hover:bg-white/10 shrink-0 transition-colors">
+                <!-- Chat Header -->
+                <header class="p-2.5 md:p-3 bg-[#202c33] flex items-center justify-between shrink-0 relative z-30" style="padding-top: max(0.5rem, env(safe-area-inset-top)); border-left: 1px solid #222d34;">
+                    <div class="flex items-center gap-3">
+                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-[#aebac1] hover:bg-white/10 shrink-0 transition-colors -ml-2">
                             <i class="fa-solid fa-arrow-left text-xl"></i>
                         </button>
-                        <div class="flex items-center gap-3">
-                            <img id="active-chat-avatar" src="" class="w-11 h-11 md:w-12 md:h-12 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
+                        <div class="flex items-center gap-3 cursor-pointer">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full object-cover">
                             <div class="flex flex-col justify-center">
-                                <h2 id="active-chat-name" class="font-bold text-white text-lg leading-tight">Contact Name</h2>
-                                <p id="active-chat-status" class="text-[12px] text-slate-500 font-medium tracking-widest transition-colors">...</p>
+                                <h2 id="active-chat-name" class="text-base text-[#e9edef] leading-tight">Contact</h2>
+                                <p id="active-chat-status" class="text-[13px] text-[#8696a0] leading-tight">...</p>
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-2 text-slate-400 relative">
-                        <button onclick="startCall('video')" class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-video text-xl text-pink-400"></i></button>
-                        <button onclick="startCall('audio')" class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone text-xl text-emerald-400"></i></button>
+                    <div class="flex gap-4 text-[#aebac1] text-xl items-center pr-2 relative">
+                        <button onclick="startCall('video')" class="hover:text-[#e9edef] transition-colors"><i class="fa-solid fa-video"></i></button>
+                        <button onclick="startCall('audio')" class="hover:text-[#e9edef] transition-colors"><i class="fa-solid fa-phone"></i></button>
+                        <div class="w-[1px] h-6 bg-[#8696a0] opacity-30 hidden md:block"></div>
+                        <button class="hover:text-[#e9edef] transition-colors hidden md:block"><i class="fa-solid fa-magnifying-glass"></i></button>
                         
-                        <button onclick="toggleChatMenu()" class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-xl"></i></button>
-                        
-                        <div id="chat-dropdown" class="dropdown-menu absolute top-12 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 w-48 z-50">
-                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-base text-red-400 active:bg-white/10 hover:bg-white/5 transition-colors flex items-center gap-3 font-medium">
-                                <i class="fa-solid fa-trash-can w-5 text-center text-xl"></i> Clear Chat
-                            </button>
+                        <div class="relative">
+                            <button onclick="toggleChatMenu(event)" class="hover:text-[#e9edef] transition-colors"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                            <div id="chat-dropdown" class="dropdown-menu absolute top-10 right-0 bg-[#233138] rounded shadow-2xl py-2 w-48 z-50 text-[#e9edef] text-sm">
+                                <button class="w-full text-left px-5 py-3 hover:bg-[#111b21] transition-colors">Contact info</button>
+                                <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 hover:bg-[#111b21] transition-colors text-red-400">Clear messages</button>
+                            </div>
                         </div>
                     </div>
                 </header>
 
-                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()" style="touch-action: pan-y;">
+                <!-- Chat Messages Area -->
+                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-8 flex flex-col gap-1 custom-scroll relative z-20" onclick="closeAllMenus()" style="touch-action: pan-y;">
                     <div class="text-center my-4">
-                        <span class="bg-black/40 text-slate-400 text-xs px-4 py-1.5 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
-                            <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> End-to-end encrypted
+                        <span class="bg-[#182229] text-[#ffd279] text-xs px-4 py-2 rounded-lg shadow-sm inline-flex items-center gap-2 max-w-sm text-center leading-relaxed font-medium">
+                            <i class="fa-solid fa-lock text-[#ffd279]"></i> 
+                            Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.
                         </span>
                     </div>
                 </main>
 
-                <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+                <!-- Chat Input Footer -->
+                <footer class="p-3 bg-[#202c33] shrink-0 relative z-30" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
                     
-                    <div id="file-preview-container" class="hidden w-full px-1 mb-3">
-                        <div class="bg-slate-800 border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-xl">
+                    <div id="file-preview-container" class="hidden w-full px-2 mb-3">
+                        <div class="bg-[#111b21] rounded-lg p-3 flex items-center justify-between shadow-sm">
                             <div class="flex items-center gap-3 overflow-hidden">
-                                <div id="preview-icon-wrapper" class="w-14 h-14 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
+                                <div id="preview-icon-wrapper" class="w-12 h-12 rounded bg-[#202c33] text-[#aebac1] flex items-center justify-center shrink-0 overflow-hidden relative">
                                     <i id="preview-icon" class="fa-solid fa-file text-2xl"></i>
                                     <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
                                 </div>
                                 <div class="overflow-hidden">
-                                    <p id="file-preview-name" class="text-base font-bold text-white truncate w-48 md:w-72">filename</p>
-                                    <p id="file-preview-size" class="text-xs text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
+                                    <p id="file-preview-name" class="text-sm text-[#e9edef] truncate w-48 md:w-72">filename</p>
+                                    <p id="file-preview-size" class="text-xs text-[#8696a0] mt-0.5">0 MB</p>
                                 </div>
                             </div>
-                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-12 h-12 flex items-center justify-center rounded-full transition-colors active:bg-white/5">
-                                <i class="fa-solid fa-xmark text-2xl"></i>
+                            <button type="button" onclick="clearFile()" class="text-[#8696a0] hover:text-red-400 w-10 h-10 flex items-center justify-center rounded-full transition-colors">
+                                <i class="fa-solid fa-xmark text-xl"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-full p-2 mb-2 animate-pulse">
-                        <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-base">
-                            <i class="fa-solid fa-microphone-lines animate-bounce text-xl"></i> Recording...
+                    <!-- Recording UI -->
+                    <div id="recording-ui" class="hidden flex items-center justify-between bg-[#111b21] rounded-lg p-2 animate-pulse mb-2">
+                        <div class="flex items-center gap-3 text-red-500 pl-4 text-sm font-medium">
+                            <i class="fa-solid fa-microphone animate-bounce"></i> <span>Recording audio...</span>
                         </div>
-                        <div class="flex gap-2 pr-1">
-                            <button type="button" onclick="cancelRecording()" class="w-12 h-12 rounded-full bg-slate-800 text-slate-400 active:text-white flex items-center justify-center transition-colors">
-                                <i class="fa-solid fa-trash-can text-lg"></i>
+                        <div class="flex gap-2 pr-2 text-[#aebac1]">
+                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 hover:bg-[#202c33] rounded-full flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
                             </button>
-                            <button type="button" onclick="stopAndSendRecording()" class="w-12 h-12 rounded-full bg-emerald-600 text-white active:bg-emerald-500 flex items-center justify-center shadow-lg transition-colors">
+                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 hover:bg-[#202c33] text-[#00a884] rounded-full flex items-center justify-center transition-colors">
                                 <i class="fa-solid fa-paper-plane text-lg"></i>
                             </button>
                         </div>
                     </div>
 
                     <form id="chat-form" class="flex items-end gap-2 w-full relative">
-                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 md:w-14 md:h-14 shrink-0 text-slate-400 active:text-pink-400 hover:text-pink-400 bg-slate-800/80 rounded-full flex items-center justify-center transition-all border border-white/10 mb-0.5">
-                            <i class="fa-solid fa-plus text-2xl"></i>
-                        </button>
+                        <div class="flex gap-1 text-[#aebac1] text-2xl pb-2 items-center">
+                            <button type="button" class="w-10 h-10 hover:bg-white/5 rounded-full flex items-center justify-center transition-colors"><i class="fa-regular fa-face-smile"></i></button>
+                            <button type="button" onclick="document.getElementById('file-input').click()" class="w-10 h-10 hover:bg-white/5 rounded-full flex items-center justify-center transition-colors transform -rotate-45"><i class="fa-solid fa-paperclip text-[22px]"></i></button>
+                        </div>
                         <input type="file" id="file-input" class="hidden">
 
-                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-3xl flex items-center px-3 py-1 transition-all focus-within:border-pink-500/50 relative">
-                            <textarea id="msg-input" rows="1" placeholder="Message..."
-                                class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-32 custom-scroll text-base" style="min-height: 52px;"></textarea>
+                        <div class="flex-grow bg-[#2a3942] rounded-lg flex items-center px-3 py-1 my-1">
+                            <textarea id="msg-input" rows="1" placeholder="Type a message"
+                                class="w-full bg-transparent p-2 text-[#e9edef] focus:outline-none resize-none max-h-32 custom-scroll text-[15px] placeholder-[#8696a0]" style="min-height: 40px;"></textarea>
                         </div>
                         
-                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-emerald-600 active:bg-emerald-500 hover:bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-microphone text-xl"></i>
-                        </button>
-                        
-                        <button type="submit" id="send-btn" class="hidden w-12 h-12 md:w-14 md:h-14 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 active:from-pink-500 hover:from-pink-500 hover:to-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>
-                        </button>
+                        <div class="pb-1.5 flex items-center justify-center w-12 h-12">
+                            <button type="button" id="mic-btn" onclick="startRecording()" class="w-10 h-10 text-[#aebac1] hover:text-[#e9edef] flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-microphone text-2xl"></i>
+                            </button>
+                            
+                            <button type="submit" id="send-btn" class="hidden w-10 h-10 text-[#aebac1] hover:text-[#e9edef] flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-paper-plane text-2xl"></i>
+                            </button>
+                        </div>
                     </form>
                 </footer>
             </div>
         </div>
     </div>
 
-    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL (ROCK SOLID WEBRTC) 🔥 -->
-    <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex flex-col">
-        <!-- Remote Media (Video/Audio) -->
+    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL 🔥 -->
+    <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-[#111b21] overflow-hidden flex-col">
+        <audio id="remote-audio" autoplay playsinline></audio>
         <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-0"></video>
-        
-        <!-- Local Video PiP -->
-        <video id="local-video" autoplay playsinline muted class="absolute top-12 right-4 md:top-8 md:right-8 w-28 h-40 md:w-40 md:h-56 bg-slate-800 rounded-2xl border-2 border-white/20 object-cover hidden z-20 shadow-2xl"></video>
+        <video id="local-video" autoplay playsinline muted class="absolute top-12 right-4 md:top-8 md:right-8 w-28 h-40 md:w-40 md:h-56 bg-black rounded-xl border border-[#222d34] object-cover hidden z-20 shadow-2xl"></video>
 
-        <!-- Overlay for Audio Calls & Ringing State -->
-        <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md transition-opacity duration-500">
-            <img id="call-avatar" src="" class="w-32 h-32 rounded-full border-4 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.5)] mb-6 mx-auto object-cover animate-pulse">
-            <h2 id="call-name" class="text-3xl font-black text-white mb-2">Caller Name</h2>
-            <p id="call-status" class="text-emerald-400 text-base font-bold tracking-widest uppercase mb-12">Calling...</p>
+        <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#111b21] transition-opacity duration-500">
+            <div class="relative mb-6">
+                <img id="call-avatar" src="" class="w-32 h-32 rounded-full object-cover z-10 relative">
+                <div class="absolute inset-0 border-4 border-[#00a884] rounded-full animate-ping opacity-50 z-0"></div>
+            </div>
+            <h2 id="call-name" class="text-2xl text-[#e9edef] mb-2 font-normal">Caller Name</h2>
+            <p id="call-status" class="text-[#8696a0] text-sm tracking-wide">Calling...</p>
         </div>
         
         <!-- Call Controls -->
         <div class="absolute bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 z-30 w-full px-4">
-            
-            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-500 text-white text-2xl hover:bg-emerald-400 hover:scale-110 transition-all shadow-lg shadow-emerald-500/30">
+            <button id="answer-btn" onclick="answerCall()" class="hidden w-14 h-14 rounded-full bg-[#00a884] text-white text-xl hover:bg-[#029071] transition-colors shadow-lg flex items-center justify-center">
                 <i class="fa-solid fa-phone"></i>
             </button>
 
-            <!-- In Call Controls (Hidden initially) -->
-            <div id="in-call-controls" class="hidden flex items-center gap-4 bg-slate-900/50 backdrop-blur-md p-2 rounded-full border border-white/10 shadow-2xl">
-                <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition-colors">
+            <!-- In Call Controls -->
+            <div id="in-call-controls" class="hidden flex items-center gap-4 bg-[#202c33] p-2 rounded-full border border-[#222d34] shadow-2xl">
+                <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-[#374045] text-[#e9edef] text-lg hover:bg-[#4a5d66] transition-colors">
                     <i class="fa-solid fa-microphone"></i>
                 </button>
-                <button id="cam-toggle-btn" onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition-colors hidden">
+                <button id="cam-toggle-btn" onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-[#374045] text-[#e9edef] text-lg hover:bg-[#4a5d66] transition-colors hidden">
                     <i class="fa-solid fa-video"></i>
                 </button>
                 
-                <div class="w-[1px] h-8 bg-white/20 mx-2"></div>
-                
-                <button id="hangup-btn" onclick="hangupCall()" class="w-14 h-14 rounded-full bg-red-500 text-white text-2xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-500/30 flex items-center justify-center">
+                <button id="hangup-btn" onclick="hangupCall()" class="w-12 h-12 rounded-full bg-[#f15c6d] text-white text-xl hover:bg-[#d85361] transition-colors shadow-lg flex items-center justify-center ml-2">
                     <i class="fa-solid fa-phone-slash"></i>
                 </button>
             </div>
             
-            <!-- Hangup only (While ringing for caller) -->
-            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-500 text-white text-2xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-500/30">
+            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-14 h-14 rounded-full bg-[#f15c6d] text-white text-xl hover:bg-[#d85361] transition-colors shadow-lg flex items-center justify-center">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -314,22 +347,18 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Viewport Fix
         function setRealViewportHeight() {
             let vh = window.innerHeight;
-            if (window.visualViewport) {
-                vh = window.visualViewport.height;
-            }
+            if (window.visualViewport) vh = window.visualViewport.height;
             document.body.style.height = vh + 'px';
             document.documentElement.style.height = vh + 'px';
             
             const appContainer = document.getElementById('app-container');
-            if (appContainer) {
-                appContainer.style.height = vh + 'px';
-            }
+            if (appContainer) appContainer.style.height = vh + 'px';
             const msgBox = document.getElementById('messages-box');
             if(msgBox) setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50);
         }
-
         window.addEventListener('resize', setRealViewportHeight);
         if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealViewportHeight);
         setRealViewportHeight();
@@ -371,18 +400,12 @@
         let isRecording = false;
         let settingsSelectedFile = null;
         
-        // 🔥 ROCK SOLID WEBRTC VARIABLES & QUEUE 🔥
-        const servers = { 
-            iceServers: [
-                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
-            ] 
-        };
+        // WebRTC Variables
+        const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }] };
         let pc = null;
         let localStream = null;
         let incomingCallData = null;
         let currentCallId = null; 
-        
-        // Anti-Race Condition Queue
         let remoteDescriptionSet = false;
         let iceCandidateQueue = [];
 
@@ -407,39 +430,53 @@
         const previewImg = document.getElementById('preview-img');
 
         function getAvatarUrl(name, customUrl) {
-            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
+            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=202c33&color=e9edef`;
+        }
+        function formatTime(seconds) {
+            if(!seconds || isNaN(seconds)) return "0:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        // 🔥 Ask for notification permission on start 🔥
+        if ("Notification" in window) {
+            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
         }
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
 
-        // Lightbox Methods
+        // Lightbox
         window.openLightbox = (url, e) => {
             e.stopPropagation();
             const lightbox = document.getElementById('image-lightbox');
             const img = document.getElementById('lightbox-img');
             img.src = url;
             lightbox.classList.remove('hidden');
-            setTimeout(() => {
-                lightbox.classList.remove('opacity-0');
-                img.classList.remove('scale-95');
-                img.classList.add('scale-100');
-            }, 10);
+            setTimeout(() => { lightbox.classList.remove('opacity-0'); img.classList.remove('scale-95'); img.classList.add('scale-100'); }, 10);
         };
-
         window.closeLightbox = () => {
             const lightbox = document.getElementById('image-lightbox');
             const img = document.getElementById('lightbox-img');
-            lightbox.classList.add('opacity-0');
-            img.classList.remove('scale-100');
-            img.classList.add('scale-95');
+            lightbox.classList.add('opacity-0'); img.classList.remove('scale-100'); img.classList.add('scale-95');
             setTimeout(() => lightbox.classList.add('hidden'), 300);
         };
 
+        // Menus & Modals
+        window.toggleSidebarMenu = (e) => { e.stopPropagation(); document.getElementById('sidebar-dropdown').classList.toggle('show'); }
+        window.toggleChatMenu = (e) => { e.stopPropagation(); document.getElementById('chat-dropdown').classList.toggle('show'); }
+        window.closeAllMenus = () => {
+            document.getElementById('sidebar-dropdown').classList.remove('show');
+            document.getElementById('chat-dropdown').classList.remove('show');
+            document.querySelectorAll('.reaction-menu-popup').forEach(el => el.classList.add('hidden'));
+        }
+        document.body.addEventListener('click', closeAllMenus);
+
         window.logoutPvtChat = () => {
-            if(confirm("Apni ki logout korte chan?")) {
-                localStorage.removeItem('pvt_chat_name');
-                localStorage.removeItem('pvt_chat_mobile');
-                localStorage.removeItem('pvt_chat_avatar');
+            if(confirm("Log out from WhatsApp Web?")) {
+                localStorage.clear();
                 location.reload();
             }
         };
@@ -447,9 +484,8 @@
         window.openSettings = () => {
             document.getElementById('settings-modal').classList.remove('hidden');
             document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl);
+            document.getElementById('settings-name-input').value = myName;
             settingsSelectedFile = null;
-            document.getElementById('save-settings-btn').disabled = true;
-            document.getElementById('save-settings-btn').classList.add('opacity-50', 'cursor-not-allowed');
         }
 
         window.closeSettings = () => {
@@ -465,71 +501,64 @@
                 const reader = new FileReader();
                 reader.onload = (e) => document.getElementById('settings-avatar-preview').src = e.target.result;
                 reader.readAsDataURL(file);
-                
-                const saveBtn = document.getElementById('save-settings-btn');
-                saveBtn.disabled = false;
-                saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
-        window.uploadProfilePic = async () => {
-            if(!settingsSelectedFile) return;
+        window.saveProfileSettings = async () => {
+            const newName = document.getElementById('settings-name-input').value.trim();
+            if(!newName) { alert("Name cannot be empty"); return; }
+
             const saveBtn = document.getElementById('save-settings-btn');
             saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
             try {
-                const formData = new FormData();
-                formData.append('file', settingsSelectedFile);
-                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                
-                const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                const uploadResult = await response.json();
-                
-                if(uploadResult.secure_url) {
-                    const newAvatarUrl = uploadResult.secure_url;
-                    await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
-                        avatarUrl: newAvatarUrl
-                    }, { merge: true });
+                let updatedAvatarUrl = myAvatarUrl;
 
-                    myAvatarUrl = newAvatarUrl;
-                    localStorage.setItem('pvt_chat_avatar', newAvatarUrl);
-                    document.getElementById('my-avatar').src = newAvatarUrl;
-                    
-                    saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
-                    setTimeout(() => closeSettings(), 1000);
-                } else throw new Error(uploadResult.error?.message || "Cloudinary failed");
+                if(settingsSelectedFile) {
+                    const formData = new FormData();
+                    formData.append('file', settingsSelectedFile);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                    const uploadResult = await response.json();
+                    if(uploadResult.secure_url) updatedAvatarUrl = uploadResult.secure_url;
+                    else throw new Error("Cloudinary failed");
+                }
+
+                await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
+                    name: newName, avatarUrl: updatedAvatarUrl
+                }, { merge: true });
+
+                myName = newName;
+                myAvatarUrl = updatedAvatarUrl;
+                localStorage.setItem('pvt_chat_name', newName);
+                localStorage.setItem('pvt_chat_avatar', updatedAvatarUrl);
+                document.getElementById('my-avatar').src = getAvatarUrl(newName, updatedAvatarUrl);
+                
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+                setTimeout(() => {
+                    closeSettings();
+                    saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save Details';
+                    saveBtn.disabled = false;
+                }, 1000);
             } catch(e) {
-                console.error(e);
                 alert("Upload failed. Check connection.");
-                saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Picture';
+                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save Details';
                 saveBtn.disabled = false;
             }
-        }
-
-        window.toggleChatMenu = () => {
-            event.stopPropagation();
-            document.getElementById('chat-dropdown').classList.toggle('show');
-        }
-        window.closeAllMenus = () => {
-            document.getElementById('chat-dropdown').classList.remove('show');
-            document.querySelectorAll('.reaction-menu-popup').forEach(el => el.classList.add('hidden'));
         }
 
         window.clearEntireChat = async () => {
             closeAllMenus();
-            if(confirm("WARNING: Eita ei chat-er shob message delete kore dibe! Apni ki nishchit?")) {
+            if(confirm("Clear this chat?")) {
                 try {
                     const chatId = generateChatId(myMobile, activeContactMobile);
                     const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
                     const q = query(msgRef, limit(100)); 
                     const querySnapshot = await getDocs(q);
-                    querySnapshot.forEach((document) => {
-                        deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, document.id));
-                    });
+                    querySnapshot.forEach((document) => { deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, document.id)); });
                     document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
-                    alert("Chat entirely cleared!");
-                } catch(e) { console.error("Clear Chat Failed:", e); }
+                } catch(e) {}
             }
         }
 
@@ -542,7 +571,7 @@
             if (n && m.length === 11) {
                 const originalText = joinBtn.innerHTML;
                 joinBtn.disabled = true;
-                joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+                joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting...';
 
                 try {
                     await signInAnonymously(auth);
@@ -552,7 +581,7 @@
                     if (userSnap.exists()) {
                         const existingName = userSnap.data().name;
                         if (existingName.toLowerCase() !== n.toLowerCase()) {
-                            alert(`🚨 OOPS! Ei number ti aage thekei "${existingName}" nam-e register kora achhe!\n\nDoyakore sothik nam din ba onno number bebohar korun.`);
+                            alert(`This number is registered to "${existingName}". Please use your correct name.`);
                             joinBtn.disabled = false; joinBtn.innerHTML = originalText;
                             return; 
                         }
@@ -566,15 +595,18 @@
 
                     myName = n; myMobile = m;
                     localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m);
+                    
+                    if ("Notification" in window && Notification.permission !== "granted") {
+                        Notification.requestPermission();
+                    }
+
                     joinModal.classList.add('hidden'); startApp();
 
                 } catch (err) {
-                    alert("Database connection error! Abar cheshta korun.");
+                    alert("Connection error!");
                     joinBtn.disabled = false; joinBtn.innerHTML = originalText;
                 }
-            } else {
-                alert("Doyakore sothik nam ebong 11-digit mobile number din.");
-            }
+            } else { alert("Please provide valid details."); }
         };
 
         function toggleInputButtons() {
@@ -591,7 +623,7 @@
         msgInput.addEventListener('focus', () => { setTimeout(() => setRealViewportHeight(), 150); });
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
+            this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px';
             toggleInputButtons();
 
             if (activeContactMobile) {
@@ -647,8 +679,8 @@
                 isRecording = true;
                 document.getElementById('recording-ui').classList.remove('hidden');
                 msgInput.parentElement.classList.add('hidden');
-                micBtn.classList.add('hidden');
-            } catch (err) { alert("Microphone permission denied! Please allow access to send voice notes."); }
+                micBtn.parentElement.classList.add('hidden'); // hide mic wrapper
+            } catch (err) { alert("Microphone permission denied."); }
         }
 
         window.cancelRecording = () => {
@@ -656,6 +688,7 @@
             isRecording = false; audioChunks = [];
             document.getElementById('recording-ui').classList.add('hidden');
             msgInput.parentElement.classList.remove('hidden');
+            micBtn.parentElement.classList.remove('hidden');
             toggleInputButtons();
         }
 
@@ -672,6 +705,7 @@
             isRecording = false;
             document.getElementById('recording-ui').classList.add('hidden');
             msgInput.parentElement.classList.remove('hidden');
+            micBtn.parentElement.classList.remove('hidden');
         }
 
         function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
@@ -680,18 +714,22 @@
             appContainer.classList.remove('hidden');
             appContainer.classList.add('flex');
             
-            document.getElementById('my-name-display').innerText = myName;
-            document.getElementById('my-mobile-display').innerText = myMobile;
             document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
 
             try {
                 await signInAnonymously(auth);
                 const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile);
                 const mySnap = await getDoc(myRef);
-                if(mySnap.exists() && mySnap.data().avatarUrl) {
-                    myAvatarUrl = mySnap.data().avatarUrl;
-                    localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
-                    document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
+                if(mySnap.exists()) {
+                    const d = mySnap.data();
+                    if(d.avatarUrl) {
+                        myAvatarUrl = d.avatarUrl;
+                        localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
+                        document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
+                    }
+                    if(d.name && d.name !== myName) {
+                        myName = d.name; localStorage.setItem('pvt_chat_name', myName);
+                    }
                 }
 
                 const updateMyStatus = async () => {
@@ -703,26 +741,29 @@
                 activeTrackingInterval = setInterval(updateMyStatus, 60000);
                 listenForUsers();
                 listenForIncomingCalls(); 
-            } catch (err) { alert("Connection problem. Refresh page."); }
+            } catch (err) {}
         }
 
-        // 🔥 ROCK SOLID WEBRTC INITIALIZATION 🔥
+        // WebRTC
         function initializePeerConnection() {
             if (pc) pc.close();
             pc = new RTCPeerConnection(servers);
-            
-            remoteDescriptionSet = false;
-            iceCandidateQueue = [];
+            remoteDescriptionSet = false; iceCandidateQueue = [];
 
             const remoteVideo = document.getElementById('remote-video');
-            remoteVideo.srcObject = null;
+            const remoteAudio = document.getElementById('remote-audio');
+            remoteVideo.srcObject = new MediaStream();
+            remoteAudio.srcObject = new MediaStream();
 
             pc.ontrack = event => {
-                if (remoteVideo.srcObject !== event.streams[0]) {
-                    remoteVideo.srcObject = event.streams[0];
+                const track = event.track;
+                if (track.kind === 'video') {
+                    remoteVideo.srcObject.addTrack(track);
                     remoteVideo.classList.remove('hidden');
-                    // Force play bypasses mobile autoplay restrictions when triggered by user click
-                    remoteVideo.play().catch(e => console.error("Media play blocked:", e));
+                    remoteVideo.play().catch(e=>{});
+                } else if (track.kind === 'audio') {
+                    remoteAudio.srcObject.addTrack(track);
+                    remoteAudio.play().catch(e=>{});
                 }
             };
             return pc;
@@ -730,9 +771,23 @@
 
         async function processIceCandidate(candidateData) {
             if (remoteDescriptionSet) {
-                await pc.addIceCandidate(new RTCIceCandidate(candidateData)).catch(e => console.error(e));
-            } else {
-                iceCandidateQueue.push(candidateData);
+                await pc.addIceCandidate(new RTCIceCandidate(candidateData)).catch(e=>{});
+            } else { iceCandidateQueue.push(candidateData); }
+        }
+
+        // 🔥 Notification Dispatcher Helper 🔥
+        function sendBackgroundNotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
+                const notif = new Notification(title, {
+                    body: body,
+                    icon: "developer.jpg",
+                    requireInteraction: true,
+                    vibrate: [200, 100, 200, 100, 200]
+                });
+                notif.onclick = function() {
+                    window.focus();
+                    this.close();
+                };
             }
         }
 
@@ -747,43 +802,39 @@
                         if (callData.callee === myMobile && callData.status === 'calling') {
                             incomingCallData = { id: callId, ...callData };
                             
-                            // UI Setup for incoming call
                             document.getElementById('call-modal').classList.remove('hidden');
                             document.getElementById('call-modal').classList.add('flex');
-                            document.getElementById('call-name').innerText = "Incoming Call...";
-                            document.getElementById('call-avatar').src = getAvatarUrl("Caller", "");
-                            document.getElementById('call-status').innerText = callData.type === 'video' ? "Video Call Ringing..." : "Audio Call Ringing...";
+                            document.getElementById('call-name').innerText = "Incoming Call";
+                            
+                            // Find caller avatar
+                            const caller = allUsers.find(u => u.mobile === callData.caller);
+                            const callerName = caller ? caller.name : "Contact";
+                            document.getElementById('call-avatar').src = caller ? getAvatarUrl(caller.name, caller.avatarUrl) : getAvatarUrl("User", "");
+                            
+                            const callTypeStr = callData.type === 'video' ? "WhatsApp Video Call" : "WhatsApp Voice Call";
+                            document.getElementById('call-status').innerText = callTypeStr;
                             
                             document.getElementById('answer-btn').classList.remove('hidden');
                             document.getElementById('in-call-controls').classList.add('hidden');
                             document.getElementById('caller-hangup-btn').classList.add('hidden');
                             
-                            // Visuals
-                            if(callData.type === 'video') {
-                                document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-video"></i>';
-                            } else {
-                                document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-phone"></i>';
-                            }
-                            
-                            // Play Ringtone
+                            if(callData.type === 'video') document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-video"></i>';
+                            else document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-phone"></i>';
                             try { document.getElementById('ringtone-sound').play(); } catch(e){}
+
+                            // 🔥 Trigger Background Call Notification
+                            sendBackgroundNotification(`Incoming Call from ${callerName}`, callTypeStr);
                         }
-                        
-                        if (callData.status === 'ended') {
-                            if (currentCallId === callId || (incomingCallData && incomingCallData.id === callId)) {
-                                resetCallUI();
-                            }
+                        if (callData.status === 'ended' && (currentCallId === callId || (incomingCallData && incomingCallData.id === callId))) {
+                            resetCallUI();
                         }
                     }
                 });
             });
         }
 
-        // START CALL (Audio or Video)
         window.startCall = async (type) => {
             if(!activeContactMobile) return;
-            
-            // Setup Caller UI
             document.getElementById('call-modal').classList.remove('hidden');
             document.getElementById('call-modal').classList.add('flex');
             document.getElementById('call-name').innerText = document.getElementById('active-chat-name').innerText;
@@ -796,21 +847,12 @@
             document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
 
             try {
-                // Determine Media Needs
-                const constraints = { 
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                    video: type === 'video' ? { facingMode: "user" } : false 
-                };
-
+                const constraints = { audio: true, video: type === 'video' ? { facingMode: "user" } : false };
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                
-                // Show local video if video call
                 if(type === 'video') {
                     const localVid = document.getElementById('local-video');
-                    localVid.srcObject = localStream;
-                    localVid.classList.remove('hidden');
+                    localVid.srcObject = localStream; localVid.classList.remove('hidden');
                 }
-                
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
@@ -819,31 +861,23 @@
                 const offerCandidates = collection(callDocRef, 'offerCandidates');
                 const answerCandidates = collection(callDocRef, 'answerCandidates');
 
-                pc.onicecandidate = event => {
-                    if(event.candidate) addDoc(offerCandidates, event.candidate.toJSON());
-                };
+                pc.onicecandidate = event => { if(event.candidate) addDoc(offerCandidates, event.candidate.toJSON()); };
 
                 const offerDescription = await pc.createOffer();
                 await pc.setLocalDescription(offerDescription);
 
                 await setDoc(callDocRef, {
                     offer: { type: offerDescription.type, sdp: offerDescription.sdp },
-                    caller: myMobile,
-                    callee: activeContactMobile,
-                    type: type,
-                    status: 'calling',
-                    timestamp: Date.now()
+                    caller: myMobile, callee: activeContactMobile, type: type, status: 'calling', timestamp: Date.now()
                 });
 
-                // Listen for Answer
                 const callUnsubscribe = onSnapshot(callDocRef, async (snapshot) => {
                     const data = snapshot.data();
-                    if(!remoteDescriptionSet && data?.answer) {
+                    if(pc && !remoteDescriptionSet && data?.answer) {
                         const answerDescription = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDescription);
                         remoteDescriptionSet = true;
-                        
-                        document.getElementById('call-status').innerText = "Connected";
+                        document.getElementById('call-status').innerText = "0:00";
                         document.getElementById('caller-hangup-btn').classList.add('hidden');
                         document.getElementById('in-call-controls').classList.remove('hidden');
                         
@@ -851,14 +885,8 @@
                             document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none');
                             document.getElementById('cam-toggle-btn').classList.remove('hidden');
                         }
-
-                        // Process Queued Candidates
-                        for(let cand of iceCandidateQueue) {
-                            await pc.addIceCandidate(new RTCIceCandidate(cand));
-                        }
+                        for(let cand of iceCandidateQueue) await pc.addIceCandidate(new RTCIceCandidate(cand));
                         iceCandidateQueue = [];
-
-                        // Listen for future candidates
                         onSnapshot(answerCandidates, (candSnapshot) => {
                             candSnapshot.docChanges().forEach(change => {
                                 if(change.type === 'added') processIceCandidate(change.doc.data());
@@ -867,39 +895,23 @@
                     }
                 });
                 pc.callUnsubscribe = callUnsubscribe;
-
-            } catch (err) {
-                alert("Hardware access failed: " + err.message);
-                resetCallUI();
-            }
+            } catch (err) { alert("Mic/Camera error"); resetCallUI(); }
         };
 
-        // ANSWER INCOMING CALL
         window.answerCall = async () => {
             if(!incomingCallData) return;
-            
-            document.getElementById('ringtone-sound').pause();
-            document.getElementById('ringtone-sound').currentTime = 0;
-            
+            document.getElementById('ringtone-sound').pause(); document.getElementById('ringtone-sound').currentTime = 0;
             document.getElementById('call-status').innerText = "Connecting...";
             document.getElementById('answer-btn').classList.add('hidden');
-
             const type = incomingCallData.type;
 
             try {
-                const constraints = { 
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                    video: type === 'video' ? { facingMode: "user" } : false 
-                };
-
+                const constraints = { audio: true, video: type === 'video' ? { facingMode: "user" } : false };
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                
                 if(type === 'video') {
                     const localVid = document.getElementById('local-video');
-                    localVid.srcObject = localStream;
-                    localVid.classList.remove('hidden');
+                    localVid.srcObject = localStream; localVid.classList.remove('hidden');
                 }
-                
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
@@ -908,42 +920,28 @@
                 const answerCandidates = collection(callDocRef, 'answerCandidates');
                 const offerCandidates = collection(callDocRef, 'offerCandidates');
 
-                pc.onicecandidate = event => {
-                    if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
-                };
+                pc.onicecandidate = event => { if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON()); };
 
-                // SET REMOTE FIRST
                 const offerDescription = new RTCSessionDescription(incomingCallData.offer);
                 await pc.setRemoteDescription(offerDescription);
                 remoteDescriptionSet = true;
 
-                // CREATE AND SET LOCAL ANSWER
                 const answerDescription = await pc.createAnswer();
                 await pc.setLocalDescription(answerDescription);
 
-                await updateDoc(callDocRef, {
-                    answer: { type: answerDescription.type, sdp: answerDescription.sdp },
-                    status: 'answered'
-                });
+                await updateDoc(callDocRef, { answer: { type: answerDescription.type, sdp: answerDescription.sdp }, status: 'answered' });
                 
-                document.getElementById('call-status').innerText = "Connected";
+                document.getElementById('call-status').innerText = "0:00";
                 document.getElementById('in-call-controls').classList.remove('hidden');
                 
                 if(type === 'video') {
                     document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none');
                     document.getElementById('cam-toggle-btn').classList.remove('hidden');
                 }
-
-                // Process Offer Candidates
                 onSnapshot(offerCandidates, (snapshot) => {
-                    snapshot.docChanges().forEach(change => {
-                        if(change.type === 'added') processIceCandidate(change.doc.data());
-                    });
+                    snapshot.docChanges().forEach(change => { if(change.type === 'added') processIceCandidate(change.doc.data()); });
                 });
-            } catch(e) {
-                alert("Connection failed: " + e.message);
-                resetCallUI();
-            }
+            } catch(e) { alert("Connection failed."); resetCallUI(); }
         };
 
         window.hangupCall = async () => {
@@ -956,54 +954,28 @@
         };
 
         function resetCallUI() {
-            document.getElementById('ringtone-sound').pause();
-            document.getElementById('ringtone-sound').currentTime = 0;
-
-            document.getElementById('call-modal').classList.remove('flex');
-            document.getElementById('call-modal').classList.add('hidden');
-            
+            document.getElementById('ringtone-sound').pause(); document.getElementById('ringtone-sound').currentTime = 0;
+            document.getElementById('call-modal').classList.remove('flex'); document.getElementById('call-modal').classList.add('hidden');
             document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
-            document.getElementById('local-video').classList.add('hidden');
-            document.getElementById('remote-video').classList.add('hidden');
+            document.getElementById('local-video').classList.add('hidden'); document.getElementById('remote-video').classList.add('hidden');
             document.getElementById('cam-toggle-btn').classList.add('hidden');
 
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            if (pc) {
-                if(pc.callUnsubscribe) pc.callUnsubscribe();
-                pc.close();
-                pc = null;
-            }
-            incomingCallData = null;
-            currentCallId = null;
-            remoteDescriptionSet = false;
-            iceCandidateQueue = [];
-
-            const remoteVideo = document.getElementById('remote-video');
-            if(remoteVideo) {
-                remoteVideo.srcObject = null;
-                remoteVideo.pause();
-            }
-            const localVideo = document.getElementById('local-video');
-            if(localVideo) localVideo.srcObject = null;
+            if (localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; }
+            if (pc) { if(pc.callUnsubscribe) pc.callUnsubscribe(); pc.close(); pc = null; }
+            incomingCallData = null; currentCallId = null; remoteDescriptionSet = false; iceCandidateQueue = [];
+            const remoteVideo = document.getElementById('remote-video'); if(remoteVideo) { remoteVideo.srcObject = null; }
+            const remoteAudio = document.getElementById('remote-audio'); if(remoteAudio) { remoteAudio.srcObject = null; }
+            const localVideo = document.getElementById('local-video'); if(localVideo) localVideo.srcObject = null;
         }
 
-        // Toggles
         window.toggleMic = () => {
             if(!localStream) return;
             const audioTrack = localStream.getAudioTracks()[0];
             if(audioTrack) {
                 audioTrack.enabled = !audioTrack.enabled;
                 const btn = document.getElementById('mic-toggle-btn');
-                if(audioTrack.enabled) {
-                    btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-                    btn.classList.replace('bg-red-500', 'bg-white/10');
-                } else {
-                    btn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
-                    btn.classList.replace('bg-white/10', 'bg-red-500');
-                }
+                if(audioTrack.enabled) { btn.innerHTML = '<i class="fa-solid fa-microphone"></i>'; btn.classList.replace('text-red-500', 'text-[#e9edef]'); } 
+                else { btn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>'; btn.classList.replace('text-[#e9edef]', 'text-red-500'); }
             }
         };
 
@@ -1013,18 +985,12 @@
             if(videoTrack) {
                 videoTrack.enabled = !videoTrack.enabled;
                 const btn = document.getElementById('cam-toggle-btn');
-                if(videoTrack.enabled) {
-                    btn.innerHTML = '<i class="fa-solid fa-video"></i>';
-                    btn.classList.replace('bg-red-500', 'bg-white/10');
-                } else {
-                    btn.innerHTML = '<i class="fa-solid fa-video-slash"></i>';
-                    btn.classList.replace('bg-white/10', 'bg-red-500');
-                }
+                if(videoTrack.enabled) { btn.innerHTML = '<i class="fa-solid fa-video"></i>'; btn.classList.replace('text-red-500', 'text-[#e9edef]'); } 
+                else { btn.innerHTML = '<i class="fa-solid fa-video-slash"></i>'; btn.classList.replace('text-[#e9edef]', 'text-red-500'); }
             }
         };
 
-
-        // --- CHAT LOGIC CONTINUES BELOW ---
+        // Users and Contact Rendering
         function listenForUsers() {
             const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
             onSnapshot(usersRef, (snapshot) => {
@@ -1032,9 +998,6 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); }
-                    else if (data.mobile === myMobile && data.avatarUrl) {
-                        document.getElementById('my-avatar').src = getAvatarUrl(data.name, data.avatarUrl);
-                    }
                 });
                 renderContacts();
             });
@@ -1051,16 +1014,16 @@
                     const newLatest = snapshot.docs[0].data();
                     const oldLatest = latestMessages[contactMobile];
                     
-                    if (newLatest.senderMobile !== myMobile && 
-                       (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && 
-                       newLatest.timestamp > appStartTime) {
+                    // 🔥 Background Message Notification & Sound
+                    if (newLatest.senderMobile !== myMobile && (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && newLatest.timestamp > appStartTime) {
                         try { document.getElementById('notification-sound').play(); } catch(e){}
+                        
+                        const senderInfo = allUsers.find(u => u.mobile === newLatest.senderMobile);
+                        const senderName = senderInfo ? senderInfo.name : "Someone";
+                        sendBackgroundNotification(`New message from ${senderName}`, newLatest.text || "Sent an attachment");
                     }
-                    
                     latestMessages[contactMobile] = newLatest;
-                } else {
-                    latestMessages[contactMobile] = null;
-                }
+                } else { latestMessages[contactMobile] = null; }
                 renderContacts();
             });
         }
@@ -1076,64 +1039,59 @@
             });
 
             contactsContainer.innerHTML = '';
-            if (filteredUsers.length === 0) {
-                contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-base mt-10 p-6 border border-white/5 rounded-2xl bg-black/20 mx-4">Kono contact nei.</p>`; return;
-            }
+            if (filteredUsers.length === 0) { contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-sm mt-10 p-6">No chats, contacts, or messages found.</p>`; return; }
             
             filteredUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
-                const activeClass = isActive ? 'contact-active bg-white/5' : 'border-l-4 border-transparent active:bg-white/5 md:hover:bg-white/5';
-                const isOnline = (Date.now() - user.lastActive) < 120000;
-                const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-600';
-
+                const activeClass = isActive ? 'bg-[#2a3942]' : 'hover:bg-[#202c33]';
+                
                 const latestMsg = latestMessages[user.mobile];
-                let msgPreview = "Kono message nei";
+                let msgPreview = "Tap to start chatting";
                 let timeString = "";
                 let isUnread = false;
-                let previewClass = "text-slate-500";
+                let previewClass = "text-[#8696a0]";
 
                 if (latestMsg) {
                     const isMe = latestMsg.senderMobile === myMobile;
-                    let tickClass = latestMsg.read ? "text-blue-400" : "text-slate-400 opacity-60";
-                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[11px] mr-1 ${tickClass}'></i> ` : "";
+                    let tickClass = latestMsg.read ? "text-[#53bdeb]" : "text-[#8696a0]";
+                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[12px] mr-1 ${tickClass}'></i> ` : "";
                     
                     if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
                     else if (latestMsg.fileUrl) {
-                        if (latestMsg.fileType?.startsWith('image/')) msgPreview = prefix + "📷 Photo";
-                        else if (latestMsg.fileType?.startsWith('video/')) msgPreview = prefix + "🎥 Video";
-                        else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "🎙️ Voice/Audio";
-                        else msgPreview = prefix + "📁 Document";
+                        if (latestMsg.fileType?.startsWith('image/')) msgPreview = prefix + "<i class='fa-solid fa-camera mr-1'></i> Photo";
+                        else if (latestMsg.fileType?.startsWith('video/')) msgPreview = prefix + "<i class='fa-solid fa-video mr-1'></i> Video";
+                        else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "<i class='fa-solid fa-microphone mr-1'></i> Voice message";
+                        else msgPreview = prefix + "<i class='fa-solid fa-file mr-1'></i> Document";
                     }
                     timeString = latestMsg.timeString || "";
                     const lastReadTime = parseInt(localStorage.getItem(`read_${user.mobile}`) || '0');
-                    if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-emerald-400 font-bold"; }
+                    if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-[#e9edef] font-semibold"; }
                 }
 
-                let unreadBadge = isUnread ? `<span class="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] shrink-0 animate-pulse"></span>` : ``;
+                let unreadBadge = isUnread ? `<span class="bg-[#00a884] text-[#111b21] text-[11px] font-bold px-2 py-0.5 rounded-full ml-2">1</span>` : ``;
                 
                 if(user.typingTo === myMobile) {
-                    msgPreview = "<span class='text-emerald-400 font-bold animate-pulse text-[12px] italic'>typing...</span>";
+                    msgPreview = "<span class='text-[#00a884] font-medium animate-pulse'>typing...</span>";
                     previewClass = ""; unreadBadge = ""; 
                 }
 
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
 
                 const div = document.createElement('div');
-                div.className = `p-4 flex items-center gap-4 cursor-pointer transition-colors border-b border-white/5 ${activeClass}`;
+                div.className = `flex items-center cursor-pointer transition-colors ${activeClass}`;
                 div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
                 
                 div.innerHTML = `
-                    <div class="relative shrink-0">
-                        <img src="${userAvatar}" class="w-12 h-12 rounded-full border border-slate-700 object-cover bg-slate-800">
-                        <span class="absolute bottom-0 right-0 w-3.5 h-3.5 ${dotColor} border-2 border-slate-900 rounded-full"></span>
+                    <div class="px-3 py-3">
+                        <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover">
                     </div>
-                    <div class="flex-grow overflow-hidden flex flex-col justify-center">
-                        <div class="flex justify-between items-baseline mb-1">
-                            <h3 class="text-base font-bold text-slate-200 truncate pr-2">${user.name}</h3>
-                            <span class="text-[10px] ${isUnread ? 'text-emerald-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
+                    <div class="flex-grow border-b border-[#222d34] pr-4 py-3 flex flex-col justify-center overflow-hidden">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <h3 class="text-[17px] ${isUnread ? 'text-[#e9edef] font-semibold' : 'text-[#e9edef]'} truncate pr-2">${user.name}</h3>
+                            <span class="text-xs ${isUnread ? 'text-[#00a884]' : 'text-[#8696a0]'} shrink-0">${timeString}</span>
                         </div>
-                        <div class="flex justify-between items-center gap-2">
-                            <p class="text-sm ${previewClass} truncate w-full">${msgPreview}</p>
+                        <div class="flex justify-between items-center">
+                            <p class="text-[14px] ${previewClass} truncate w-full">${msgPreview}</p>
                             ${unreadBadge}
                         </div>
                     </div>
@@ -1146,37 +1104,21 @@
 
         window.addEventListener('popstate', (event) => {
             if (activeContactMobile && window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.remove('hidden');
-                document.getElementById('sidebar').classList.add('flex');
-                document.getElementById('chat-area').classList.remove('flex');
-                document.getElementById('chat-area').classList.add('hidden');
-                
-                activeContactMobile = null; 
-                renderContacts();
-                if(currentChatUnsubscribe) currentChatUnsubscribe();
-                if(userStatusUnsubscribe) userStatusUnsubscribe();
-                closeAllMenus();
+                document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
+                document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden');
+                activeContactMobile = null; renderContacts();
+                if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
             }
         });
 
         function closeChatLogic() {
-            document.getElementById('sidebar').classList.remove('hidden');
-            document.getElementById('sidebar').classList.add('flex');
-            
+            document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
             if (window.innerWidth < 768) {
-                document.getElementById('chat-area').classList.remove('flex');
-                document.getElementById('chat-area').classList.add('hidden');
-                if (window.location.hash === '#chat') {
-                    history.replaceState(null, null, ' '); 
-                }
-            } else {
-                document.getElementById('empty-chat-state').classList.remove('hidden');
-            }
-            
+                document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden');
+                if (window.location.hash === '#chat') history.replaceState(null, null, ' '); 
+            } else { document.getElementById('empty-chat-state').classList.remove('hidden'); }
             activeContactMobile = null; renderContacts();
-            if(currentChatUnsubscribe) currentChatUnsubscribe();
-            if(userStatusUnsubscribe) userStatusUnsubscribe();
-            closeAllMenus();
+            if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
         }
 
         window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
@@ -1185,20 +1127,14 @@
             
             document.getElementById('active-chat-name').innerText = contactName;
             document.getElementById('active-chat-avatar').src = contactAvatarUrl;
-            
             document.getElementById('empty-chat-state').classList.add('hidden');
             
             if (window.innerWidth < 768) {
-                if (!document.getElementById('sidebar').classList.contains('hidden')) {
-                    history.pushState({ chatOpen: true }, "Chat", "#chat");
-                }
-                document.getElementById('sidebar').classList.remove('flex');
-                document.getElementById('sidebar').classList.add('hidden'); 
-                document.getElementById('chat-area').classList.remove('hidden');
-                document.getElementById('chat-area').classList.add('flex'); 
+                if (!document.getElementById('sidebar').classList.contains('hidden')) history.pushState({ chatOpen: true }, "Chat", "#chat");
+                document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); 
+                document.getElementById('chat-area').classList.remove('hidden'); document.getElementById('chat-area').classList.add('flex'); 
             } else { 
-                document.getElementById('chat-area').classList.remove('hidden'); 
-                document.getElementById('chat-area').classList.add('flex'); 
+                document.getElementById('chat-area').classList.remove('hidden'); document.getElementById('chat-area').classList.add('flex'); 
             }
 
             renderContacts();
@@ -1212,11 +1148,11 @@
                     if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
 
                     if(uData.typingTo === myMobile) {
-                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[12px] text-emerald-400 font-bold tracking-widest transition-colors animate-pulse italic';
+                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[13px] text-[#00a884] font-medium animate-pulse';
                     } else {
                         const isOnline = (Date.now() - uData.lastActive) < 120000;
-                        statusElem.innerText = isOnline ? 'Online' : 'Offline';
-                        statusElem.className = isOnline ? 'text-[11px] text-emerald-400 font-bold tracking-widest transition-colors' : 'text-[11px] text-slate-500 font-medium tracking-widest transition-colors';
+                        statusElem.innerText = isOnline ? 'online' : 'offline';
+                        statusElem.className = 'text-[13px] text-[#8696a0]';
                     }
                 }
             });
@@ -1229,13 +1165,13 @@
             currentChatUnsubscribe = onSnapshot(q, (snapshot) => {
                 snapshot.docChanges().forEach(change => {
                     const mData = change.doc.data();
-                    if (!mData.read && mData.senderMobile !== myMobile) {
-                        updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
-                    }
-                    if (change.type === "added") msgBox.appendChild(createMessageElement(change.doc.id, mData));
+                    if (!mData.read && mData.senderMobile !== myMobile) { updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true }); }
+                    
+                    // Call the modified render element
+                    if (change.type === "added") msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
                     else if (change.type === "modified") {
                         const oldNode = document.getElementById(`msg-${change.doc.id}`);
-                        if(oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData));
+                        if(oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData, contactName));
                     } 
                     else if (change.type === "removed") {
                         const msgDiv = document.getElementById(`msg-${change.doc.id}`);
@@ -1247,13 +1183,7 @@
             });
         };
 
-        window.closeChatMobile = () => { 
-            if (window.innerWidth < 768 && window.location.hash === '#chat') {
-                history.back(); 
-            } else {
-                closeChatLogic();
-            }
-        };
+        window.closeChatMobile = () => { if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); else closeChatLogic(); };
         
         window.toggleReactionMenu = (docId, e) => {
             e.stopPropagation(); if(e.target.closest('button')) return; 
@@ -1262,23 +1192,9 @@
             closeAllMenus();
             if(isHidden) menu.classList.remove('hidden');
         };
-
-        window.addReaction = async (docId, emoji, e) => {
-            if(e) e.stopPropagation(); closeAllMenus();
-            try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: emoji }); } catch(e){}
-        };
-
-        window.removeReaction = async (docId, e) => {
-            if(e) e.stopPropagation();
-            try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: null }); } catch(e){}
-        };
-
-        window.deleteMsg = async (docId, e) => {
-            if(e) e.stopPropagation(); closeAllMenus();
-            if(confirm("Delete message for everyone?")) {
-                try { await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId)); } catch(e){}
-            }
-        };
+        window.addReaction = async (docId, emoji, e) => { if(e) e.stopPropagation(); closeAllMenus(); try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: emoji }); } catch(e){} };
+        window.removeReaction = async (docId, e) => { if(e) e.stopPropagation(); try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: null }); } catch(e){} };
+        window.deleteMsg = async (docId, e) => { if(e) e.stopPropagation(); closeAllMenus(); if(confirm("Delete message for everyone?")) { try { await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId)); } catch(e){} } };
 
         chatForm.onsubmit = async (e) => {
             e.preventDefault();
@@ -1308,63 +1224,136 @@
                 });
 
                 msgInput.value = ''; clearFile();
-                msgInput.style.height = '52px'; toggleInputButtons();
+                msgInput.style.height = '40px'; toggleInputButtons();
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
             } catch (error) { alert("Message failed."); } 
             finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
+        // 🔥 Custom Audio Logic 🔥
+        window.toggleCustomAudio = (id, btn) => {
+            const audio = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (audio.paused) {
+                document.querySelectorAll('audio').forEach(a => {
+                    if(a.id !== id && a.id.startsWith('audio_pvt_')) {
+                        a.pause();
+                        const otherBtn = document.getElementById('btn_'+a.id);
+                        if(otherBtn) { otherBtn.querySelector('i').className = 'fa-solid fa-play'; }
+                    }
+                });
+                audio.play();
+                icon.className = 'fa-solid fa-pause';
+            } else {
+                audio.pause();
+                icon.className = 'fa-solid fa-play';
+            }
+        };
+        window.updateAudioProgress = (id, audio) => {
+            const slider = document.getElementById('slider_'+id);
+            const timeDisplay = document.getElementById('time_'+id);
+            if(audio.duration && slider) {
+                slider.value = (audio.currentTime / audio.duration) * 100;
+                timeDisplay.innerText = formatTime(audio.currentTime);
+            }
+        };
+        window.seekAudio = (id, slider) => {
+            const audio = document.getElementById(id);
+            if(audio.duration) audio.currentTime = (slider.value / 100) * audio.duration;
+        };
+        window.audioEnded = (id, audio) => {
+            const btn = document.getElementById('btn_'+id);
+            if(btn) btn.querySelector('i').className = 'fa-solid fa-play';
+            const slider = document.getElementById('slider_'+id);
+            if(slider) slider.value = 0;
+            const timeDisplay = document.getElementById('time_'+id);
+            if(timeDisplay) timeDisplay.innerText = formatTime(audio.duration || 0);
+        };
+        window.initAudioDuration = (id, audio) => {
+            const timeDisplay = document.getElementById('time_'+id);
+            if(timeDisplay) timeDisplay.innerText = formatTime(audio.duration);
+        };
+
         function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
 
-        function createMessageElement(docId, data) {
+        function createMessageElement(docId, data, contactName) {
             const isMe = data.senderMobile === myMobile;
-            const bubbleClasses = isMe ? 'bg-gradient-to-br from-emerald-600 to-teal-600 self-end items-end rounded-br-sm' : 'bg-slate-800 border border-white/5 self-start items-start rounded-bl-sm';
+            const bubbleClasses = isMe ? 'bg-[#005c4b] self-end rounded-tr-sm' : 'bg-[#202c33] self-start rounded-tl-sm';
             
             const msgDiv = document.createElement('div');
             msgDiv.id = `msg-${docId}`;
-            const bottomMargin = data.reaction ? 'mb-6' : 'mb-3';
-            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[70%] ${bubbleClasses} p-3 md:p-4 rounded-2xl ${bottomMargin} relative shadow-md cursor-pointer select-none group`;
+            const bottomMargin = data.reaction ? 'mb-6' : 'mb-1';
+            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[65%] ${bubbleClasses} p-2 rounded-xl ${bottomMargin} relative shadow-sm cursor-pointer select-none group`;
             msgDiv.onclick = (e) => toggleReactionMenu(docId, e);
             
             let content = '';
+            
             if (data.fileUrl) {
-                if (data.fileType && data.fileType.startsWith('video/')) {
-                    content = `<video controls class="rounded-xl mb-2 max-h-64 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
-                } else if (data.fileType && data.fileType.startsWith('audio/')) {
-                    content = `<audio controls class="w-full mb-2" preload="none"><source src="${data.fileUrl}"></audio>`;
+                // 🔥 NEW WHATSAPP STYLE AUDIO UI 🔥
+                if (data.fileType && data.fileType.startsWith('audio/')) {
+                    const audioId = `audio_pvt_${docId}`;
+                    const avatarForAudio = isMe ? getAvatarUrl(myName, myAvatarUrl) : document.getElementById('active-chat-avatar').src;
+                    const micColor = isMe ? (data.read ? 'text-[#53bdeb]' : 'text-[#8696a0]') : 'text-[#00a884]';
+                    
+                    content = `
+                    <div class="flex items-center gap-3 w-56 md:w-64 pt-1 pb-2">
+                        <div class="relative shrink-0">
+                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-full object-cover">
+                            <div class="absolute -bottom-1 -right-1 bg-[#202c33] rounded-full p-1 border-2 border-[${isMe ? '#005c4b' : '#202c33'}]">
+                                <i class="fa-solid fa-microphone ${micColor} text-[10px]"></i>
+                            </div>
+                        </div>
+                        <button id="btn_${audioId}" onclick="toggleCustomAudio('${audioId}', this); event.stopPropagation();" class="text-3xl text-[#aebac1] hover:text-white transition-colors w-8 text-left">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <div class="flex flex-col flex-grow relative top-1">
+                            <input type="range" id="slider_${audioId}" min="0" max="100" value="0" class="audio-slider w-full" oninput="seekAudio('${audioId}', this); event.stopPropagation();" onclick="event.stopPropagation();">
+                            <div class="flex justify-between items-center mt-1">
+                                <span id="time_${audioId}" class="text-[11px] text-[#8696a0]">0:00</span>
+                            </div>
+                        </div>
+                        <audio id="${audioId}" src="${data.fileUrl}" preload="metadata" onloadedmetadata="initAudioDuration('${audioId}', this)" ontimeupdate="updateAudioProgress('${audioId}', this)" onended="audioEnded('${audioId}', this)"></audio>
+                    </div>`;
+                } 
+                else if (data.fileType && data.fileType.startsWith('video/')) {
+                    content = `<video controls class="rounded-lg mb-1 max-h-64 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
                 } else if (data.fileType && data.fileType.startsWith('image/')) {
-                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-2 max-h-64 w-full object-cover cursor-pointer hover:opacity-90 transition-opacity bg-black/20" onclick="openLightbox('${data.fileUrl}', event)">`;
+                    content = `<img src="${data.fileUrl}" class="rounded-lg mb-1 max-h-64 w-full object-cover cursor-pointer" onclick="openLightbox('${data.fileUrl}', event)">`;
                 } else {
                     const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
-                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-black/20 p-3 rounded-xl flex items-center gap-3 text-sm mb-2 border border-white/5 hover:bg-black/40 transition-colors w-full">
-                        <i class="fa-solid fa-file-arrow-down text-2xl ${isMe ? 'text-teal-200' : 'text-pink-400'} shrink-0"></i> 
-                        <span class="truncate font-bold text-white">${data.fileName}</span>
+                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-black/20 p-3 rounded-lg flex items-center gap-3 text-sm mb-1 border border-white/5 w-full">
+                        <i class="fa-solid fa-file-arrow-down text-2xl ${isMe ? 'text-[#00a884]' : 'text-pink-400'} shrink-0"></i> 
+                        <span class="truncate font-medium text-[#e9edef]">${data.fileName}</span>
                     </a>`;
                 }
             }
             
-            let finalHtmlText = data.text ? `<p class="text-base whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
-            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-800 border border-white/10 rounded-full px-2 py-0.5 text-xs shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
+            let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 text-[#e9edef] mt-1">${escapeHTML(data.text)}</p>` : '';
+            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-[#233138] border border-[#222d34] rounded-full px-2 py-0.5 text-xs shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
 
             let popupMenu = `
-                <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-12 bg-slate-800 border border-white/10 rounded-2xl flex items-center gap-2 px-3 py-2 shadow-2xl z-[60] min-w-max animate-popIn">
-                    <button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">👍</button>
-                    <button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">❤️</button>
-                    <button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">😂</button>
-                    <button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-xl">😢</button>
-                    ${isMe ? `<div class="w-[1px] h-5 bg-white/20 mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 hover:-translate-y-1 transition-all text-red-500 text-lg" title="Delete"><i class="fa-solid fa-trash"></i></button>` : ''}
+                <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-12 bg-[#233138] border border-[#222d34] rounded-full flex items-center gap-2 px-3 py-1.5 shadow-2xl z-[60] min-w-max">
+                    <button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 transition-all text-xl">👍</button>
+                    <button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 transition-all text-xl">❤️</button>
+                    <button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 transition-all text-xl">😂</button>
+                    <button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 transition-all text-xl">😢</button>
+                    ${isMe ? `<div class="w-[1px] h-5 bg-white/10 mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-red-500 text-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
                 </div>
             `;
 
-            let tickColor = data.read ? "text-blue-400" : "text-emerald-100 opacity-70";
-            let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[11px] ${tickColor} transition-colors"></i>` : '';
+            let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]";
+            // If it is an audio message, ticks are shown differently or hidden inside the time bar usually, but we keep it bottom right for consistency
+            let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[12px] ${tickColor} ml-1"></i>` : '';
+            
+            // Adjust margin if text exists vs only media
+            let timeMargin = (data.text || !data.fileUrl) ? "mt-1 float-right" : "absolute bottom-2 right-2 bg-black/40 px-1.5 rounded-full backdrop-blur-sm";
 
             msgDiv.innerHTML = `
                 ${popupMenu}
                 ${content}
                 ${finalHtmlText}
-                <div class="flex items-center gap-1 mt-1 justify-end px-1 w-full">
-                    <span class="text-[10px] ${isMe ? 'text-teal-100' : 'text-slate-500'} font-medium">${data.timeString}</span>
+                <div class="flex items-center justify-end px-1 ${timeMargin}">
+                    <span class="text-[11px] text-[#8696a0]">${data.timeString}</span>
                     ${ticksHtml}
                 </div>
                 ${reactionBadge}
