@@ -12,13 +12,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Android Display & Keyboard Fixes 🔥 */
         html, body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
             overflow: hidden; 
-            height: 100vh; /* Fallback */
+            height: 100vh; 
             width: 100vw;
             margin: 0;
             padding: 0;
@@ -47,7 +46,6 @@
         
         .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
         
-        /* Stop auto-zoom on mobile */
         textarea, input { font-size: 16px !important; } 
         
         .contact-active { background: linear-gradient(to right, rgba(236,72,153,0.1), rgba(168,85,247,0.1)); border-left: 4px solid #ec4899; }
@@ -62,6 +60,7 @@
 <body class="flex selection:bg-pink-500/30">
 
     <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
+    <audio id="ringtone-sound" src="https://assets.mixkit.co/active_storage/sfx/2803/2803-preview.mp3" preload="auto" loop></audio>
 
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity opacity-0" onclick="closeLightbox()">
         <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
@@ -185,8 +184,8 @@
                         </div>
                     </div>
                     <div class="flex gap-2 text-slate-400 relative">
-                        <button class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-video text-xl"></i></button>
-                        <button onclick="startAudioCall()" class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone text-xl"></i></button>
+                        <button onclick="startCall('video')" class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-video text-xl text-pink-400"></i></button>
+                        <button onclick="startCall('audio')" class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone text-xl text-emerald-400"></i></button>
                         
                         <button onclick="toggleChatMenu()" class="w-11 h-11 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-xl"></i></button>
                         
@@ -206,7 +205,6 @@
                     </div>
                 </main>
 
-                <!-- Footer with Input & Voice Recording -->
                 <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
                     
                     <div id="file-preview-container" class="hidden w-full px-1 mb-3">
@@ -265,24 +263,48 @@
         </div>
     </div>
 
-    <!-- 🔥 AUDIO CALL UI MODAL (FIXED FOR WEBRTC) 🔥 -->
-    <div id="call-modal" class="hidden fixed inset-0 z-[300] flex-col items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl transition-opacity">
-        <!-- Audio tag with required attributes to bypass mobile silence block -->
-        <audio id="remote-audio" autoplay playsinline></audio>
+    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL (ROCK SOLID WEBRTC) 🔥 -->
+    <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex flex-col">
+        <!-- Remote Media (Video/Audio) -->
+        <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-0"></video>
         
-        <div class="text-center">
-            <img id="call-avatar" src="" class="w-32 h-32 rounded-full border-4 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-6 mx-auto object-cover animate-pulse">
+        <!-- Local Video PiP -->
+        <video id="local-video" autoplay playsinline muted class="absolute top-12 right-4 md:top-8 md:right-8 w-28 h-40 md:w-40 md:h-56 bg-slate-800 rounded-2xl border-2 border-white/20 object-cover hidden z-20 shadow-2xl"></video>
+
+        <!-- Overlay for Audio Calls & Ringing State -->
+        <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md transition-opacity duration-500">
+            <img id="call-avatar" src="" class="w-32 h-32 rounded-full border-4 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.5)] mb-6 mx-auto object-cover animate-pulse">
             <h2 id="call-name" class="text-3xl font-black text-white mb-2">Caller Name</h2>
             <p id="call-status" class="text-emerald-400 text-base font-bold tracking-widest uppercase mb-12">Calling...</p>
+        </div>
+        
+        <!-- Call Controls -->
+        <div class="absolute bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 z-30 w-full px-4">
             
-            <div class="flex items-center justify-center gap-10">
-                <button id="answer-btn" onclick="answerCall()" class="hidden w-20 h-20 rounded-full bg-emerald-500 text-white text-3xl hover:bg-emerald-400 transition-transform hover:scale-110 shadow-lg shadow-emerald-500/30">
-                    <i class="fa-solid fa-phone"></i>
+            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-500 text-white text-2xl hover:bg-emerald-400 hover:scale-110 transition-all shadow-lg shadow-emerald-500/30">
+                <i class="fa-solid fa-phone"></i>
+            </button>
+
+            <!-- In Call Controls (Hidden initially) -->
+            <div id="in-call-controls" class="hidden flex items-center gap-4 bg-slate-900/50 backdrop-blur-md p-2 rounded-full border border-white/10 shadow-2xl">
+                <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition-colors">
+                    <i class="fa-solid fa-microphone"></i>
                 </button>
-                <button id="hangup-btn" onclick="hangupCall()" class="w-20 h-20 rounded-full bg-red-500 text-white text-3xl hover:bg-red-400 transition-transform hover:scale-110 shadow-lg shadow-red-500/30">
+                <button id="cam-toggle-btn" onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition-colors hidden">
+                    <i class="fa-solid fa-video"></i>
+                </button>
+                
+                <div class="w-[1px] h-8 bg-white/20 mx-2"></div>
+                
+                <button id="hangup-btn" onclick="hangupCall()" class="w-14 h-14 rounded-full bg-red-500 text-white text-2xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-500/30 flex items-center justify-center">
                     <i class="fa-solid fa-phone-slash"></i>
                 </button>
             </div>
+            
+            <!-- Hangup only (While ringing for caller) -->
+            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-500 text-white text-2xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-500/30">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     </div>
 
@@ -292,7 +314,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Real Viewport Height Fix
         function setRealViewportHeight() {
             let vh = window.innerHeight;
             if (window.visualViewport) {
@@ -350,7 +371,7 @@
         let isRecording = false;
         let settingsSelectedFile = null;
         
-        // 🔥 IMPROVED WEBRTC VARIABLES (Race Condition Fixed) 🔥
+        // 🔥 ROCK SOLID WEBRTC VARIABLES & QUEUE 🔥
         const servers = { 
             iceServers: [
                 { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
@@ -359,7 +380,11 @@
         let pc = null;
         let localStream = null;
         let incomingCallData = null;
-        let currentCallId = null; // <- Eitai call kete jaoya thekabe!
+        let currentCallId = null; 
+        
+        // Anti-Race Condition Queue
+        let remoteDescriptionSet = false;
+        let iceCandidateQueue = [];
 
         const appStartTime = Date.now();
 
@@ -681,23 +706,34 @@
             } catch (err) { alert("Connection problem. Refresh page."); }
         }
 
-        // 🔥 FIX 1: Correct Audio Initiation for Call 🔥
+        // 🔥 ROCK SOLID WEBRTC INITIALIZATION 🔥
         function initializePeerConnection() {
             if (pc) pc.close();
             pc = new RTCPeerConnection(servers);
             
-            const remoteAudio = document.getElementById('remote-audio');
-            remoteAudio.srcObject = null;
-            remoteAudio.volume = 1.0;
-            remoteAudio.muted = false;
+            remoteDescriptionSet = false;
+            iceCandidateQueue = [];
+
+            const remoteVideo = document.getElementById('remote-video');
+            remoteVideo.srcObject = null;
 
             pc.ontrack = event => {
-                if (remoteAudio.srcObject !== event.streams[0]) {
-                    remoteAudio.srcObject = event.streams[0];
-                    remoteAudio.play().catch(e => console.error("Audio blocked by browser, interaction needed.", e));
+                if (remoteVideo.srcObject !== event.streams[0]) {
+                    remoteVideo.srcObject = event.streams[0];
+                    remoteVideo.classList.remove('hidden');
+                    // Force play bypasses mobile autoplay restrictions when triggered by user click
+                    remoteVideo.play().catch(e => console.error("Media play blocked:", e));
                 }
             };
             return pc;
+        }
+
+        async function processIceCandidate(candidateData) {
+            if (remoteDescriptionSet) {
+                await pc.addIceCandidate(new RTCIceCandidate(candidateData)).catch(e => console.error(e));
+            } else {
+                iceCandidateQueue.push(candidateData);
+            }
         }
 
         function listenForIncomingCalls() {
@@ -710,15 +746,29 @@
                     if (change.type === 'added' || change.type === 'modified') {
                         if (callData.callee === myMobile && callData.status === 'calling') {
                             incomingCallData = { id: callId, ...callData };
+                            
+                            // UI Setup for incoming call
                             document.getElementById('call-modal').classList.remove('hidden');
                             document.getElementById('call-modal').classList.add('flex');
                             document.getElementById('call-name').innerText = "Incoming Call...";
                             document.getElementById('call-avatar').src = getAvatarUrl("Caller", "");
-                            document.getElementById('call-status').innerText = "Ringing...";
+                            document.getElementById('call-status').innerText = callData.type === 'video' ? "Video Call Ringing..." : "Audio Call Ringing...";
+                            
                             document.getElementById('answer-btn').classList.remove('hidden');
-                            try { document.getElementById('notification-sound').play(); } catch(e){}
+                            document.getElementById('in-call-controls').classList.add('hidden');
+                            document.getElementById('caller-hangup-btn').classList.add('hidden');
+                            
+                            // Visuals
+                            if(callData.type === 'video') {
+                                document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-video"></i>';
+                            } else {
+                                document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-phone"></i>';
+                            }
+                            
+                            // Play Ringtone
+                            try { document.getElementById('ringtone-sound').play(); } catch(e){}
                         }
-                        // 🔥 Only reset if THIS specific call ended
+                        
                         if (callData.status === 'ended') {
                             if (currentCallId === callId || (incomingCallData && incomingCallData.id === callId)) {
                                 resetCallUI();
@@ -729,23 +779,41 @@
             });
         }
 
-        window.startAudioCall = async () => {
+        // START CALL (Audio or Video)
+        window.startCall = async (type) => {
             if(!activeContactMobile) return;
+            
+            // Setup Caller UI
             document.getElementById('call-modal').classList.remove('hidden');
             document.getElementById('call-modal').classList.add('flex');
             document.getElementById('call-name').innerText = document.getElementById('active-chat-name').innerText;
             document.getElementById('call-avatar').src = document.getElementById('active-chat-avatar').src;
             document.getElementById('call-status').innerText = "Calling...";
+            
             document.getElementById('answer-btn').classList.add('hidden');
+            document.getElementById('in-call-controls').classList.add('hidden');
+            document.getElementById('caller-hangup-btn').classList.remove('hidden');
+            document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
 
             try {
-                // 🔥 Android OverconstrainedError Fix: Shudhu basic audio call kora holo
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Determine Media Needs
+                const constraints = { 
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                    video: type === 'video' ? { facingMode: "user" } : false 
+                };
+
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Show local video if video call
+                if(type === 'video') {
+                    const localVid = document.getElementById('local-video');
+                    localVid.srcObject = localStream;
+                    localVid.classList.remove('hidden');
+                }
                 
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-                // 🔥 Unique Call ID to prevent Database Mix-up
                 currentCallId = "call_" + generateChatId(myMobile, activeContactMobile) + "_" + Date.now();
                 const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', currentCallId);
                 const offerCandidates = collection(callDocRef, 'offerCandidates');
@@ -762,24 +830,38 @@
                     offer: { type: offerDescription.type, sdp: offerDescription.sdp },
                     caller: myMobile,
                     callee: activeContactMobile,
+                    type: type,
                     status: 'calling',
                     timestamp: Date.now()
                 });
 
+                // Listen for Answer
                 const callUnsubscribe = onSnapshot(callDocRef, async (snapshot) => {
                     const data = snapshot.data();
-                    if(!pc.currentRemoteDescription && data?.answer) {
+                    if(!remoteDescriptionSet && data?.answer) {
                         const answerDescription = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDescription);
+                        remoteDescriptionSet = true;
                         
-                        document.getElementById('call-status').innerText = "In Call (Connected)";
+                        document.getElementById('call-status').innerText = "Connected";
+                        document.getElementById('caller-hangup-btn').classList.add('hidden');
+                        document.getElementById('in-call-controls').classList.remove('hidden');
+                        
+                        if(type === 'video') {
+                            document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none');
+                            document.getElementById('cam-toggle-btn').classList.remove('hidden');
+                        }
 
+                        // Process Queued Candidates
+                        for(let cand of iceCandidateQueue) {
+                            await pc.addIceCandidate(new RTCIceCandidate(cand));
+                        }
+                        iceCandidateQueue = [];
+
+                        // Listen for future candidates
                         onSnapshot(answerCandidates, (candSnapshot) => {
                             candSnapshot.docChanges().forEach(change => {
-                                if(change.type === 'added') {
-                                    const candidate = new RTCIceCandidate(change.doc.data());
-                                    pc.addIceCandidate(candidate).catch(e => console.error(e));
-                                }
+                                if(change.type === 'added') processIceCandidate(change.doc.data());
                             });
                         });
                     }
@@ -787,20 +869,36 @@
                 pc.callUnsubscribe = callUnsubscribe;
 
             } catch (err) {
-                console.error("Mic error:", err);
-                alert("Call Failed: " + err.message + "\n\n(Microphone access is required)");
+                alert("Hardware access failed: " + err.message);
                 resetCallUI();
             }
         };
 
+        // ANSWER INCOMING CALL
         window.answerCall = async () => {
             if(!incomingCallData) return;
+            
+            document.getElementById('ringtone-sound').pause();
+            document.getElementById('ringtone-sound').currentTime = 0;
+            
             document.getElementById('call-status').innerText = "Connecting...";
             document.getElementById('answer-btn').classList.add('hidden');
 
+            const type = incomingCallData.type;
+
             try {
-                // 🔥 Basic audio call request
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const constraints = { 
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                    video: type === 'video' ? { facingMode: "user" } : false 
+                };
+
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                if(type === 'video') {
+                    const localVid = document.getElementById('local-video');
+                    localVid.srcObject = localStream;
+                    localVid.classList.remove('hidden');
+                }
                 
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
@@ -814,9 +912,12 @@
                     if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
                 };
 
+                // SET REMOTE FIRST
                 const offerDescription = new RTCSessionDescription(incomingCallData.offer);
                 await pc.setRemoteDescription(offerDescription);
+                remoteDescriptionSet = true;
 
+                // CREATE AND SET LOCAL ANSWER
                 const answerDescription = await pc.createAnswer();
                 await pc.setLocalDescription(answerDescription);
 
@@ -825,19 +926,22 @@
                     status: 'answered'
                 });
                 
-                document.getElementById('call-status').innerText = "In Call (Connected)";
+                document.getElementById('call-status').innerText = "Connected";
+                document.getElementById('in-call-controls').classList.remove('hidden');
+                
+                if(type === 'video') {
+                    document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none');
+                    document.getElementById('cam-toggle-btn').classList.remove('hidden');
+                }
 
+                // Process Offer Candidates
                 onSnapshot(offerCandidates, (snapshot) => {
                     snapshot.docChanges().forEach(change => {
-                        if(change.type === 'added') {
-                            const candidate = new RTCIceCandidate(change.doc.data());
-                            pc.addIceCandidate(candidate).catch(e => console.error(e));
-                        }
+                        if(change.type === 'added') processIceCandidate(change.doc.data());
                     });
                 });
             } catch(e) {
-                console.error("Answer Error:", e);
-                alert("Could not connect the call: " + e.message);
+                alert("Connection failed: " + e.message);
                 resetCallUI();
             }
         };
@@ -846,14 +950,23 @@
             const idToHangup = currentCallId || (incomingCallData ? incomingCallData.id : null);
             if(idToHangup) {
                 const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', idToHangup);
-                await updateDoc(callDocRef, { status: 'ended' }).catch(()=>console.log("Call ended"));
+                await updateDoc(callDocRef, { status: 'ended' }).catch(()=>{});
             }
             resetCallUI();
         };
 
         function resetCallUI() {
+            document.getElementById('ringtone-sound').pause();
+            document.getElementById('ringtone-sound').currentTime = 0;
+
             document.getElementById('call-modal').classList.remove('flex');
             document.getElementById('call-modal').classList.add('hidden');
+            
+            document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('local-video').classList.add('hidden');
+            document.getElementById('remote-video').classList.add('hidden');
+            document.getElementById('cam-toggle-btn').classList.add('hidden');
+
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
@@ -865,13 +978,53 @@
             }
             incomingCallData = null;
             currentCallId = null;
-            const remoteAudio = document.getElementById('remote-audio');
-            if(remoteAudio) {
-                remoteAudio.srcObject = null;
-                remoteAudio.pause();
+            remoteDescriptionSet = false;
+            iceCandidateQueue = [];
+
+            const remoteVideo = document.getElementById('remote-video');
+            if(remoteVideo) {
+                remoteVideo.srcObject = null;
+                remoteVideo.pause();
             }
+            const localVideo = document.getElementById('local-video');
+            if(localVideo) localVideo.srcObject = null;
         }
 
+        // Toggles
+        window.toggleMic = () => {
+            if(!localStream) return;
+            const audioTrack = localStream.getAudioTracks()[0];
+            if(audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                const btn = document.getElementById('mic-toggle-btn');
+                if(audioTrack.enabled) {
+                    btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                    btn.classList.replace('bg-red-500', 'bg-white/10');
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
+                    btn.classList.replace('bg-white/10', 'bg-red-500');
+                }
+            }
+        };
+
+        window.toggleCamera = () => {
+            if(!localStream) return;
+            const videoTrack = localStream.getVideoTracks()[0];
+            if(videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                const btn = document.getElementById('cam-toggle-btn');
+                if(videoTrack.enabled) {
+                    btn.innerHTML = '<i class="fa-solid fa-video"></i>';
+                    btn.classList.replace('bg-red-500', 'bg-white/10');
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-video-slash"></i>';
+                    btn.classList.replace('bg-white/10', 'bg-red-500');
+                }
+            }
+        };
+
+
+        // --- CHAT LOGIC CONTINUES BELOW ---
         function listenForUsers() {
             const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
             onSnapshot(usersRef, (snapshot) => {
@@ -991,7 +1144,6 @@
 
         searchInput.addEventListener('input', () => renderContacts());
 
-        // 🔥 FIX 2: Android Hardware Back Button Fix (PopState) 🔥
         window.addEventListener('popstate', (event) => {
             if (activeContactMobile && window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.remove('hidden');
@@ -1014,7 +1166,6 @@
             if (window.innerWidth < 768) {
                 document.getElementById('chat-area').classList.remove('flex');
                 document.getElementById('chat-area').classList.add('hidden');
-                // Clean URL hash without triggering popstate
                 if (window.location.hash === '#chat') {
                     history.replaceState(null, null, ' '); 
                 }
@@ -1097,7 +1248,6 @@
         };
 
         window.closeChatMobile = () => { 
-            // Phone er hardware back button ba Arrow duitoi ekoi kaj korbe
             if (window.innerWidth < 768 && window.location.hash === '#chat') {
                 history.back(); 
             } else {
