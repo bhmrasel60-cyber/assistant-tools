@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#ffffff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Nexus Chat Suite | Secure P2P Messenger</title>
+    <title>Nexus Messenger | Seamless P2P Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Premium Dark Glassmorphism Theme (From your exact file) 🔥 */
+        /* 🔥 Beautiful Light & Clean UI 🔥 */
         html, body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #020617; 
-            color: #f8fafc; 
+            background-color: #f8fafc; 
+            color: #1e293b; 
             overflow: hidden; 
             height: 100vh; 
             width: 100vw;
@@ -28,11 +28,12 @@
             touch-action: none;
         }
         
-        /* Dark Cubes Background */
+        /* Beautiful Subtle Chat Background */
         .chat-bg {
+            background-color: #f1f5f9;
             background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-            background-color: #0f172a;
-            background-blend-mode: overlay;
+            background-blend-mode: multiply;
+            opacity: 0.95;
         }
 
         @keyframes popIn {
@@ -43,16 +44,12 @@
 
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
-        
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .glass-header { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .glass-footer { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         textarea, input { font-size: 16px !important; } 
         
-        .contact-active { background: linear-gradient(to right, rgba(59, 130, 246, 0.15), transparent); border-left: 4px solid #3b82f6; }
+        .contact-active { background-color: #eff6ff; border-left: 4px solid #3b82f6; }
 
         audio { height: 40px; outline: none; border-radius: 20px; width: 100%; }
         audio::-webkit-media-controls-panel { background-color: rgba(255, 255, 255, 0.9); }
@@ -63,7 +60,7 @@
         /* Custom Audio Player */
         .audio-slider {
             -webkit-appearance: none;
-            background: rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.1);
             height: 4px;
             border-radius: 5px;
             outline: none;
@@ -73,163 +70,158 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #fff;
+            background: currentColor;
             cursor: pointer;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
         }
     </style>
 </head>
-<body class="flex selection:bg-pink-500/30">
+<body class="flex selection:bg-blue-500/30">
 
     <!-- Sound Effects -->
     <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <audio id="ringtone-sound" src="https://assets.mixkit.co/active_storage/sfx/2803/2803-preview.mp3" preload="auto" loop></audio>
 
-    <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md transition-opacity opacity-0" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
+    <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/95 backdrop-blur-md transition-opacity opacity-0" onclick="closeLightbox()">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/20 text-white text-xl hover:bg-white/30 transition-colors z-50">
             <i class="fa-solid fa-xmark"></i>
         </button>
         <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl rounded-xl">
     </div>
 
     <!-- Registration Modal -->
-    <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg transition-opacity">
-        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-500 to-purple-600"></div>
-            <div class="w-20 h-20 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-pink-500/20 border border-pink-500/30 transform rotate-3">
-                <i class="fa-solid fa-bolt-lightning text-3xl text-pink-400 -rotate-3"></i>
+    <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-800/80 backdrop-blur-lg transition-opacity">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative overflow-hidden border border-slate-100">
+            <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-sm border border-blue-100 transform rotate-3">
+                <i class="fa-solid fa-paper-plane text-3xl text-blue-500 -rotate-3"></i>
             </div>
-            <h2 class="text-2xl font-black mb-2 text-white tracking-tight">Nexus Chat Suite</h2>
-            <p class="text-slate-400 text-sm mb-8 font-medium">Secure and unified private messenger.</p>
+            <h2 class="text-2xl font-black mb-2 text-slate-800 tracking-tight">Nexus Messenger</h2>
+            <p class="text-slate-500 text-sm mb-8 font-medium">Please enter details to connect.</p>
             
             <form id="join-form" class="space-y-4">
-                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all font-bold text-base shadow-inner" placeholder="Your Name">
-                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-bold tracking-widest text-base shadow-inner" placeholder="Mobile Number (11 digits)">
+                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-800 text-center focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-bold text-base shadow-inner" placeholder="Your Name">
+                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-800 text-center focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-bold tracking-widest text-base shadow-inner" placeholder="Mobile Number (11 digits)">
                 
-                <button type="submit" id="join-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg shadow-pink-500/30 active:scale-95 text-sm mt-4">Connect Securely</button>
+                <button type="submit" id="join-btn" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/30 active:scale-95 text-sm mt-4">Connect Securely</button>
             </form>
             <div class="mt-6">
-                <a href="index.html" class="text-xs text-slate-500 hover:text-white font-medium underline transition-colors">Back to Dashboard</a>
+                <a href="index.html" class="text-xs text-slate-500 hover:text-blue-600 font-medium underline transition-colors">Back to Dashboard</a>
             </div>
         </div>
     </div>
 
     <!-- PROFILE SETTINGS MODAL -->
-    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
-        <div class="bg-slate-900 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative border border-white/10">
-            <button onclick="closeSettings()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
+    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative border border-slate-100">
+            <button onclick="closeSettings()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h2 class="text-xl font-black mb-6 text-white uppercase tracking-wider">Profile Settings</h2>
+            <h2 class="text-xl font-black mb-6 text-slate-800 uppercase tracking-wider">Profile Settings</h2>
 
             <div class="relative w-32 h-32 mx-auto mb-6 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
-                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-[2rem] object-cover group-hover:opacity-60 transition-opacity bg-slate-800 shadow-lg border-2 border-white/10">
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] bg-black/50">
+                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-[2rem] object-cover group-hover:opacity-60 transition-opacity bg-slate-100 shadow-lg border-2 border-slate-200">
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] bg-black/40">
                     <i class="fa-solid fa-camera text-3xl text-white"></i>
                 </div>
             </div>
             <input type="file" id="profile-pic-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
 
             <div class="mb-6 text-left">
-                <label class="text-pink-400 text-xs font-bold uppercase tracking-widest mb-2 block ml-1">Display Name</label>
-                <div class="flex items-center bg-black/40 rounded-2xl border border-white/10 px-4 py-2 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 transition-all">
-                    <input type="text" id="settings-name-input" class="w-full bg-transparent p-2 text-white focus:outline-none text-base font-bold" placeholder="Enter your name">
-                    <i class="fa-solid fa-pen text-slate-500 text-sm"></i>
+                <label class="text-blue-500 text-xs font-bold uppercase tracking-widest mb-2 block ml-1">Display Name</label>
+                <div class="flex items-center bg-slate-50 rounded-2xl border border-slate-200 px-4 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                    <input type="text" id="settings-name-input" class="w-full bg-transparent p-2 text-slate-800 focus:outline-none text-base font-bold" placeholder="Enter your name">
+                    <i class="fa-solid fa-pen text-slate-400 text-sm"></i>
                 </div>
             </div>
 
-            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30">
+            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl text-white font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
                 <i class="fa-solid fa-check"></i> Save Changes
             </button>
         </div>
     </div>
 
-    <!-- Main App Container -->
+    <!-- Main App Container (WhatsApp Structure, Unique Clean UI) -->
     <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-[1600px] mx-auto md:py-4 md:px-4" style="height: 100%;">
-        <div class="w-full h-full flex bg-slate-950/80 shadow-2xl md:rounded-[2rem] border border-white/10 overflow-hidden relative backdrop-blur-md">
+        <div class="w-full h-full flex bg-white shadow-2xl md:rounded-[2rem] border border-slate-200 overflow-hidden relative">
             
             <!-- LEFT SIDEBAR (Contacts) -->
-            <div id="sidebar" class="w-full md:w-[380px] lg:w-[420px] flex flex-col border-r border-white/10 bg-slate-900/50 z-20 flex-shrink-0 absolute md:relative inset-0 md:inset-auto">
+            <div id="sidebar" class="w-full md:w-[380px] lg:w-[420px] flex flex-col border-r border-slate-200 bg-white z-20 flex-shrink-0 absolute md:relative inset-0 md:inset-auto">
                 
-                <!-- Top Header (From global chat style) -->
-                <header class="glass-header p-4 flex items-center justify-between shrink-0 z-10" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                <!-- Top Header -->
+                <header class="p-4 bg-slate-50 flex items-center justify-between shrink-0 border-b border-slate-200 z-10" style="padding-top: max(1rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
-                        <img id="my-avatar" src="" onclick="openSettings()" class="w-11 h-11 rounded-[1rem] object-cover cursor-pointer hover:opacity-80 transition-opacity border border-white/10 shadow-sm bg-slate-800" title="Profile Settings">
+                        <img id="my-avatar" src="" onclick="openSettings()" class="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity border border-slate-200 shadow-sm bg-slate-100" title="Profile Settings">
                         <div class="hidden md:block">
-                            <h2 id="my-name-display" class="font-bold text-white text-sm">My Profile</h2>
-                            <p class="text-[10px] text-emerald-400 font-bold tracking-widest uppercase">Active Now</p>
+                            <h2 id="my-name-display" class="font-bold text-slate-800 text-sm">My Profile</h2>
+                            <p class="text-[10px] text-emerald-500 font-bold tracking-widest uppercase">Active Now</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-slate-300">
-                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-pink-600 hover:text-white transition-colors" title="Home">
+                    <div class="flex items-center gap-2 text-slate-500">
+                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors" title="Home">
                             <i class="fa-solid fa-house text-sm"></i>
                         </a>
-                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-pink-600 hover:text-white transition-colors" title="Settings">
+                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors" title="Settings">
                             <i class="fa-solid fa-gear text-sm"></i>
                         </button>
-                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition-colors" title="Logout">
+                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors" title="Logout">
                             <i class="fa-solid fa-right-from-bracket text-sm"></i>
                         </button>
                     </div>
                 </header>
 
                 <!-- Search Bar -->
-                <div class="p-3 bg-black/20 shrink-0 border-b border-white/5">
-                    <div class="bg-black/40 rounded-2xl flex items-center px-4 py-3 border border-white/10 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 transition-all shadow-inner">
+                <div class="p-3 bg-white shrink-0 border-b border-slate-100">
+                    <div class="bg-slate-100 rounded-xl flex items-center px-4 py-2.5 border border-slate-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all shadow-inner">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
-                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-500 font-medium">
+                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-slate-700 text-sm w-full ml-3 placeholder-slate-400 font-medium">
                     </div>
                 </div>
 
                 <!-- Contacts List -->
-                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative" style="touch-action: pan-y;">
-                    <div class="text-center py-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest sticky top-0 glass-header z-10 border-b border-white/5 flex justify-between items-center px-6">
-                        <span>All Contacts</span>
-                        <i class="fa-solid fa-users text-pink-500/50"></i>
-                    </div>
+                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-white" style="touch-action: pan-y;">
                     <div id="contacts-container" class="pb-6"></div>
                 </div>
             </div>
 
             <!-- RIGHT SIDEBAR (Chat Window) -->
-            <div id="chat-area" class="w-full hidden flex-col relative h-full bg-slate-900/30">
+            <div id="chat-area" class="w-full hidden flex-col relative h-full bg-slate-50">
                 
                 <!-- Empty State -->
-                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg backdrop-blur-sm border-l border-white/5">
-                    <div class="w-28 h-28 bg-gradient-to-br from-pink-500/10 to-purple-600/10 rounded-[2rem] flex items-center justify-center mb-6 border border-pink-500/20 shadow-xl transform rotate-3">
-                        <i class="fa-solid fa-bolt-lightning text-5xl text-pink-400 -rotate-3"></i>
+                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-slate-50 border-l border-slate-200">
+                    <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6 border border-blue-100 shadow-lg">
+                        <i class="fa-solid fa-comments text-4xl text-blue-400"></i>
                     </div>
-                    <h2 class="text-3xl font-black text-white mb-3 tracking-tight">Nexus Chat Suite</h2>
-                    <p class="text-slate-400 text-sm max-w-sm text-center px-4 font-medium leading-relaxed">Select a contact to start an encrypted conversation. Experience seamless messaging.</p>
-                    <div class="mt-8 bg-black/40 border border-white/10 shadow-sm px-4 py-2 rounded-full text-xs text-slate-400 flex items-center gap-2 font-bold">
-                        <i class="fa-solid fa-shield-halved text-emerald-500"></i> P2P Encryption Active
+                    <h2 class="text-3xl font-light text-slate-700 mb-3 tracking-tight">Nexus Chat Suite</h2>
+                    <p class="text-slate-500 text-sm max-w-sm text-center px-4 font-medium leading-relaxed">Select a contact to start an encrypted conversation. Enjoy seamless calls & messaging.</p>
+                    <div class="mt-8 bg-white border border-slate-200 shadow-sm px-4 py-2 rounded-full text-xs text-slate-500 flex items-center gap-2 font-bold">
+                        <i class="fa-solid fa-lock text-emerald-500"></i> End-to-end Encrypted
                     </div>
                 </div>
 
                 <!-- Chat Header -->
-                <header class="p-3 md:p-4 glass-header flex items-center justify-between shrink-0 relative z-30 shadow-md" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
+                <header class="p-3 md:p-4 bg-slate-50 flex items-center justify-between shrink-0 relative z-30 border-b border-slate-200 shadow-sm" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
-                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-slate-300 hover:bg-white/10 shrink-0 transition-colors bg-white/5 border border-white/10">
+                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-slate-600 hover:bg-slate-200 shrink-0 transition-colors bg-white border border-slate-200 shadow-sm">
                             <i class="fa-solid fa-arrow-left text-sm"></i>
                         </button>
                         <div class="flex items-center gap-3 cursor-pointer">
-                            <img id="active-chat-avatar" src="" class="w-11 h-11 rounded-[1rem] object-cover border border-white/10 shadow-sm bg-slate-800">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm bg-white">
                             <div class="flex flex-col justify-center">
-                                <h2 id="active-chat-name" class="font-bold text-white text-base leading-tight">Contact</h2>
-                                <p id="active-chat-status" class="text-[11px] text-pink-400 font-bold tracking-widest uppercase mt-0.5">...</p>
+                                <h2 id="active-chat-name" class="font-bold text-slate-800 text-base leading-tight">Contact</h2>
+                                <p id="active-chat-status" class="text-[11px] text-blue-500 font-bold tracking-widest uppercase mt-0.5">...</p>
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-2 text-slate-300 relative pr-2">
-                        <button onclick="startCall('video')" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:border-pink-500 hover:bg-pink-600 hover:text-white transition-all shadow-sm text-pink-400"><i class="fa-solid fa-video text-sm"></i></button>
-                        <button onclick="startCall('audio')" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500 hover:bg-emerald-600 hover:text-white transition-all shadow-sm text-emerald-400"><i class="fa-solid fa-phone text-sm"></i></button>
+                    <div class="flex gap-2 text-slate-500 relative pr-2">
+                        <button onclick="startCall('video')" class="w-10 h-10 rounded-full bg-white border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm text-slate-600"><i class="fa-solid fa-video text-sm"></i></button>
+                        <button onclick="startCall('audio')" class="w-10 h-10 rounded-full bg-white border border-slate-200 hover:text-emerald-600 hover:bg-emerald-50 transition-all shadow-sm text-slate-600"><i class="fa-solid fa-phone text-sm"></i></button>
                         
-                        <div class="w-[1px] h-6 bg-white/10 mx-1 self-center hidden md:block"></div>
+                        <div class="w-[1px] h-6 bg-slate-300 mx-1 self-center hidden md:block"></div>
                         
-                        <button onclick="toggleChatMenu(event)" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-sm"></i></button>
+                        <button onclick="toggleChatMenu(event)" class="w-10 h-10 rounded-full bg-transparent hover:bg-slate-200 transition-colors text-slate-600"><i class="fa-solid fa-ellipsis-vertical text-sm"></i></button>
                         
-                        <div id="chat-dropdown" class="dropdown-menu absolute top-14 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-xl py-2 w-48 z-50 overflow-hidden">
-                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-3 font-bold">
+                        <div id="chat-dropdown" class="dropdown-menu absolute top-14 right-2 bg-white border border-slate-200 rounded-xl shadow-xl py-2 w-48 z-50 overflow-hidden">
+                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3 font-bold">
                                 <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear Chat
                             </button>
                         </div>
@@ -239,65 +231,65 @@
                 <!-- Chat Messages Area -->
                 <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-2 custom-scroll relative z-20" onclick="closeAllMenus()" style="touch-action: pan-y;">
                     <div class="text-center my-4">
-                        <span class="bg-black/60 text-slate-300 text-[10px] px-4 py-1.5 rounded-full border border-white/10 uppercase tracking-widest font-bold backdrop-blur-md shadow-sm">
-                            <i class="fa-solid fa-shield-halved text-pink-400 mr-1"></i> End-to-end encrypted
+                        <span class="bg-white/90 text-slate-500 text-[10px] px-4 py-1.5 rounded-full border border-slate-200 uppercase tracking-widest font-bold shadow-sm">
+                            <i class="fa-solid fa-lock text-blue-500 mr-1"></i> Messages are encrypted
                         </span>
                     </div>
                 </main>
 
                 <!-- Chat Input Footer -->
-                <footer class="p-3 md:p-4 glass-footer shrink-0 z-30 relative" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                <footer class="p-3 md:p-4 bg-slate-50 shrink-0 border-t border-slate-200 z-30 relative" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
                     
                     <div id="file-preview-container" class="hidden w-full px-1 mb-3">
-                        <div class="bg-slate-800/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-lg">
+                        <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between shadow-sm">
                             <div class="flex items-center gap-3 overflow-hidden">
-                                <div id="preview-icon-wrapper" class="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
+                                <div id="preview-icon-wrapper" class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100 overflow-hidden relative">
                                     <i id="preview-icon" class="fa-solid fa-file text-xl"></i>
                                     <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
                                 </div>
                                 <div class="overflow-hidden">
-                                    <p id="file-preview-name" class="text-sm font-bold text-white truncate w-48 md:w-72">filename</p>
+                                    <p id="file-preview-name" class="text-sm font-bold text-slate-700 truncate w-48 md:w-72">filename</p>
                                     <p id="file-preview-size" class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
                                 </div>
                             </div>
-                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-10 h-10 flex items-center justify-center rounded-full transition-colors bg-white/5 border border-white/5 shadow-sm">
+                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full transition-colors bg-slate-100">
                                 <i class="fa-solid fa-xmark text-lg"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- Recording UI -->
-                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-2xl p-2 mb-3 animate-pulse">
-                        <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
+                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-50 border border-red-200 rounded-2xl p-2 mb-3 animate-pulse shadow-sm">
+                        <div class="flex items-center gap-3 text-red-500 pl-4 font-bold text-sm">
                             <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording Audio...
                         </div>
                         <div class="flex gap-2 pr-1">
-                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-xl bg-slate-800 border border-white/10 text-slate-300 hover:text-red-400 flex items-center justify-center transition-colors shadow-sm">
+                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-500 flex items-center justify-center transition-colors shadow-sm">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
-                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:opacity-90 flex items-center justify-center shadow-lg shadow-pink-500/30 transition-all">
+                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center shadow-md shadow-blue-500/30 transition-all">
                                 <i class="fa-solid fa-paper-plane"></i>
                             </button>
                         </div>
                     </div>
 
                     <form id="chat-form" class="flex items-end gap-2 w-full relative">
-                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-300 hover:text-pink-400 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all border border-white/10 mb-0.5 shadow-sm">
-                            <i class="fa-solid fa-paperclip text-lg"></i>
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-500 hover:text-blue-600 bg-white rounded-full flex items-center justify-center transition-all border border-slate-200 mb-0.5 shadow-sm">
+                            <i class="fa-solid fa-paperclip text-xl"></i>
                         </button>
                         <input type="file" id="file-input" class="hidden">
 
-                        <div class="flex-grow bg-black/40 border border-white/10 rounded-3xl flex items-center px-4 py-1.5 transition-all focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 relative shadow-inner">
-                            <textarea id="msg-input" rows="1" placeholder="Message..."
-                                class="w-full bg-transparent py-2 text-white focus:outline-none resize-none max-h-32 custom-scroll text-[15px] placeholder-slate-500 font-medium" style="min-height: 40px;"></textarea>
+                        <div class="flex-grow bg-white border border-slate-200 rounded-[1.5rem] flex items-center px-4 py-1.5 transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/10 relative shadow-sm">
+                            <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                                class="w-full bg-transparent py-2 text-slate-800 focus:outline-none resize-none max-h-32 custom-scroll text-[15px] placeholder-slate-400 font-medium" style="min-height: 40px;"></textarea>
                         </div>
                         
-                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-pink-500/30 transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-microphone text-lg"></i>
+                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white shadow-md shadow-blue-500/30 transition-all active:scale-95 mb-0.5">
+                            <i class="fa-solid fa-microphone text-xl"></i>
                         </button>
                         
-                        <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-pink-500/30 transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
+                        <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white shadow-md shadow-blue-500/30 transition-all active:scale-95 mb-0.5">
+                            <i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>
                         </button>
                     </form>
                 </footer>
@@ -305,24 +297,24 @@
         </div>
     </div>
 
-    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL (ROBUST P2P WITH SIMPLE CONSTRAINTS) 🔥 -->
-    <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex-col">
+    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL (ROBUST P2P WITH SAFE CONSTRAINTS) 🔥 -->
+    <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-900 overflow-hidden flex-col">
         <audio id="remote-audio" autoplay playsinline></audio>
         <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-0 bg-black"></video>
         <video id="local-video" autoplay playsinline muted class="absolute top-12 right-4 md:top-8 md:right-8 w-28 h-40 md:w-40 md:h-56 bg-slate-800 rounded-2xl border-2 border-white/20 object-cover hidden z-20 shadow-2xl"></video>
 
-        <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-xl transition-opacity duration-500">
+        <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/95 backdrop-blur-xl transition-opacity duration-500">
             <div class="relative mb-8">
-                <img id="call-avatar" src="" class="w-32 h-32 rounded-[2rem] object-cover z-10 relative border-4 border-pink-500 shadow-2xl shadow-pink-500/50">
-                <div class="absolute inset-0 border-4 border-pink-500 rounded-[2rem] animate-ping opacity-40 z-0"></div>
+                <img id="call-avatar" src="" class="w-32 h-32 rounded-full object-cover z-10 relative border-4 border-blue-500 shadow-2xl shadow-blue-500/50">
+                <div class="absolute inset-0 border-4 border-blue-500 rounded-full animate-ping opacity-30 z-0"></div>
             </div>
             <h2 id="call-name" class="text-3xl font-black text-white mb-2 tracking-tight">Caller Name</h2>
-            <p id="call-status" class="text-pink-400 text-sm font-bold tracking-widest uppercase mb-12">Calling...</p>
+            <p id="call-status" class="text-blue-400 text-sm font-bold tracking-widest uppercase mb-12">Calling...</p>
         </div>
         
         <!-- Call Controls -->
         <div class="absolute bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 z-30 w-full px-4">
-            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-600 text-white text-2xl hover:bg-emerald-500 hover:scale-110 transition-all shadow-lg shadow-emerald-600/40 flex items-center justify-center">
+            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-500 text-white text-2xl hover:bg-emerald-400 hover:scale-110 transition-all shadow-lg shadow-emerald-500/40 flex items-center justify-center">
                 <i class="fa-solid fa-phone"></i>
             </button>
 
@@ -336,12 +328,12 @@
                 
                 <div class="w-[1px] h-8 bg-white/20 mx-1"></div>
                 
-                <button id="hangup-btn" onclick="hangupCall()" class="w-14 h-14 rounded-full bg-red-600 text-white text-xl hover:bg-red-500 hover:scale-110 transition-all shadow-lg shadow-red-600/40 flex items-center justify-center">
+                <button id="hangup-btn" onclick="hangupCall()" class="w-14 h-14 rounded-full bg-red-500 text-white text-xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-500/40 flex items-center justify-center">
                     <i class="fa-solid fa-phone-slash"></i>
                 </button>
             </div>
             
-            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-600 text-white text-2xl hover:bg-red-500 hover:scale-110 transition-all shadow-lg shadow-red-600/40 flex items-center justify-center">
+            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-500 text-white text-2xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-500/40 flex items-center justify-center">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -353,7 +345,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Viewport Fix
         function setRealViewportHeight() {
             let vh = window.innerHeight;
             if (window.visualViewport) vh = window.visualViewport.height;
@@ -406,8 +397,12 @@
         let isRecording = false;
         let settingsSelectedFile = null;
         
-        // 🔥 SAFE WEBRTC SETUP 🔥
-        const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }] };
+        // 🔥 ERROR FIXED: Used pure Google STUN Servers (No Twilio, No Queries) 🔥
+        const servers = { 
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+            ] 
+        };
         let pc = null;
         let localStream = null;
         let incomingCallData = null;
@@ -435,9 +430,8 @@
         const previewIcon = document.getElementById('preview-icon');
         const previewImg = document.getElementById('preview-img');
 
-        // Initial Avatar format generator
         function getAvatarUrl(name, customUrl) {
-            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ec4899&color=fff&bold=true`;
+            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&bold=true`;
         }
         function formatTime(seconds) {
             if(!seconds || isNaN(seconds)) return "0:00";
@@ -448,7 +442,6 @@
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
 
-        // Lightbox
         window.openLightbox = (url, e) => {
             e.stopPropagation();
             const lightbox = document.getElementById('image-lightbox');
@@ -464,7 +457,6 @@
             setTimeout(() => lightbox.classList.add('hidden'), 300);
         };
 
-        // Menus & Modals
         window.toggleChatMenu = (e) => { e.stopPropagation(); document.getElementById('chat-dropdown').classList.toggle('show'); }
         window.closeAllMenus = () => {
             document.getElementById('chat-dropdown').classList.remove('show');
@@ -479,7 +471,6 @@
             }
         };
 
-        // Settings (Rename & Avatar)
         window.openSettings = () => {
             document.getElementById('settings-modal').classList.remove('hidden');
             document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl);
@@ -651,7 +642,7 @@
                     reader.readAsDataURL(file);
                 } else {
                     previewIcon.className = "fa-solid text-2xl";
-                    if(file.type.startsWith('video/')) previewIcon.classList.add("fa-video", "text-pink-500");
+                    if(file.type.startsWith('video/')) previewIcon.classList.add("fa-video", "text-blue-500");
                     else if(file.type.startsWith('audio/')) previewIcon.classList.add("fa-headphones", "text-emerald-500");
                     else previewIcon.classList.add("fa-file", "text-slate-400");
                 }
@@ -742,7 +733,6 @@
             } catch (err) {}
         }
 
-        // 🔥 CRITICAL WEBRTC FIX (Simple Constraints to bypass Overconstrained Error) 🔥
         function initializePeerConnection() {
             if (pc) pc.close();
             pc = new RTCPeerConnection(servers);
@@ -810,7 +800,7 @@
             });
         }
 
-        // 🔥 SIMPLIFIED MEDIA CONSTRAINTS FOR 100% DEVICE COMPATIBILITY 🔥
+        // 🔥 CRITICAL FIX: Safe, basic constraints so NO phones crash 🔥
         window.startCall = async (type) => {
             if(!activeContactMobile) return;
             
@@ -830,7 +820,7 @@
                     throw new Error("Browser doesn't support calling features.");
                 }
 
-                // Ekhanei Error Hocchilo: Taito shobcheye simple boolean constraints deya holo
+                // Ekdom simple true/false constraints jate phone reject na kore
                 const constraints = type === 'video' ? { video: true, audio: true } : { audio: true };
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 
@@ -884,8 +874,8 @@
                 pc.callUnsubscribe = callUnsubscribe;
 
             } catch (err) {
-                console.error("Device media error:", err);
-                alert("Call Error: " + err.message + "\n\nPlease allow Camera/Mic permissions in your browser.");
+                console.error("Media Error:", err);
+                alert("Please allow Camera/Microphone permissions to make a call.");
                 resetCallUI();
             }
         };
@@ -902,7 +892,6 @@
             const type = incomingCallData.type;
 
             try {
-                // Ekhaneo simple constraints
                 const constraints = type === 'video' ? { video: true, audio: true } : { audio: true };
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 
@@ -943,7 +932,7 @@
                 });
             } catch(e) {
                 console.error("Answer error:", e);
-                alert("Connection failed: " + e.message);
+                alert("Connection failed: Please allow Camera/Mic.");
                 resetCallUI();
             }
         };
@@ -1041,7 +1030,7 @@
             
             filteredUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
-                const activeClass = isActive ? 'contact-active bg-white/5' : 'hover:bg-white/5 border-l-4 border-transparent';
+                const activeClass = isActive ? 'contact-active' : 'hover:bg-white/5 border-l-4 border-transparent';
                 
                 const latestMsg = latestMessages[user.mobile];
                 let msgPreview = "Tap to start chatting";
@@ -1051,7 +1040,7 @@
 
                 if (latestMsg) {
                     const isMe = latestMsg.senderMobile === myMobile;
-                    let tickClass = latestMsg.read ? "text-cyan-400" : "text-slate-500";
+                    let tickClass = latestMsg.read ? "text-blue-500" : "text-slate-500";
                     const prefix = isMe ? `<i class='fa-solid fa-check-double text-[11px] mr-1 ${tickClass}'></i> ` : "";
                     
                     if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
@@ -1066,16 +1055,16 @@
                     if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-white font-semibold"; }
                 }
 
-                let unreadBadge = isUnread ? `<span class="bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 shadow-[0_0_8px_rgba(236,72,153,0.8)]">New</span>` : ``;
+                let unreadBadge = isUnread ? `<span class="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 shadow-[0_0_8px_rgba(59,130,246,0.8)]">New</span>` : ``;
                 
                 if(user.typingTo === myMobile) {
-                    msgPreview = "<span class='text-pink-400 font-medium animate-pulse text-xs'>typing...</span>";
+                    msgPreview = "<span class='text-blue-400 font-medium animate-pulse text-xs'>typing...</span>";
                     previewClass = ""; unreadBadge = ""; 
                 }
 
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
                 const isOnline = (Date.now() - user.lastActive) < 120000;
-                const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-700';
+                const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-600';
 
                 const div = document.createElement('div');
                 div.className = `flex items-center cursor-pointer transition-colors p-3 border-b border-white/5 ${activeClass}`;
@@ -1084,12 +1073,12 @@
                 div.innerHTML = `
                     <div class="relative shrink-0 mr-4">
                         <img src="${userAvatar}" class="w-12 h-12 rounded-[1rem] object-cover bg-slate-800 border border-white/10 shadow-sm">
-                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${dotColor} border-2 border-slate-900 rounded-full"></span>
+                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${dotColor} border-2 border-[#0f172a] rounded-full"></span>
                     </div>
                     <div class="flex-grow flex flex-col justify-center overflow-hidden">
                         <div class="flex justify-between items-center mb-0.5">
                             <h3 class="text-[15px] font-bold text-white truncate pr-2">${user.name}</h3>
-                            <span class="text-[10px] ${isUnread ? 'text-pink-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
+                            <span class="text-[10px] ${isUnread ? 'text-blue-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
                         </div>
                         <div class="flex justify-between items-center gap-2">
                             <p class="text-xs ${previewClass} truncate w-full">${msgPreview}</p>
@@ -1149,7 +1138,7 @@
                     if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
 
                     if(uData.typingTo === myMobile) {
-                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[11px] text-pink-400 font-bold tracking-widest uppercase animate-pulse';
+                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[11px] text-blue-400 font-bold tracking-widest uppercase animate-pulse';
                     } else {
                         const isOnline = (Date.now() - uData.lastActive) < 120000;
                         statusElem.innerText = isOnline ? 'Online' : 'Offline';
@@ -1279,7 +1268,7 @@
         function createMessageElement(docId, data, contactName) {
             const isMe = data.senderMobile === myMobile;
             
-            const bubbleClasses = isMe ? 'bg-gradient-to-br from-pink-600 to-purple-600 self-end rounded-tr-sm shadow-md' : 'bg-slate-800 border border-white/5 self-start rounded-tl-sm shadow-md';
+            const bubbleClasses = isMe ? 'bg-gradient-to-br from-blue-600 to-blue-500 self-end rounded-tr-sm shadow-md' : 'bg-slate-800 border border-white/5 self-start rounded-tl-sm shadow-md';
             const textColor = 'text-white';
             
             const msgDiv = document.createElement('div');
@@ -1295,15 +1284,15 @@
                     const audioId = `audio_pvt_${docId}`;
                     const avatarForAudio = isMe ? getAvatarUrl(myName, myAvatarUrl) : document.getElementById('active-chat-avatar').src;
                     
-                    const micColor = isMe ? 'text-white' : 'text-pink-400';
-                    const iconColor = isMe ? 'text-white hover:text-pink-200' : 'text-pink-400 hover:text-pink-300';
+                    const micColor = isMe ? 'text-white' : 'text-blue-400';
+                    const iconColor = isMe ? 'text-white hover:text-blue-200' : 'text-blue-400 hover:text-blue-300';
                     const timeColor = isMe ? 'text-white/80' : 'text-slate-400';
 
                     content = `
                     <div class="flex items-center gap-3 w-56 md:w-64 pt-1 pb-1">
                         <div class="relative shrink-0">
-                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-full object-cover shadow-sm border-2 ${isMe ? 'border-white/30' : 'border-slate-600'} bg-slate-700">
-                            <div class="absolute -bottom-1 -right-1 ${isMe ? 'bg-purple-700 border-white/20' : 'bg-slate-800 border-slate-600'} rounded-full p-1 border-2">
+                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-[1rem] object-cover shadow-sm border-2 ${isMe ? 'border-white/30' : 'border-slate-600'} bg-slate-700">
+                            <div class="absolute -bottom-1 -right-1 ${isMe ? 'bg-blue-700 border-white/20' : 'bg-slate-800 border-slate-600'} rounded-full p-1 border-2">
                                 <i class="fa-solid fa-microphone ${micColor} text-[9px]"></i>
                             </div>
                         </div>
@@ -1311,7 +1300,7 @@
                             <i class="fa-solid fa-play drop-shadow-sm"></i>
                         </button>
                         <div class="flex flex-col flex-grow relative top-1">
-                            <input type="range" id="slider_${audioId}" min="0" max="100" value="0" class="audio-slider w-full" style="color: ${isMe ? 'white' : '#f472b6'}" oninput="seekAudio('${audioId}', this); event.stopPropagation();" onclick="event.stopPropagation();">
+                            <input type="range" id="slider_${audioId}" min="0" max="100" value="0" class="audio-slider w-full" style="color: ${isMe ? 'white' : '#60a5fa'}" oninput="seekAudio('${audioId}', this); event.stopPropagation();" onclick="event.stopPropagation();">
                             <div class="flex justify-between items-center mt-1.5">
                                 <span id="time_${audioId}" class="text-[10px] font-bold ${timeColor}">0:00</span>
                             </div>
@@ -1326,7 +1315,7 @@
                 } else {
                     const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
                     content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="${isMe ? 'bg-white/10 hover:bg-white/20' : 'bg-slate-900/50 hover:bg-slate-900'} p-3 rounded-xl flex items-center gap-3 text-sm mb-2 transition-colors w-full border ${isMe ? 'border-white/10' : 'border-white/5'}">
-                        <i class="fa-solid fa-file-arrow-down text-2xl ${isMe ? 'text-white' : 'text-pink-400'} shrink-0"></i> 
+                        <i class="fa-solid fa-file-arrow-down text-2xl ${isMe ? 'text-white' : 'text-blue-400'} shrink-0"></i> 
                         <span class="truncate font-semibold ${textColor}">${data.fileName}</span>
                     </a>`;
                 }
