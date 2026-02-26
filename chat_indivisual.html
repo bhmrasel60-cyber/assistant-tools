@@ -6,24 +6,23 @@
     <meta name="theme-color" content="#020617">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Private Messenger | Web Tools Suite</title>
+    <title>Private Messenger | Android Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Strict Android Layout Fixes 🔥 */
-        html, body { 
+        /* 🔥 Exact same logic from your chat.html 🔥 */
+        body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
-            overflow: hidden; /* Prevent native body scroll */
+            overflow: hidden; 
+            height: 100dvh; 
             width: 100vw;
+            position: fixed; 
             margin: 0;
             padding: 0;
-            position: fixed; /* Keep body fixed to prevent jumping */
-            top: 0;
-            left: 0;
         }
         
         .chat-bg {
@@ -38,10 +37,13 @@
         }
         .msg-bubble { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
+        .custom-scroll {
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+        }
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
         
         .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
         
@@ -55,25 +57,19 @@
         
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; animation: popIn 0.2s ease-out forwards; }
-
-        /* Ensure scrollable areas work smoothly */
-        #messages-box, #contacts-list {
-            overscroll-behavior-y: contain;
-            -webkit-overflow-scrolling: touch;
-        }
     </style>
 </head>
-<body class="flex selection:bg-pink-500/30">
+<body class="flex flex-col selection:bg-pink-500/30">
 
     <!-- Notification Sound Effect -->
     <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
 
     <!-- Fullscreen Image Lightbox -->
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity opacity-0" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
             <i class="fa-solid fa-xmark"></i>
         </button>
-        <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl">
+        <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 transform scale-95 transition-transform duration-300 shadow-2xl">
     </div>
 
     <!-- 1. Registration Modal -->
@@ -121,155 +117,142 @@
         </div>
     </div>
 
-    <!-- 2. Main App Container -->
-    <!-- 🔥 Absolute container managed by JS for dynamic height calculation -->
-    <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-6xl mx-auto md:relative md:py-4 md:px-4 flex">
+    <!-- 2. Main App Container (Pure Mobile Layout) -->
+    <div id="app-container" class="hidden flex-col w-full h-full max-w-xl mx-auto bg-slate-950 relative shadow-2xl md:border-x border-white/5 overflow-hidden">
         
-        <div class="w-full h-full flex flex-row bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden">
+        <!-- =================== VIEW 1: CONTACTS LIST =================== -->
+        <div id="sidebar" class="w-full h-full flex flex-col z-10 bg-slate-950">
+            <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                <div class="flex items-center gap-3">
+                    <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 border border-white/5 shrink-0">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
+                        <div class="truncate">
+                            <h2 id="my-name-display" class="font-bold text-white text-base truncate">My Name</h2>
+                            <p id="my-mobile-display" class="text-[11px] text-emerald-400 font-medium tracking-widest">01700000000</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 transition-colors" title="Settings">
+                        <i class="fa-solid fa-gear text-sm"></i>
+                    </button>
+                    <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 transition-colors" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="p-3 shrink-0">
+                <div class="bg-black/30 rounded-xl flex items-center px-4 py-3 border border-white/5 focus-within:border-pink-500/50 transition-colors">
+                    <i class="fa-solid fa-search text-slate-500 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-600">
+                </div>
+            </div>
+
+            <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative">
+                <div class="text-center py-3 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
+                    <span>Available Users</span>
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div id="contacts-container" class="pb-6"></div>
+            </div>
+        </div>
+
+        <!-- =================== VIEW 2: CHAT INBOX =================== -->
+        <div id="chat-area" class="w-full h-full hidden flex-col z-20 bg-slate-950">
             
-            <!-- LEFT SIDEBAR (Contacts) -->
-            <div id="sidebar" class="w-full h-full md:w-[350px] lg:w-[400px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 bg-slate-950">
-                <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
+            <header class="glass-panel p-3 border-b border-white/10 flex items-center justify-between shrink-0" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                <div class="flex items-center gap-4">
+                    <button onclick="closeChatMobile()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 border border-white/5 shrink-0 transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
                     <div class="flex items-center gap-3">
-                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors shrink-0">
-                            <i class="fa-solid fa-arrow-left text-base"></i>
-                        </a>
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
-                            <div class="truncate">
-                                <h2 id="my-name-display" class="font-bold text-white text-base truncate">My Name</h2>
-                                <p id="my-mobile-display" class="text-[11px] text-emerald-400 font-medium tracking-widest">01700000000</p>
-                            </div>
+                        <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
+                        <div class="flex flex-col justify-center">
+                            <h2 id="active-chat-name" class="font-bold text-white text-base leading-tight truncate">Contact Name</h2>
+                            <p id="active-chat-status" class="text-[11px] text-slate-500 font-medium tracking-widest transition-colors">...</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors" title="Settings">
-                            <i class="fa-solid fa-gear text-sm"></i>
-                        </button>
-                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
-                            <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                        </button>
-                    </div>
-                </header>
-
-                <div class="p-3 shrink-0">
-                    <div class="bg-black/30 rounded-xl flex items-center px-4 py-3 border border-white/5 focus-within:border-pink-500/50 transition-colors">
-                        <i class="fa-solid fa-search text-slate-500 text-sm"></i>
-                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-600">
-                    </div>
                 </div>
-
-                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative">
-                    <div class="text-center py-3 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
-                        <span>Available Users</span>
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <div id="contacts-container" class="pb-6"></div>
-                </div>
-            </div>
-
-            <!-- RIGHT SIDEBAR (Chat Window) -->
-            <div id="chat-area" class="w-full h-full hidden md:flex flex-col bg-slate-950 relative">
-                
-                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
-                    <div class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-6 border border-white/10">
-                        <i class="fa-brands fa-whatsapp text-4xl text-slate-400"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Web Tools Messenger</h2>
-                    <p class="text-slate-500 text-sm max-w-sm text-center px-4">Select a contact to send messages, videos, audio, and documents with end-to-end encryption.</p>
-                </div>
-
-                <header class="p-3 md:p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0 relative" style="padding-top: max(1rem, env(safe-area-inset-top));">
-                    <div class="flex items-center gap-4">
-                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-white active:bg-white/10 hover:bg-white/10 shrink-0 transition-colors">
-                            <i class="fa-solid fa-arrow-left text-xl"></i>
-                        </button>
-                        <div class="flex items-center gap-3">
-                            <img id="active-chat-avatar" src="" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
-                            <div class="flex flex-col justify-center">
-                                <h2 id="active-chat-name" class="font-bold text-white text-base md:text-lg leading-tight">Contact Name</h2>
-                                <p id="active-chat-status" class="text-[11px] text-slate-500 font-medium tracking-widest transition-colors">...</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 text-slate-400 relative">
-                        <button class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-video text-lg"></i></button>
-                        <button class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-phone text-lg"></i></button>
-                        
-                        <button onclick="toggleChatMenu()" class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
-                        
-                        <div id="chat-dropdown" class="dropdown-menu absolute top-12 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 w-44 z-50">
-                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 active:bg-white/10 hover:bg-white/5 transition-colors flex items-center gap-3 font-medium">
-                                <i class="fa-solid fa-trash-can w-4 text-center text-lg"></i> Clear Chat
-                            </button>
-                        </div>
-                    </div>
-                </header>
-
-                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()">
-                    <div class="text-center my-4">
-                        <span class="bg-black/40 text-slate-400 text-[11px] px-4 py-1.5 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
-                            <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> End-to-end encrypted
-                        </span>
-                    </div>
-                </main>
-
-                <!-- Footer with Input & Voice Recording -->
-                <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
+                <div class="flex gap-2 text-slate-400 relative">
+                    <button class="w-10 h-10 rounded-full active:bg-white/10 transition-colors"><i class="fa-solid fa-video text-lg"></i></button>
+                    <button class="w-10 h-10 rounded-full active:bg-white/10 transition-colors"><i class="fa-solid fa-phone text-lg"></i></button>
+                    <button onclick="toggleChatMenu()" class="w-10 h-10 rounded-full active:bg-white/10 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
                     
-                    <div id="file-preview-container" class="hidden w-full px-1 mb-3">
-                        <div class="bg-slate-800 border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-xl">
-                            <div class="flex items-center gap-3 overflow-hidden">
-                                <div id="preview-icon-wrapper" class="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
-                                    <i id="preview-icon" class="fa-solid fa-file text-xl"></i>
-                                    <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
-                                </div>
-                                <div class="overflow-hidden">
-                                    <p id="file-preview-name" class="text-sm font-bold text-white truncate w-40 md:w-64">filename</p>
-                                    <p id="file-preview-size" class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
-                                </div>
+                    <div id="chat-dropdown" class="dropdown-menu absolute top-12 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 w-44 z-50">
+                        <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 active:bg-white/10 flex items-center gap-3 font-medium">
+                            <i class="fa-solid fa-trash-can w-4 text-center text-lg"></i> Clear Chat
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()">
+                <div class="text-center my-4">
+                    <span class="bg-black/40 text-slate-400 text-[11px] px-4 py-1.5 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
+                        <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> End-to-end encrypted
+                    </span>
+                </div>
+            </main>
+
+            <!-- EXACT SAME FOOTER LOGIC FROM CHAT.HTML -->
+            <footer class="glass-panel p-3 shrink-0 flex flex-col border-t border-white/10" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
+                
+                <div id="file-preview-container" class="hidden w-full px-1 mb-2">
+                    <div class="bg-slate-800/80 border border-white/10 rounded-xl p-2.5 flex items-center justify-between shadow-xl">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div id="preview-icon-wrapper" class="w-8 h-8 rounded bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
+                                <i id="preview-icon" class="fa-solid fa-file"></i>
+                                <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
                             </div>
-                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-10 h-10 flex items-center justify-center rounded-full transition-colors active:bg-white/5">
-                                <i class="fa-solid fa-xmark text-xl"></i>
-                            </button>
+                            <div class="overflow-hidden">
+                                <p id="file-preview-name" class="text-xs font-bold text-white truncate w-48">filename.pdf</p>
+                                <p id="file-preview-size" class="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
+                            </div>
                         </div>
+                        <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-8 h-8 flex items-center justify-center rounded-full transition-colors active:bg-white/5">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
                     </div>
+                </div>
 
-                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-full p-2 mb-2 animate-pulse">
-                        <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
-                            <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording...
-                        </div>
-                        <div class="flex gap-2 pr-1">
-                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 active:text-white flex items-center justify-center transition-colors">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-emerald-600 text-white active:bg-emerald-500 flex items-center justify-center shadow-lg transition-colors">
-                                <i class="fa-solid fa-paper-plane"></i>
-                            </button>
-                        </div>
+                <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-full p-2 mb-2 animate-pulse">
+                    <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
+                        <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording...
                     </div>
+                    <div class="flex gap-2 pr-1">
+                        <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center transition-colors">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg transition-colors">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
 
-                    <form id="chat-form" class="flex items-end gap-2 w-full relative">
-                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 active:text-pink-400 hover:text-pink-400 bg-slate-800/80 rounded-full flex items-center justify-center transition-all border border-white/10 mb-0.5">
-                            <i class="fa-solid fa-plus text-2xl"></i>
-                        </button>
-                        <input type="file" id="file-input" class="hidden">
+                <form id="chat-form" class="flex items-end gap-2 w-full">
+                    <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 hover:text-pink-400 bg-slate-800/80 rounded-2xl flex items-center justify-center transition-all border border-white/10 mb-0.5">
+                        <i class="fa-solid fa-paperclip text-lg"></i>
+                    </button>
+                    <input type="file" id="file-input" class="hidden">
 
-                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-3xl flex items-center px-2 py-1.5 transition-all focus-within:border-pink-500/50 relative">
-                            <textarea id="msg-input" rows="1" placeholder="Type a message..."
-                                class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-32 custom-scroll text-[15px]" style="min-height: 48px;"></textarea>
-                        </div>
-                        
-                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-emerald-600 active:bg-emerald-500 hover:bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-microphone text-xl"></i>
-                        </button>
-                        
-                        <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 active:from-pink-500 hover:from-pink-500 hover:to-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>
-                        </button>
-                    </form>
-                </footer>
-            </div>
+                    <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-2xl flex items-center px-2 py-1 transition-all focus-within:border-pink-500/50">
+                        <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                            class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-28 custom-scroll text-[15px]" style="min-height: 44px;"></textarea>
+                    </div>
+                    
+                    <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-emerald-600 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
+                        <i class="fa-solid fa-microphone text-lg"></i>
+                    </button>
+                    
+                    <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
+                        <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
+                    </button>
+                </form>
+            </footer>
         </div>
     </div>
 
@@ -279,37 +262,19 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 Dynamic Screen Resizer (Forces Screen to shrink for Android Keyboard) 🔥
-        function adjustAppHeight() {
-            const viewportHeight = window.innerHeight;
-            document.body.style.height = `${viewportHeight}px`;
-            const appBox = document.getElementById('app-container');
-            if (appBox) {
-                appBox.style.height = `${viewportHeight}px`;
-            }
-        }
-
-        // Call immediately and on every resize
-        adjustAppHeight();
-        window.addEventListener('resize', () => {
-            adjustAppHeight();
-            setTimeout(scrollToBottom, 50);
-        });
+        // 🔥 SCROLL & KEYBOARD LOGIC FROM CHAT.HTML 🔥
+        const msgBox = document.getElementById('messages-box');
+        const msgInput = document.getElementById('msg-input');
 
         function scrollToBottom() {
-            const msgBox = document.getElementById('messages-box');
-            if(msgBox) {
-                msgBox.scrollTop = msgBox.scrollHeight;
-            }
+            if(msgBox) msgBox.scrollTop = msgBox.scrollHeight;
         }
 
-        // Push scroll to bottom when user clicks input
-        const msgInput = document.getElementById('msg-input');
         msgInput.addEventListener('focus', () => {
             setTimeout(() => {
-                adjustAppHeight();
                 scrollToBottom();
-            }, 300); // Wait for keyboard animation to finish
+                window.scrollTo(0, document.body.scrollHeight);
+            }, 300);
         });
 
         const firebaseConfig = {
@@ -355,11 +320,9 @@
         const appContainer = document.getElementById('app-container');
         const contactsContainer = document.getElementById('contacts-container');
         const searchInput = document.getElementById('search-input');
-        const emptyState = document.getElementById('empty-chat-state');
         
         const chatArea = document.getElementById('chat-area');
         const sidebar = document.getElementById('sidebar');
-        const msgBox = document.getElementById('messages-box');
         const chatForm = document.getElementById('chat-form');
         
         const sendBtn = document.getElementById('send-btn');
@@ -552,7 +515,7 @@
 
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
+            this.style.height = (this.scrollHeight < 112 ? this.scrollHeight : 112) + 'px';
             toggleInputButtons();
 
             if (activeContactMobile) {
@@ -639,6 +602,11 @@
 
         async function startApp() {
             appContainer.classList.remove('hidden');
+            appContainer.classList.add('flex');
+            
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('sidebar').classList.add('flex');
+            
             document.getElementById('my-name-display').innerText = myName;
             document.getElementById('my-mobile-display').innerText = myMobile;
             document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
@@ -720,8 +688,6 @@
             }
             
             filteredUsers.forEach(user => {
-                const isActive = activeContactMobile === user.mobile;
-                const activeClass = isActive ? 'contact-active bg-white/5' : 'border-l-4 border-transparent active:bg-white/5 md:hover:bg-white/5';
                 const isOnline = (Date.now() - user.lastActive) < 120000;
                 const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-600';
 
@@ -758,7 +724,7 @@
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
 
                 const div = document.createElement('div');
-                div.className = `p-4 flex items-center gap-4 cursor-pointer transition-colors border-b border-white/5 ${activeClass}`;
+                div.className = `p-4 flex items-center gap-4 cursor-pointer transition-colors border-b border-white/5 active:bg-white/5 hover:bg-white/5`;
                 div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
                 
                 div.innerHTML = `
@@ -783,11 +749,17 @@
 
         searchInput.addEventListener('input', () => renderContacts());
 
-        window.addEventListener('hashchange', () => { if (window.location.hash !== '#chat' && activeContactMobile) closeChatLogic(); });
+        // 🔥 Mobile Native Back Button Handling 🔥
+        window.addEventListener('hashchange', () => { 
+            if (window.location.hash !== '#chat') closeChatLogic(); 
+        });
 
         function closeChatLogic() {
             document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('sidebar').classList.add('flex');
+            
             document.getElementById('chat-area').classList.add('hidden');
+            document.getElementById('chat-area').classList.remove('flex');
             
             activeContactMobile = null; renderContacts();
             if(currentChatUnsubscribe) currentChatUnsubscribe();
@@ -802,21 +774,17 @@
             document.getElementById('active-chat-name').innerText = contactName;
             document.getElementById('active-chat-avatar').src = contactAvatarUrl;
             
-            document.getElementById('empty-chat-state').classList.add('hidden');
+            // 🔥 Switch Views (Pure Mobile Style) 🔥
+            document.getElementById('sidebar').classList.add('hidden'); 
+            document.getElementById('sidebar').classList.remove('flex'); 
             
-            if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('hidden'); 
-                document.getElementById('chat-area').classList.remove('hidden');
-                if(window.location.hash !== '#chat') window.location.hash = 'chat';
-            } else { 
-                document.getElementById('chat-area').classList.remove('hidden'); 
-            }
+            document.getElementById('chat-area').classList.remove('hidden'); 
+            document.getElementById('chat-area').classList.add('flex'); 
+            
+            if(window.location.hash !== '#chat') history.pushState({ chat: contactMobile }, "Chat", "#chat");
 
             renderContacts();
             document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
-
-            // 🔥 Run height fixer right when opening chat 🔥
-            adjustAppHeight();
 
             if(userStatusUnsubscribe) userStatusUnsubscribe();
             userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
@@ -861,7 +829,10 @@
             });
         };
 
-        window.closeChatMobile = () => { if(window.location.hash === '#chat') history.back(); else closeChatLogic(); };
+        window.closeChatMobile = () => { 
+            if(window.location.hash === '#chat') history.back(); 
+            else closeChatLogic(); 
+        };
         
         window.toggleReactionMenu = (docId, e) => {
             e.stopPropagation(); if(e.target.closest('button')) return; 
@@ -916,11 +887,11 @@
                 });
 
                 msgInput.value = ''; clearFile();
-                msgInput.style.height = '48px'; toggleInputButtons();
+                msgInput.style.height = '44px'; toggleInputButtons();
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
                 setTimeout(scrollToBottom, 100);
             } catch (error) { alert("Message failed."); } 
-            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
+            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
         function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
@@ -932,7 +903,7 @@
             const msgDiv = document.createElement('div');
             msgDiv.id = `msg-${docId}`;
             const bottomMargin = data.reaction ? 'mb-6' : 'mb-3';
-            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[70%] ${bubbleClasses} p-3 rounded-2xl ${bottomMargin} relative shadow-md cursor-pointer select-none group`;
+            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[75%] ${bubbleClasses} p-3 rounded-2xl ${bottomMargin} relative shadow-md cursor-pointer select-none group`;
             msgDiv.onclick = (e) => toggleReactionMenu(docId, e);
             
             let content = '';
@@ -952,7 +923,7 @@
                 }
             }
             
-            let finalHtmlText = data.text ? `<p class="text-[15px] md:text-base whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
+            let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
             let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-800 border border-white/10 rounded-full px-2 py-0.5 text-[11px] shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
 
             let popupMenu = `
