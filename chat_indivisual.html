@@ -211,18 +211,25 @@
         <div class="w-full h-full flex bg-[#111b21] overflow-hidden relative">
             
             <div id="sidebar" class="w-full md:w-[400px] flex flex-col border-r border-[#222d34] bg-[#111b21] z-20 flex-shrink-0 absolute md:relative inset-0 md:inset-auto slide-in-anim">
-                <header class="p-3 bg-[#202c33] flex items-center justify-between shrink-0 h-[64px]" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
+                
+                <header class="p-3 bg-[#111b21] flex items-center justify-between shrink-0 h-[64px]" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
-                        <img id="my-avatar" src="" onclick="openSettings()" class="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity bg-[#111b21]" title="Profile Settings">
+                        <img id="my-avatar" src="" onclick="openSettings()" class="w-9 h-9 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity bg-[#202c33]" title="Profile Settings">
+                        <h1 class="text-white text-[22px] font-semibold tracking-wide">WhatsApp</h1>
                     </div>
-                    <div class="flex items-center gap-5 text-[#aebac1] text-[18px]">
-                        <button onclick="openGroupModal()" title="New Group" class="hover:text-white transition-colors"><i class="fa-solid fa-users"></i></button>
-                        <button onclick="openSettings()" title="Settings" class="hover:text-white transition-colors"><i class="fa-solid fa-gear"></i></button>
+                    <div class="flex items-center gap-4 text-[#aebac1] text-[18px]">
+                        <button title="Camera" class="hover:text-white transition-colors"><i class="fa-solid fa-camera"></i></button>
                         <div class="relative">
                             <button onclick="toggleSidebarMenu(event)" class="px-2 hover:text-white transition-colors"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                            <div id="sidebar-dropdown" class="dropdown-menu absolute top-full right-0 mt-2 w-60 bg-[#233138] rounded-md shadow-xl py-2 z-50 border border-[#222d34]">
+                            <div id="sidebar-dropdown" class="dropdown-menu absolute top-full right-0 mt-2 w-56 bg-[#233138] rounded-md shadow-xl py-2 z-50 border border-[#222d34]">
+                                <button onclick="openGroupModal()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
+                                    <i class="fa-solid fa-users w-5 text-center text-[#8696a0]"></i> New Group
+                                </button>
+                                <button onclick="openSettings()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
+                                    <i class="fa-solid fa-gear w-5 text-center text-[#8696a0]"></i> Settings
+                                </button>
                                 <button onclick="toggleActiveStatus()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
-                                    <i id="status-icon" class="fa-solid fa-eye-slash w-5 text-center"></i> <span id="status-toggle-text">Turn off Active Status</span>
+                                    <i id="status-icon" class="fa-solid fa-eye-slash w-5 text-center text-[#8696a0]"></i> <span id="status-toggle-text">Turn off Active Status</span>
                                 </button>
                                 <button onclick="openLockedChats()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium border-t border-[#222d34]">
                                     <i class="fa-solid fa-lock w-5 text-center text-[#00a884]"></i> Locked chats
@@ -235,8 +242,8 @@
                     </div>
                 </header>
 
-                <div class="p-2 border-b border-[#222d34] bg-[#111b21] shrink-0">
-                    <div class="bg-[#202c33] rounded-lg flex items-center px-4 py-2 focus-within:bg-[#111b21] border border-transparent focus-within:border-[#00a884]/50 transition-colors">
+                <div class="px-2 pb-2 border-b border-[#222d34] bg-[#111b21] shrink-0">
+                    <div class="bg-[#202c33] rounded-full flex items-center px-4 py-1.5 focus-within:bg-[#111b21] border border-transparent focus-within:border-[#00a884]/50 transition-colors">
                         <i class="fa-solid fa-magnifying-glass text-[#8696a0] text-[15px]"></i>
                         <input type="text" id="search-input" placeholder="Search or start new chat" class="bg-transparent border-none outline-none text-white text-[16px] w-full ml-4 placeholder-[#8696a0] font-medium py-1">
                     </div>
@@ -281,7 +288,7 @@
                             <i class="fa-solid fa-arrow-left"></i>
                         </button>
                         <div class="flex items-center gap-4 cursor-pointer">
-                            <img id="active-chat-avatar" src="" class="w-11 h-11 rounded-full object-cover bg-[#111b21]">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-[#111b21]">
                             <div class="flex flex-col justify-center">
                                 <h2 id="active-chat-name" class="font-semibold text-white text-[17px] leading-tight">Contact</h2>
                                 <p id="active-chat-status" class="text-[13px] text-[#8696a0] mt-0.5">...</p>
@@ -549,12 +556,10 @@
 
         // --- AUTH FLOW ---
         if (myName && myMobile && myPassword) {
-            // Returning User -> Show Unlock Screen
             document.getElementById('unlock-avatar').src = getAvatarUrl(myName, myAvatarUrl);
             document.getElementById('unlock-name-display').innerText = `Welcome Back, ${myName.split(' ')[0]}`;
             unlockModal.classList.remove('hidden');
         } else {
-            // New User -> Show Join Screen
             joinModal.classList.remove('hidden');
         }
 
@@ -588,7 +593,6 @@
                     if (userSnap.exists()) {
                         const dbData = userSnap.data();
                         
-                        // If DB user doesn't have a password yet (old account), set it now.
                         if (!dbData.password) {
                             await updateDoc(userRef, { password: p, name: n }); 
                         } else if (dbData.password !== p) { 
