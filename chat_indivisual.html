@@ -12,7 +12,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Android Display & Keyboard Fixes 🔥 */
         html, body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
@@ -47,7 +46,6 @@
         
         .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
         
-        /* Stop auto-zoom on mobile */
         textarea, input { font-size: 16px !important; } 
         
         .contact-active { background: linear-gradient(to right, rgba(236,72,153,0.1), rgba(168,85,247,0.1)); border-left: 4px solid #ec4899; }
@@ -61,10 +59,8 @@
 </head>
 <body class="flex selection:bg-pink-500/30">
 
-    <!-- Notification Sound Effect -->
     <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
 
-    <!-- Fullscreen Image Lightbox -->
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity opacity-0" onclick="closeLightbox()">
         <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
             <i class="fa-solid fa-xmark"></i>
@@ -72,7 +68,7 @@
         <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl">
     </div>
 
-    <!-- 1. Registration Modal -->
+    <!-- Registration Modal -->
     <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
         <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform">
             <div class="w-20 h-20 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center mb-6 mx-auto shadow-lg">
@@ -117,10 +113,8 @@
         </div>
     </div>
 
-    <!-- 2. Main App Container -->
-    <!-- 🔥 Note: Removed flex class initially, it will be added via JS so it doesn't conflict -->
+    <!-- Main App Container -->
     <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-6xl mx-auto md:relative md:py-4 md:px-4" style="height: 100%;">
-        
         <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden relative">
             
             <!-- LEFT SIDEBAR (Contacts) -->
@@ -269,9 +263,9 @@
         </div>
     </div>
 
-    <!-- 🔥 AUDIO CALL UI MODAL (FIXED) 🔥 -->
+    <!-- 🔥 AUDIO CALL UI MODAL (FIXED FOR WEBRTC) 🔥 -->
     <div id="call-modal" class="hidden fixed inset-0 z-[300] flex-col items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl transition-opacity">
-        <!-- 🔥 playsinline and correct properties added so mobile doesn't block audio 🔥 -->
+        <!-- Audio tag with required attributes to bypass mobile silence block -->
         <audio id="remote-audio" autoplay playsinline></audio>
         
         <div class="text-center">
@@ -296,6 +290,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Real Viewport Height Fix
         function setRealViewportHeight() {
             let vh = window.innerHeight;
             if (window.visualViewport) {
@@ -308,17 +303,12 @@
             if (appContainer) {
                 appContainer.style.height = vh + 'px';
             }
-
             const msgBox = document.getElementById('messages-box');
-            if(msgBox) {
-                setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50);
-            }
+            if(msgBox) setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50);
         }
 
         window.addEventListener('resize', setRealViewportHeight);
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', setRealViewportHeight);
-        }
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealViewportHeight);
         setRealViewportHeight();
 
         const firebaseConfig = {
@@ -358,8 +348,13 @@
         let isRecording = false;
         let settingsSelectedFile = null;
         
-        // WebRTC Audio Call Variables
-        const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
+        // 🔥 IMPROVED WEBRTC VARIABLES WITH STUN FALLBACKS 🔥
+        const servers = { 
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
+                { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
+            ] 
+        };
         let pc = null;
         let localStream = null;
         let incomingCallData = null;
@@ -390,6 +385,7 @@
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
 
+        // Lightbox Methods
         window.openLightbox = (url, e) => {
             e.stopPropagation();
             const lightbox = document.getElementById('image-lightbox');
@@ -683,18 +679,22 @@
             } catch (err) { alert("Connection problem. Refresh page."); }
         }
 
-        // 🔥 FIX 1: WebRTC Calling Fixes - Force Audio Playback 🔥
+        // 🔥 FIX 1: WebRTC Audio Connection Setup 🔥
         function initializePeerConnection() {
             if (pc) pc.close();
             pc = new RTCPeerConnection(servers);
             
-            // Audio Stream Handler for Remote Call
+            const remoteAudio = document.getElementById('remote-audio');
+            // Force reset audio state
+            remoteAudio.srcObject = null;
+            remoteAudio.volume = 1.0;
+            remoteAudio.muted = false;
+
             pc.ontrack = event => {
-                const remoteAudio = document.getElementById('remote-audio');
                 if (remoteAudio.srcObject !== event.streams[0]) {
                     remoteAudio.srcObject = event.streams[0];
-                    // Browser Auto-play Policy bypass kore force play korchi
-                    remoteAudio.play().catch(e => console.error("Audio Play Blocked by Browser:", e));
+                    // Play must be explicitly called to bypass mobile security policies
+                    remoteAudio.play().catch(e => console.error("Audio blocked by browser, wait for interaction.", e));
                 }
             };
             return pc;
@@ -736,7 +736,15 @@
             document.getElementById('answer-btn').classList.add('hidden');
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Pre-play silent audio to unlock audio context on mobile
+                const remoteAudio = document.getElementById('remote-audio');
+                remoteAudio.play().catch(e => {});
+
+                // Added echo cancellation & noise suppression to prevent howling
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                });
+                
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
@@ -760,15 +768,16 @@
                     timestamp: Date.now()
                 });
 
-                // 🔥 FIX 2: Race Condition Fix - Listen for Answer Candidates ONLY AFTER Remote Description is set
+                // 🔥 FIX 2: Prevent ICE Race Conditions
                 const callUnsubscribe = onSnapshot(callDocRef, async (snapshot) => {
                     const data = snapshot.data();
                     if(!pc.currentRemoteDescription && data?.answer) {
-                        document.getElementById('call-status').innerText = "In Call (Connected)";
                         const answerDescription = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDescription);
+                        
+                        document.getElementById('call-status').innerText = "In Call (Connected)";
 
-                        // Start receiving ICE candidates after description is set
+                        // Start receiving ICE candidates AFTER remote description is set
                         onSnapshot(answerCandidates, (candSnapshot) => {
                             candSnapshot.docChanges().forEach(change => {
                                 if(change.type === 'added') {
@@ -779,8 +788,6 @@
                         });
                     }
                 });
-                
-                // Store unsubscribe to clear if call drops
                 pc.callUnsubscribe = callUnsubscribe;
 
             } catch (err) {
@@ -796,7 +803,14 @@
             document.getElementById('answer-btn').classList.add('hidden');
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Force play to satisfy browser policies
+                const remoteAudio = document.getElementById('remote-audio');
+                remoteAudio.play().catch(e => {});
+
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                });
+                
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
@@ -808,7 +822,7 @@
                     if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
                 };
 
-                // 🔥 FIX 3: Wait for Remote Description BEFORE generating Answer
+                // Wait for Remote Description BEFORE answering
                 const offerDescription = new RTCSessionDescription(incomingCallData.offer);
                 await pc.setRemoteDescription(offerDescription);
 
@@ -860,7 +874,11 @@
                 pc = null;
             }
             incomingCallData = null;
-            document.getElementById('remote-audio').srcObject = null;
+            const remoteAudio = document.getElementById('remote-audio');
+            if(remoteAudio) {
+                remoteAudio.srcObject = null;
+                remoteAudio.pause();
+            }
         }
 
         function listenForUsers() {
@@ -982,7 +1000,22 @@
 
         searchInput.addEventListener('input', () => renderContacts());
 
-        window.addEventListener('hashchange', () => { if (window.location.hash !== '#chat' && activeContactMobile) closeChatLogic(); });
+        // 🔥 FIX 3: Robust Hardware Back Button Handling with PopState 🔥
+        window.addEventListener('popstate', (event) => {
+            if (activeContactMobile && window.innerWidth < 768) {
+                // If back button pressed on mobile while chat is open, close chat visually
+                document.getElementById('sidebar').classList.remove('hidden');
+                document.getElementById('sidebar').classList.add('flex');
+                document.getElementById('chat-area').classList.remove('flex');
+                document.getElementById('chat-area').classList.add('hidden');
+                
+                activeContactMobile = null; 
+                renderContacts();
+                if(currentChatUnsubscribe) currentChatUnsubscribe();
+                if(userStatusUnsubscribe) userStatusUnsubscribe();
+                closeAllMenus();
+            }
+        });
 
         function closeChatLogic() {
             document.getElementById('sidebar').classList.remove('hidden');
@@ -991,6 +1024,9 @@
             if (window.innerWidth < 768) {
                 document.getElementById('chat-area').classList.remove('flex');
                 document.getElementById('chat-area').classList.add('hidden');
+                if (window.location.hash === '#chat') {
+                    history.replaceState(null, null, ' '); // Clean URL silently
+                }
             } else {
                 document.getElementById('empty-chat-state').classList.remove('hidden');
             }
@@ -1011,13 +1047,16 @@
             document.getElementById('empty-chat-state').classList.add('hidden');
             
             if (window.innerWidth < 768) {
+                // Push state so Android Back Button works correctly
+                if (!document.getElementById('sidebar').classList.contains('hidden')) {
+                    history.pushState({ chatOpen: true }, "Chat", "#chat");
+                }
+
                 document.getElementById('sidebar').classList.remove('flex');
                 document.getElementById('sidebar').classList.add('hidden'); 
                 
                 document.getElementById('chat-area').classList.remove('hidden');
                 document.getElementById('chat-area').classList.add('flex'); 
-                
-                if(window.location.hash !== '#chat') window.location.hash = 'chat';
             } else { 
                 document.getElementById('chat-area').classList.remove('hidden'); 
                 document.getElementById('chat-area').classList.add('flex'); 
@@ -1069,7 +1108,13 @@
             });
         };
 
-        window.closeChatMobile = () => { if(window.location.hash === '#chat') history.back(); else closeChatLogic(); };
+        window.closeChatMobile = () => { 
+            if (window.innerWidth < 768 && window.location.hash === '#chat') {
+                history.back(); // Triggers popstate listener
+            } else {
+                closeChatLogic();
+            }
+        };
         
         window.toggleReactionMenu = (docId, e) => {
             e.stopPropagation(); if(e.target.closest('button')) return; 
