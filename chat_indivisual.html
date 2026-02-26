@@ -6,14 +6,13 @@
     <meta name="theme-color" content="#020617">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Private Messenger | Android Edition</title>
+    <title>Private Messenger | Web Tools Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Exact same logic from your chat.html 🔥 */
-        body { 
+        html, body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
             color: #f8fafc; 
@@ -35,15 +34,19 @@
             0% { opacity: 0; transform: scale(0.95) translateY(10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .msg-bubble { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-
-        .custom-scroll {
-            overscroll-behavior-y: contain;
-            -webkit-overflow-scrolling: touch;
+        
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
         }
+
+        .msg-bubble { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .ripple-effect { animation: ripple 2s infinite ease-out; }
+
         .custom-scroll::-webkit-scrollbar { width: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
         
         .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
         
@@ -57,19 +60,78 @@
         
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; animation: popIn 0.2s ease-out forwards; }
+
+        #messages-box, #contacts-list {
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
-<body class="flex flex-col selection:bg-pink-500/30">
+<body class="flex selection:bg-pink-500/30">
 
-    <!-- Notification Sound Effect -->
+    <!-- Notification & Call Sound Effects -->
     <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
+    <audio id="ringtone-sound" src="https://assets.mixkit.co/active_storage/sfx/2800/2800-preview.mp3" loop preload="auto"></audio>
+    <audio id="dialing-sound" src="https://assets.mixkit.co/active_storage/sfx/2802/2802-preview.mp3" loop preload="auto"></audio>
+    
+    <!-- Remote WebRTC Audio Element -->
+    <audio id="remote-audio" autoplay playsinline></audio>
+
+    <!-- ACTIVE CALL / CALLING MODAL -->
+    <div id="active-call-modal" class="hidden fixed inset-0 z-[300] flex-col items-center justify-between bg-slate-950/95 backdrop-blur-xl p-8 transition-opacity">
+        <div class="w-full pt-12 flex flex-col items-center">
+            <h2 id="call-status-text" class="text-emerald-400 text-sm font-bold tracking-widest uppercase mb-8 animate-pulse">Calling...</h2>
+            
+            <div class="relative w-32 h-32 mb-6">
+                <!-- Ripple effects -->
+                <div id="call-ripple" class="absolute inset-0 bg-pink-500 rounded-full ripple-effect"></div>
+                <div id="call-ripple-2" class="absolute inset-0 bg-purple-500 rounded-full ripple-effect" style="animation-delay: 1s;"></div>
+                
+                <img id="call-avatar" src="" class="absolute inset-0 w-full h-full rounded-full border-4 border-slate-800 object-cover shadow-2xl z-10">
+            </div>
+            
+            <h1 id="call-name" class="text-3xl font-black text-white tracking-tight mb-2">Name</h1>
+            <p id="call-duration" class="text-slate-400 font-mono text-lg">00:00</p>
+        </div>
+
+        <div class="w-full pb-12 flex items-center justify-center gap-8">
+            <button id="mute-mic-btn" onclick="toggleMute()" class="w-16 h-16 rounded-full bg-slate-800 border border-white/10 text-white flex items-center justify-center text-xl hover:bg-slate-700 transition-colors shadow-lg">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <button onclick="endCall()" class="w-20 h-20 rounded-full bg-red-600 text-white flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(220,38,38,0.6)] hover:bg-red-500 hover:scale-105 active:scale-95 transition-all">
+                <i class="fa-solid fa-phone-slash"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- INCOMING CALL MODAL -->
+    <div id="incoming-call-modal" class="hidden fixed inset-0 z-[350] flex-col items-center justify-between bg-gradient-to-b from-slate-900 to-slate-950 p-8 transition-opacity">
+        <div class="w-full pt-16 flex flex-col items-center">
+            <h2 class="text-pink-400 text-sm font-bold tracking-widest uppercase mb-8 animate-pulse">Incoming Audio Call</h2>
+            <div class="relative w-32 h-32 mb-6">
+                <div class="absolute inset-0 bg-emerald-500 rounded-full ripple-effect"></div>
+                <img id="incoming-call-avatar" src="" class="absolute inset-0 w-full h-full rounded-full border-4 border-slate-800 object-cover shadow-2xl z-10">
+            </div>
+            <h1 id="incoming-call-name" class="text-3xl font-black text-white tracking-tight mb-2">Name</h1>
+            <p class="text-slate-400">is calling you...</p>
+        </div>
+
+        <div class="w-full pb-16 flex items-center justify-center gap-12">
+            <button onclick="rejectCall()" class="w-16 h-16 rounded-full bg-red-600 text-white flex flex-col items-center justify-center text-2xl shadow-lg hover:bg-red-500 transition-all hover:scale-110">
+                <i class="fa-solid fa-phone-slash"></i>
+            </button>
+            <button onclick="acceptCall()" class="w-20 h-20 rounded-full bg-emerald-500 text-white flex flex-col items-center justify-center text-3xl shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:bg-emerald-400 transition-all hover:scale-110 animate-bounce">
+                <i class="fa-solid fa-phone"></i>
+            </button>
+        </div>
+    </div>
 
     <!-- Fullscreen Image Lightbox -->
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity opacity-0" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" class="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
             <i class="fa-solid fa-xmark"></i>
         </button>
-        <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 transform scale-95 transition-transform duration-300 shadow-2xl">
+        <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl">
     </div>
 
     <!-- 1. Registration Modal -->
@@ -117,152 +179,165 @@
         </div>
     </div>
 
-    <!-- 2. Main App Container (Pure Mobile Layout) -->
-    <div id="app-container" class="hidden flex-col w-full h-full max-w-xl mx-auto bg-slate-950 relative shadow-2xl md:border-x border-white/5 overflow-hidden">
+    <!-- 2. Main App Container -->
+    <div id="app-container" class="hidden w-full h-full max-w-6xl mx-auto md:relative md:py-4 md:px-4 flex">
         
-        <!-- =================== VIEW 1: CONTACTS LIST =================== -->
-        <div id="sidebar" class="w-full h-full flex flex-col z-10 bg-slate-950">
-            <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
-                <div class="flex items-center gap-3">
-                    <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 border border-white/5 shrink-0">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </a>
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
-                        <div class="truncate">
-                            <h2 id="my-name-display" class="font-bold text-white text-base truncate">My Name</h2>
-                            <p id="my-mobile-display" class="text-[11px] text-emerald-400 font-medium tracking-widest">01700000000</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 transition-colors" title="Settings">
-                        <i class="fa-solid fa-gear text-sm"></i>
-                    </button>
-                    <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 transition-colors" title="Logout">
-                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                    </button>
-                </div>
-            </header>
-
-            <div class="p-3 shrink-0">
-                <div class="bg-black/30 rounded-xl flex items-center px-4 py-3 border border-white/5 focus-within:border-pink-500/50 transition-colors">
-                    <i class="fa-solid fa-search text-slate-500 text-sm"></i>
-                    <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-600">
-                </div>
-            </div>
-
-            <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative">
-                <div class="text-center py-3 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
-                    <span>Available Users</span>
-                    <i class="fa-solid fa-users"></i>
-                </div>
-                <div id="contacts-container" class="pb-6"></div>
-            </div>
-        </div>
-
-        <!-- =================== VIEW 2: CHAT INBOX =================== -->
-        <div id="chat-area" class="w-full h-full hidden flex-col z-20 bg-slate-950">
+        <div class="w-full h-full flex flex-row bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden">
             
-            <header class="glass-panel p-3 border-b border-white/10 flex items-center justify-between shrink-0" style="padding-top: max(1rem, env(safe-area-inset-top));">
-                <div class="flex items-center gap-4">
-                    <button onclick="closeChatMobile()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 border border-white/5 shrink-0 transition-colors">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
+            <!-- LEFT SIDEBAR (Contacts) -->
+            <div id="sidebar" class="w-full h-full md:w-[350px] lg:w-[400px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 bg-slate-950">
+                <header class="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-black/20" style="padding-top: max(1rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
-                        <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
-                        <div class="flex flex-col justify-center">
-                            <h2 id="active-chat-name" class="font-bold text-white text-base leading-tight truncate">Contact Name</h2>
-                            <p id="active-chat-status" class="text-[11px] text-slate-500 font-medium tracking-widest transition-colors">...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex gap-2 text-slate-400 relative">
-                    <button class="w-10 h-10 rounded-full active:bg-white/10 transition-colors"><i class="fa-solid fa-video text-lg"></i></button>
-                    <button class="w-10 h-10 rounded-full active:bg-white/10 transition-colors"><i class="fa-solid fa-phone text-lg"></i></button>
-                    <button onclick="toggleChatMenu()" class="w-10 h-10 rounded-full active:bg-white/10 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
-                    
-                    <div id="chat-dropdown" class="dropdown-menu absolute top-12 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 w-44 z-50">
-                        <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 active:bg-white/10 flex items-center gap-3 font-medium">
-                            <i class="fa-solid fa-trash-can w-4 text-center text-lg"></i> Clear Chat
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 flex flex-col gap-3 custom-scroll relative" onclick="closeAllMenus()">
-                <div class="text-center my-4">
-                    <span class="bg-black/40 text-slate-400 text-[11px] px-4 py-1.5 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
-                        <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> End-to-end encrypted
-                    </span>
-                </div>
-            </main>
-
-            <!-- EXACT SAME FOOTER LOGIC FROM CHAT.HTML -->
-            <footer class="glass-panel p-3 shrink-0 flex flex-col border-t border-white/10" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
-                
-                <div id="file-preview-container" class="hidden w-full px-1 mb-2">
-                    <div class="bg-slate-800/80 border border-white/10 rounded-xl p-2.5 flex items-center justify-between shadow-xl">
+                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-colors shrink-0">
+                            <i class="fa-solid fa-arrow-left text-base"></i>
+                        </a>
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <div id="preview-icon-wrapper" class="w-8 h-8 rounded bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
-                                <i id="preview-icon" class="fa-solid fa-file"></i>
-                                <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
-                            </div>
-                            <div class="overflow-hidden">
-                                <p id="file-preview-name" class="text-xs font-bold text-white truncate w-48">filename.pdf</p>
-                                <p id="file-preview-size" class="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
+                            <img id="my-avatar" src="" class="w-10 h-10 rounded-full border border-white/20 shadow-md shrink-0 object-cover bg-slate-800">
+                            <div class="truncate">
+                                <h2 id="my-name-display" class="font-bold text-white text-base truncate">My Name</h2>
+                                <p id="my-mobile-display" class="text-[11px] text-emerald-400 font-medium tracking-widest">01700000000</p>
                             </div>
                         </div>
-                        <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-8 h-8 flex items-center justify-center rounded-full transition-colors active:bg-white/5">
-                            <i class="fa-solid fa-xmark text-lg"></i>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors" title="Settings">
+                            <i class="fa-solid fa-gear text-sm"></i>
                         </button>
+                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
+                            <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <div class="p-3 shrink-0">
+                    <div class="bg-black/30 rounded-xl flex items-center px-4 py-3 border border-white/5 focus-within:border-pink-500/50 transition-colors">
+                        <i class="fa-solid fa-search text-slate-500 text-sm"></i>
+                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-600">
                     </div>
                 </div>
 
-                <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-full p-2 mb-2 animate-pulse">
-                    <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
-                        <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording...
+                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative">
+                    <div class="text-center py-3 text-xs text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-950/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
+                        <span>Available Users</span>
+                        <i class="fa-solid fa-users"></i>
                     </div>
-                    <div class="flex gap-2 pr-1">
-                        <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center transition-colors">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                        <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg transition-colors">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
+                    <div id="contacts-container" class="pb-6"></div>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDEBAR (Chat Window) -->
+            <div id="chat-area" class="w-full h-full hidden md:flex flex-col bg-slate-950 relative">
+                
+                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
+                    <div class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-full flex items-center justify-center mb-6 border border-white/10">
+                        <i class="fa-brands fa-whatsapp text-4xl text-slate-400"></i>
                     </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Web Tools Messenger</h2>
+                    <p class="text-slate-500 text-sm max-w-sm text-center px-4">Select a contact to send messages, videos, audio, and documents with end-to-end encryption.</p>
                 </div>
 
-                <form id="chat-form" class="flex items-end gap-2 w-full">
-                    <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 hover:text-pink-400 bg-slate-800/80 rounded-2xl flex items-center justify-center transition-all border border-white/10 mb-0.5">
-                        <i class="fa-solid fa-paperclip text-lg"></i>
-                    </button>
-                    <input type="file" id="file-input" class="hidden">
-
-                    <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-2xl flex items-center px-2 py-1 transition-all focus-within:border-pink-500/50">
-                        <textarea id="msg-input" rows="1" placeholder="Type a message..."
-                            class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-28 custom-scroll text-[15px]" style="min-height: 44px;"></textarea>
+                <header class="p-3 md:p-4 border-b border-white/10 flex items-center justify-between glass-panel shrink-0 relative" style="padding-top: max(1rem, env(safe-area-inset-top));">
+                    <div class="flex items-center gap-4">
+                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-white active:bg-white/10 hover:bg-white/10 shrink-0 transition-colors">
+                            <i class="fa-solid fa-arrow-left text-xl"></i>
+                        </button>
+                        <div class="flex items-center gap-3">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 md:w-12 md:h-12 rounded-full border border-slate-700 shadow-md object-cover bg-slate-800">
+                            <div class="flex flex-col justify-center">
+                                <h2 id="active-chat-name" class="font-bold text-white text-base md:text-lg leading-tight">Contact Name</h2>
+                                <p id="active-chat-status" class="text-[11px] text-slate-500 font-medium tracking-widest transition-colors">...</p>
+                            </div>
+                        </div>
                     </div>
+                    <div class="flex gap-2 text-slate-400 relative">
+                        <button class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-video text-lg"></i></button>
+                        <!-- AUDIO CALL BUTTON -->
+                        <button onclick="startAudioCall()" class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors text-emerald-400"><i class="fa-solid fa-phone text-lg"></i></button>
+                        
+                        <button onclick="toggleChatMenu()" class="w-10 h-10 rounded-full active:bg-white/10 hover:bg-white/5 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
+                        
+                        <div id="chat-dropdown" class="dropdown-menu absolute top-12 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 w-44 z-50">
+                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 active:bg-white/10 hover:bg-white/5 transition-colors flex items-center gap-3 font-medium">
+                                <i class="fa-solid fa-trash-can w-4 text-center text-lg"></i> Clear Chat
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scroll relative overscroll-contain" onclick="closeAllMenus()">
+                    <div class="text-center my-4">
+                        <span class="bg-black/40 text-slate-400 text-[11px] px-4 py-1.5 rounded-full border border-white/5 uppercase tracking-widest font-bold backdrop-blur-sm shadow-md">
+                            <i class="fa-solid fa-lock text-emerald-500 mr-1"></i> End-to-end encrypted
+                        </span>
+                    </div>
+                </main>
+
+                <!-- Footer with Input & Voice Recording -->
+                <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 bg-slate-900/95" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
                     
-                    <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-emerald-600 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
-                        <i class="fa-solid fa-microphone text-lg"></i>
-                    </button>
-                    
-                    <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
-                        <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
-                    </button>
-                </form>
-            </footer>
+                    <div id="file-preview-container" class="hidden w-full px-1 mb-3">
+                        <div class="bg-slate-800 border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div id="preview-icon-wrapper" class="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
+                                    <i id="preview-icon" class="fa-solid fa-file text-xl"></i>
+                                    <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p id="file-preview-name" class="text-sm font-bold text-white truncate w-40 md:w-64">filename</p>
+                                    <p id="file-preview-size" class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-10 h-10 flex items-center justify-center rounded-full transition-colors active:bg-white/5">
+                                <i class="fa-solid fa-xmark text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-full p-2 mb-2 animate-pulse">
+                        <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
+                            <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording...
+                        </div>
+                        <div class="flex gap-2 pr-1">
+                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 active:text-white flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-emerald-600 text-white active:bg-emerald-500 flex items-center justify-center shadow-lg transition-colors">
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="chat-form" class="flex items-end gap-2 w-full relative">
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 active:text-pink-400 hover:text-pink-400 bg-slate-800/80 rounded-full flex items-center justify-center transition-all border border-white/10 mb-0.5">
+                            <i class="fa-solid fa-plus text-2xl"></i>
+                        </button>
+                        <input type="file" id="file-input" class="hidden">
+
+                        <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-3xl flex items-center px-2 py-1.5 transition-all focus-within:border-pink-500/50 relative">
+                            <textarea id="msg-input" rows="1" placeholder="Type a message..."
+                                class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-32 custom-scroll text-[15px]" style="min-height: 48px;"></textarea>
+                        </div>
+                        
+                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-emerald-600 active:bg-emerald-500 hover:bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
+                            <i class="fa-solid fa-microphone text-xl"></i>
+                        </button>
+                        
+                        <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-br from-pink-600 to-purple-600 active:from-pink-500 hover:from-pink-500 hover:to-purple-500 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 mb-0.5">
+                            <i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>
+                        </button>
+                    </form>
+                </footer>
+            </div>
         </div>
     </div>
 
-    <!-- Firebase & Chat Logic -->
+    <!-- Firebase, Chat & WebRTC Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 SCROLL & KEYBOARD LOGIC FROM CHAT.HTML 🔥
+        // 🔥 SCROLL & KEYBOARD LOGIC 🔥
         const msgBox = document.getElementById('messages-box');
         const msgInput = document.getElementById('msg-input');
 
@@ -274,9 +349,10 @@
             setTimeout(() => {
                 scrollToBottom();
                 window.scrollTo(0, document.body.scrollHeight);
-            }, 300);
+            }, 300); 
         });
 
+        // 🔥 CREDENTIALS 🔥
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -285,7 +361,6 @@
             messagingSenderId: "979594414301",
             appId: "1:979594414301:web:7048c995e56e331a85f334"
         };
-        
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
         const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
         const SYNC_APP_ID = "rasel-mia-universal-sync";
@@ -305,15 +380,28 @@
 
         let currentChatUnsubscribe = null;
         let userStatusUnsubscribe = null;
+        let myGlobalUserUnsubscribe = null;
         let activeTrackingInterval = null;
         let selectedFile = null;
         let typingTimeout = null; 
 
-        let mediaRecorder;
-        let audioChunks = [];
-        let isRecording = false;
-        let settingsSelectedFile = null;
-        
+        // 🔥 WebRTC Global Variables 🔥
+        let peerConnection = null;
+        let localStream = null;
+        let callSignalingUnsubscribe = null;
+        let currentCallChatId = null;
+        let isAudioMuted = false;
+        let callTimerInterval = null;
+        let callSeconds = 0;
+        let processedIceCandidates = new Set();
+        let isCallIncoming = false;
+
+        const rtcConfig = {
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+            ]
+        };
+
         const appStartTime = Date.now();
 
         const joinModal = document.getElementById('join-modal');
@@ -337,34 +425,26 @@
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
 
-        // Lightbox Methods
+        // Lightbox Methods...
         window.openLightbox = (url, e) => {
             e.stopPropagation();
             const lightbox = document.getElementById('image-lightbox');
             const img = document.getElementById('lightbox-img');
             img.src = url;
             lightbox.classList.remove('hidden');
-            setTimeout(() => {
-                lightbox.classList.remove('opacity-0');
-                img.classList.remove('scale-95');
-                img.classList.add('scale-100');
-            }, 10);
+            setTimeout(() => { lightbox.classList.remove('opacity-0'); img.classList.remove('scale-95'); img.classList.add('scale-100'); }, 10);
         };
 
         window.closeLightbox = () => {
             const lightbox = document.getElementById('image-lightbox');
             const img = document.getElementById('lightbox-img');
-            lightbox.classList.add('opacity-0');
-            img.classList.remove('scale-100');
-            img.classList.add('scale-95');
+            lightbox.classList.add('opacity-0'); img.classList.remove('scale-100'); img.classList.add('scale-95');
             setTimeout(() => lightbox.classList.add('hidden'), 300);
         };
 
         window.logoutPvtChat = () => {
             if(confirm("Apni ki logout korte chan?")) {
-                localStorage.removeItem('pvt_chat_name');
-                localStorage.removeItem('pvt_chat_mobile');
-                localStorage.removeItem('pvt_chat_avatar');
+                localStorage.removeItem('pvt_chat_name'); localStorage.removeItem('pvt_chat_mobile'); localStorage.removeItem('pvt_chat_avatar');
                 location.reload();
             }
         };
@@ -373,14 +453,292 @@
             document.getElementById('settings-modal').classList.remove('hidden');
             document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl);
             settingsSelectedFile = null;
-            document.getElementById('save-settings-btn').disabled = true;
-            document.getElementById('save-settings-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('save-settings-btn').disabled = true; document.getElementById('save-settings-btn').classList.add('opacity-50', 'cursor-not-allowed');
         }
 
         window.closeSettings = () => {
-            document.getElementById('settings-modal').classList.add('hidden');
-            document.getElementById('profile-pic-input').value = '';
+            document.getElementById('settings-modal').classList.add('hidden'); document.getElementById('profile-pic-input').value = '';
         }
+
+        // ==========================================
+        // 🔥 WebRTC AUDIO CALL LOGIC 🔥
+        // ==========================================
+
+        window.startAudioCall = async () => {
+            if (!activeContactMobile) return;
+            if (peerConnection) return alert("Already in a call!");
+
+            try {
+                // Request microphone access
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                currentCallChatId = generateChatId(myMobile, activeContactMobile);
+                processedIceCandidates.clear();
+
+                // Setup UI
+                document.getElementById('call-name').innerText = document.getElementById('active-chat-name').innerText;
+                document.getElementById('call-avatar').src = document.getElementById('active-chat-avatar').src;
+                document.getElementById('call-status-text').innerText = "Calling...";
+                document.getElementById('call-duration').innerText = "Waiting for answer";
+                document.getElementById('active-call-modal').classList.remove('hidden');
+                document.getElementById('active-call-modal').classList.add('flex');
+                
+                document.getElementById('dialing-sound').play().catch(e=>console.log(e));
+
+                peerConnection = new RTCPeerConnection(rtcConfig);
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                // Listen for remote audio track
+                peerConnection.ontrack = (event) => {
+                    document.getElementById('remote-audio').srcObject = event.streams[0];
+                };
+
+                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `audio_call_${currentCallChatId}`);
+
+                // Send ICE candidates to Firestore
+                peerConnection.onicecandidate = event => {
+                    if (event.candidate) {
+                        updateDoc(callDocRef, { callerCandidates: arrayUnion(JSON.stringify(event.candidate.toJSON())) });
+                    }
+                };
+
+                // Create Offer
+                const offerDescription = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offerDescription);
+
+                // Save Offer to Firestore
+                const offer = { type: offerDescription.type, sdp: offerDescription.sdp };
+                await setDoc(callDocRef, { offer: offer, caller: myMobile, callee: activeContactMobile });
+
+                // Notify Callee
+                await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', activeContactMobile), {
+                    incomingCall: { chatId: currentCallChatId, callerMobile: myMobile, callerName: myName, callerAvatar: myAvatarUrl }
+                }, { merge: true });
+
+                // Listen for Callee's Answer
+                listenToCallSignaling(currentCallChatId, true);
+
+            } catch (err) {
+                console.error(err);
+                alert("Microphone permission denied or WebRTC error!");
+                cleanupCall();
+            }
+        };
+
+        window.acceptCall = async () => {
+            if (!currentCallChatId || !peerConnection) return;
+            
+            document.getElementById('ringtone-sound').pause();
+            document.getElementById('incoming-call-modal').classList.add('hidden');
+            document.getElementById('incoming-call-modal').classList.remove('flex');
+            
+            document.getElementById('call-status-text').innerText = "Connecting...";
+            document.getElementById('call-status-text').classList.remove('animate-pulse');
+            document.getElementById('active-call-modal').classList.remove('hidden');
+            document.getElementById('active-call-modal').classList.add('flex');
+            
+            const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `audio_call_${currentCallChatId}`);
+            
+            try {
+                // Get Callee's microphone
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+                // Send ICE candidates
+                peerConnection.onicecandidate = event => {
+                    if (event.candidate) {
+                        updateDoc(callDocRef, { calleeCandidates: arrayUnion(JSON.stringify(event.candidate.toJSON())) });
+                    }
+                };
+
+                // Create Answer
+                const answerDescription = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answerDescription);
+                const answer = { type: answerDescription.type, sdp: answerDescription.sdp };
+
+                // Save Answer to Firestore
+                await updateDoc(callDocRef, { answer: answer });
+
+                // Clear ringing status from my profile
+                await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { incomingCall: null });
+
+            } catch (err) {
+                console.error(err);
+                alert("Could not access microphone.");
+                endCall();
+            }
+        };
+
+        window.rejectCall = async () => {
+            document.getElementById('ringtone-sound').pause();
+            document.getElementById('incoming-call-modal').classList.add('hidden');
+            document.getElementById('incoming-call-modal').classList.remove('flex');
+            
+            // Delete the call signal and clear user status
+            if (currentCallChatId) {
+                await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `audio_call_${currentCallChatId}`));
+            }
+            await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { incomingCall: null });
+            cleanupCall();
+        };
+
+        window.endCall = async () => {
+            if (currentCallChatId) {
+                const targetMobile = document.getElementById('call-name').innerText; // fallback logic
+                
+                // Delete the signal doc
+                await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `audio_call_${currentCallChatId}`));
+                
+                // If it was still ringing, clear the target's incoming call flag
+                if (activeContactMobile) {
+                    await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', activeContactMobile), { incomingCall: null }).catch(e=>{});
+                }
+            }
+            cleanupCall();
+        };
+
+        function showIncomingCallUI(callData) {
+            if (peerConnection || isCallIncoming) return; // Ignore if already busy
+            isCallIncoming = true;
+            currentCallChatId = callData.chatId;
+            processedIceCandidates.clear();
+
+            document.getElementById('incoming-call-name').innerText = callData.callerName;
+            document.getElementById('incoming-call-avatar').src = getAvatarUrl(callData.callerName, callData.callerAvatar);
+            
+            // Prepare connection early
+            peerConnection = new RTCPeerConnection(rtcConfig);
+            peerConnection.ontrack = (event) => { document.getElementById('remote-audio').srcObject = event.streams[0]; };
+
+            document.getElementById('call-name').innerText = callData.callerName;
+            document.getElementById('call-avatar').src = getAvatarUrl(callData.callerName, callData.callerAvatar);
+            
+            document.getElementById('incoming-call-modal').classList.remove('hidden');
+            document.getElementById('incoming-call-modal').classList.add('flex');
+            document.getElementById('ringtone-sound').play().catch(e=>console.log(e));
+
+            // Setup listener for remote offer and caller candidates
+            listenToCallSignaling(currentCallChatId, false);
+        }
+
+        function listenToCallSignaling(chatId, isCaller) {
+            if (callSignalingUnsubscribe) callSignalingUnsubscribe();
+            callSignalingUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `audio_call_${chatId}`), (snap) => {
+                if (!snap.exists()) {
+                    // Call was ended or rejected by the other party
+                    cleanupCall();
+                    return;
+                }
+                const data = snap.data();
+
+                // If Caller, wait for Answer
+                if (isCaller && data.answer && !peerConnection.currentRemoteDescription) {
+                    const rtcDesc = new RTCSessionDescription(data.answer);
+                    peerConnection.setRemoteDescription(rtcDesc);
+                    document.getElementById('dialing-sound').pause();
+                    startCallTimer();
+                }
+
+                // If Callee, process Offer immediately (it should be there)
+                if (!isCaller && data.offer && !peerConnection.currentRemoteDescription) {
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                }
+
+                // Process ICE Candidates
+                if (isCaller && data.calleeCandidates) {
+                    data.calleeCandidates.forEach(cStr => {
+                        if (!processedIceCandidates.has(cStr)) {
+                            peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(cStr)));
+                            processedIceCandidates.add(cStr);
+                        }
+                    });
+                } else if (!isCaller && data.callerCandidates && peerConnection.currentRemoteDescription) {
+                    // Important: Callee can only add ICE candidates AFTER setting remote description
+                    data.callerCandidates.forEach(cStr => {
+                        if (!processedIceCandidates.has(cStr)) {
+                            peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(cStr)));
+                            processedIceCandidates.add(cStr);
+                        }
+                    });
+                }
+            });
+        }
+
+        window.toggleMute = () => {
+            if (localStream) {
+                isAudioMuted = !isAudioMuted;
+                localStream.getAudioTracks()[0].enabled = !isAudioMuted;
+                const btn = document.getElementById('mute-mic-btn');
+                if (isAudioMuted) {
+                    btn.classList.add('bg-red-500', 'border-red-500'); btn.classList.remove('bg-slate-800');
+                    btn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>';
+                } else {
+                    btn.classList.remove('bg-red-500', 'border-red-500'); btn.classList.add('bg-slate-800');
+                    btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+                }
+            }
+        };
+
+        function startCallTimer() {
+            document.getElementById('call-status-text').innerText = "In Call";
+            document.getElementById('call-status-text').classList.remove('animate-pulse');
+            document.getElementById('call-status-text').classList.add('text-teal-400');
+            
+            document.getElementById('call-ripple').style.display = 'none';
+            document.getElementById('call-ripple-2').style.display = 'none';
+
+            callSeconds = 0;
+            if(callTimerInterval) clearInterval(callTimerInterval);
+            callTimerInterval = setInterval(() => {
+                callSeconds++;
+                const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const s = String(callSeconds % 60).padStart(2, '0');
+                document.getElementById('call-duration').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function cleanupCall() {
+            isCallIncoming = false;
+            if (callSignalingUnsubscribe) callSignalingUnsubscribe();
+            if (callTimerInterval) clearInterval(callTimerInterval);
+            
+            document.getElementById('ringtone-sound').pause();
+            document.getElementById('ringtone-sound').currentTime = 0;
+            document.getElementById('dialing-sound').pause();
+            document.getElementById('dialing-sound').currentTime = 0;
+
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            
+            document.getElementById('remote-audio').srcObject = null;
+            currentCallChatId = null;
+            
+            document.getElementById('incoming-call-modal').classList.add('hidden');
+            document.getElementById('incoming-call-modal').classList.remove('flex');
+            document.getElementById('active-call-modal').classList.add('hidden');
+            document.getElementById('active-call-modal').classList.remove('flex');
+            
+            // Reset UI
+            document.getElementById('call-ripple').style.display = 'block';
+            document.getElementById('call-ripple-2').style.display = 'block';
+            document.getElementById('call-status-text').classList.add('animate-pulse', 'text-emerald-400');
+            document.getElementById('call-status-text').classList.remove('text-teal-400');
+            
+            isAudioMuted = false;
+            const btn = document.getElementById('mute-mic-btn');
+            btn.classList.remove('bg-red-500', 'border-red-500'); btn.classList.add('bg-slate-800');
+            btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        }
+
+        // ==========================================
+        // 🔥 MAIN APP LOGIC 🔥
+        // ==========================================
 
         window.previewProfilePic = (event) => {
             const file = event.target.files[0];
@@ -423,10 +781,9 @@
                     
                     saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
                     setTimeout(() => closeSettings(), 1000);
-                } else throw new Error(uploadResult.error?.message || "Cloudinary failed");
+                } else throw new Error("Cloudinary failed");
             } catch(e) {
-                console.error(e);
-                alert("Upload failed. Check connection.");
+                alert("Upload failed.");
                 saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Picture';
                 saveBtn.disabled = false;
             }
@@ -477,7 +834,7 @@
                     if (userSnap.exists()) {
                         const existingName = userSnap.data().name;
                         if (existingName.toLowerCase() !== n.toLowerCase()) {
-                            alert(`🚨 OOPS! Ei number ti aage thekei "${existingName}" nam-e register kora achhe!\n\nDoyakore sothik nam din ba onno number bebohar korun.`);
+                            alert(`🚨 OOPS! Ei number ti aage thekei "${existingName}" nam-e register kora achhe!`);
                             joinBtn.disabled = false; joinBtn.innerHTML = originalText;
                             return; 
                         }
@@ -515,7 +872,7 @@
 
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = (this.scrollHeight < 112 ? this.scrollHeight : 112) + 'px';
+            this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
             toggleInputButtons();
 
             if (activeContactMobile) {
@@ -602,24 +959,36 @@
 
         async function startApp() {
             appContainer.classList.remove('hidden');
-            appContainer.classList.add('flex');
-            
-            document.getElementById('sidebar').classList.remove('hidden');
-            document.getElementById('sidebar').classList.add('flex');
-            
             document.getElementById('my-name-display').innerText = myName;
             document.getElementById('my-mobile-display').innerText = myMobile;
             document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
 
             try {
                 await signInAnonymously(auth);
-                const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile);
-                const mySnap = await getDoc(myRef);
-                if(mySnap.exists() && mySnap.data().avatarUrl) {
-                    myAvatarUrl = mySnap.data().avatarUrl;
-                    localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
-                    document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
-                }
+                
+                // Clear any stuck calls from previous session
+                await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { incomingCall: null }).catch(e=>{});
+
+                // Global listener for MY profile (for incoming calls)
+                if (myGlobalUserUnsubscribe) myGlobalUserUnsubscribe();
+                myGlobalUserUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.avatarUrl && !myAvatarUrl) {
+                            myAvatarUrl = data.avatarUrl;
+                            localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
+                            document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
+                        }
+                        
+                        // Check for incoming call
+                        if (data.incomingCall && !peerConnection) {
+                            showIncomingCallUI(data.incomingCall);
+                        } else if (!data.incomingCall && isCallIncoming && !peerConnection.currentRemoteDescription) {
+                            // Call was cancelled by caller before we answered
+                            cleanupCall();
+                        }
+                    }
+                });
 
                 const updateMyStatus = async () => {
                     await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
@@ -639,9 +1008,6 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); }
-                    else if (data.mobile === myMobile && data.avatarUrl) {
-                        document.getElementById('my-avatar').src = getAvatarUrl(data.name, data.avatarUrl);
-                    }
                 });
                 renderContacts();
             });
@@ -663,7 +1029,6 @@
                        newLatest.timestamp > appStartTime) {
                         try { document.getElementById('notification-sound').play(); } catch(e){}
                     }
-                    
                     latestMessages[contactMobile] = newLatest;
                 } else {
                     latestMessages[contactMobile] = null;
@@ -688,6 +1053,8 @@
             }
             
             filteredUsers.forEach(user => {
+                const isActive = activeContactMobile === user.mobile;
+                const activeClass = isActive ? 'contact-active bg-white/5' : 'border-l-4 border-transparent active:bg-white/5 md:hover:bg-white/5';
                 const isOnline = (Date.now() - user.lastActive) < 120000;
                 const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-600';
 
@@ -724,7 +1091,7 @@
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
 
                 const div = document.createElement('div');
-                div.className = `p-4 flex items-center gap-4 cursor-pointer transition-colors border-b border-white/5 active:bg-white/5 hover:bg-white/5`;
+                div.className = `p-4 flex items-center gap-4 cursor-pointer transition-colors border-b border-white/5 ${activeClass}`;
                 div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
                 
                 div.innerHTML = `
@@ -749,17 +1116,11 @@
 
         searchInput.addEventListener('input', () => renderContacts());
 
-        // 🔥 Mobile Native Back Button Handling 🔥
-        window.addEventListener('hashchange', () => { 
-            if (window.location.hash !== '#chat') closeChatLogic(); 
-        });
+        window.addEventListener('hashchange', () => { if (window.location.hash !== '#chat' && activeContactMobile) closeChatLogic(); });
 
         function closeChatLogic() {
             document.getElementById('sidebar').classList.remove('hidden');
-            document.getElementById('sidebar').classList.add('flex');
-            
             document.getElementById('chat-area').classList.add('hidden');
-            document.getElementById('chat-area').classList.remove('flex');
             
             activeContactMobile = null; renderContacts();
             if(currentChatUnsubscribe) currentChatUnsubscribe();
@@ -774,14 +1135,15 @@
             document.getElementById('active-chat-name').innerText = contactName;
             document.getElementById('active-chat-avatar').src = contactAvatarUrl;
             
-            // 🔥 Switch Views (Pure Mobile Style) 🔥
-            document.getElementById('sidebar').classList.add('hidden'); 
-            document.getElementById('sidebar').classList.remove('flex'); 
+            document.getElementById('empty-chat-state').classList.add('hidden');
             
-            document.getElementById('chat-area').classList.remove('hidden'); 
-            document.getElementById('chat-area').classList.add('flex'); 
-            
-            if(window.location.hash !== '#chat') history.pushState({ chat: contactMobile }, "Chat", "#chat");
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('hidden'); 
+                document.getElementById('chat-area').classList.remove('hidden');
+                if(window.location.hash !== '#chat') window.location.hash = 'chat';
+            } else { 
+                document.getElementById('chat-area').classList.remove('hidden'); 
+            }
 
             renderContacts();
             document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
@@ -829,10 +1191,7 @@
             });
         };
 
-        window.closeChatMobile = () => { 
-            if(window.location.hash === '#chat') history.back(); 
-            else closeChatLogic(); 
-        };
+        window.closeChatMobile = () => { if(window.location.hash === '#chat') history.back(); else closeChatLogic(); };
         
         window.toggleReactionMenu = (docId, e) => {
             e.stopPropagation(); if(e.target.closest('button')) return; 
@@ -887,11 +1246,11 @@
                 });
 
                 msgInput.value = ''; clearFile();
-                msgInput.style.height = '44px'; toggleInputButtons();
+                msgInput.style.height = '48px'; toggleInputButtons();
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
                 setTimeout(scrollToBottom, 100);
             } catch (error) { alert("Message failed."); } 
-            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
+            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
         function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
@@ -903,7 +1262,7 @@
             const msgDiv = document.createElement('div');
             msgDiv.id = `msg-${docId}`;
             const bottomMargin = data.reaction ? 'mb-6' : 'mb-3';
-            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[75%] ${bubbleClasses} p-3 rounded-2xl ${bottomMargin} relative shadow-md cursor-pointer select-none group`;
+            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[70%] ${bubbleClasses} p-3 rounded-2xl ${bottomMargin} relative shadow-md cursor-pointer select-none group`;
             msgDiv.onclick = (e) => toggleReactionMenu(docId, e);
             
             let content = '';
@@ -923,7 +1282,7 @@
                 }
             }
             
-            let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
+            let finalHtmlText = data.text ? `<p class="text-[15px] md:text-base whitespace-pre-wrap leading-relaxed px-1 text-white">${escapeHTML(data.text)}</p>` : '';
             let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-800 border border-white/10 rounded-full px-2 py-0.5 text-[11px] shadow-lg z-10 hover:bg-slate-700 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
 
             let popupMenu = `
