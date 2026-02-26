@@ -128,6 +128,20 @@
         </div>
     </div>
 
+    <div id="add-lock-modal" class="hidden fixed inset-0 z-[170] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity">
+        <div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-[#222d34] flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white">Select Chats to Lock</h2>
+                <button onclick="closeAddLockModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full hover:bg-[#111b21] flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-2 overflow-y-auto custom-scroll flex-grow" id="unlocked-contact-list">
+                </div>
+            <div class="p-4 border-t border-[#222d34]">
+                <button onclick="addSelectedToLock()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg hover:bg-[#029071] transition-colors"><i class="fa-solid fa-lock mr-2"></i> Lock Selected Chats</button>
+            </div>
+        </div>
+    </div>
+
     <div id="pin-modal" class="hidden fixed inset-0 z-[160] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
         <div class="bg-[#202c33] rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border border-[#222d34]">
             <div class="w-16 h-16 bg-[#00a884]/20 text-[#00a884] rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
@@ -138,7 +152,7 @@
             <input type="password" id="pin-input" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-center text-white focus:outline-none focus:border-[#00a884] mb-6 text-2xl tracking-[0.5em] font-bold" maxlength="4" placeholder="••••">
             <div class="flex gap-3">
                 <button onclick="closePinModal()" class="flex-1 bg-transparent text-white py-3 rounded-lg border border-[#222d34] hover:bg-[#111b21] font-medium transition-colors">Cancel</button>
-                <button onclick="verifyPin()" class="flex-1 bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg hover:bg-[#029071] transition-colors">Unlock</button>
+                <button id="pin-action-btn" onclick="handlePinAction()" class="flex-1 bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg hover:bg-[#029071] transition-colors">Unlock</button>
             </div>
         </div>
     </div>
@@ -208,9 +222,15 @@
                     <div class="w-10 h-10 rounded-full bg-[#00a884]/10 text-[#00a884] flex items-center justify-center"><i class="fa-solid fa-lock"></i></div>
                     <span class="text-white font-medium text-[16px]">Locked chats</span>
                 </div>
-                <div id="back-to-main" class="hidden px-4 py-3 bg-[#202c33] border-b border-[#222d34] flex items-center gap-4 cursor-pointer text-[#00a884] font-medium transition-colors hover:bg-[#182229]" onclick="closeLockedChats()">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back to Main Chats</span>
+
+                <div id="locked-header-bar" class="hidden px-4 py-3 bg-[#202c33] border-b border-[#222d34] flex items-center justify-between shadow-sm z-10">
+                    <div class="flex items-center gap-3 cursor-pointer text-[#00a884] font-medium hover:text-white transition-colors" onclick="closeLockedChats()">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Locked Chats</span>
+                    </div>
+                    <button onclick="openAddLockModal()" class="w-8 h-8 rounded-full bg-[#00a884]/20 text-[#00a884] hover:bg-[#00a884] hover:text-[#111b21] flex items-center justify-center transition-colors" title="Add chats to lock">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
@@ -497,7 +517,7 @@
             }
         };
 
-        // --- NEW: Group Modal Logic ---
+        // --- Group Modal Logic ---
         window.openGroupModal = () => {
             closeAllMenus();
             document.getElementById('group-modal').classList.remove('hidden');
@@ -525,42 +545,102 @@
             closeGroupModal();
         }
 
-        // --- NEW: Locked Chats Logic ---
+        // --- NEW: Locked Chats Logic (Updated with Add function) ---
         window.openLockedChats = () => {
             closeAllMenus();
-            if(!userPin) {
-                userPin = prompt("Set a 4-digit PIN for Locked Chats:");
-                if(userPin && userPin.length >= 4) { localStorage.setItem('nexus_pin', userPin); }
-                else { alert("Invalid PIN. Cancelled."); return; }
-            }
             document.getElementById('pin-input').value = "";
+            
+            if(!userPin) {
+                document.getElementById('pin-title').innerText = "Create a PIN";
+                document.getElementById('pin-desc').innerText = "Set a 4-digit PIN for locked chats.";
+                document.getElementById('pin-action-btn').innerText = "Set PIN";
+            } else {
+                document.getElementById('pin-title').innerText = "Enter PIN";
+                document.getElementById('pin-desc').innerText = "Unlock your secure chats.";
+                document.getElementById('pin-action-btn').innerText = "Unlock";
+            }
+            
             document.getElementById('pin-modal').classList.remove('hidden');
-            document.getElementById('pin-input').focus();
+            setTimeout(() => document.getElementById('pin-input').focus(), 100);
         }
-        window.verifyPin = () => {
+
+        window.handlePinAction = () => {
             const input = document.getElementById('pin-input').value;
-            if(input === userPin) {
+            if(input.length < 4) { alert("Please enter exactly 4 digits!"); return; }
+            
+            if(!userPin) {
+                userPin = input;
+                localStorage.setItem('nexus_pin', userPin);
+                alert("PIN set successfully!");
                 document.getElementById('pin-modal').classList.add('hidden');
-                isViewingLocked = true;
-                document.getElementById('back-to-main').classList.remove('hidden');
-                document.getElementById('locked-indicator').classList.add('hidden');
-                renderContacts();
-            } else { alert("Incorrect PIN!"); }
+                enterLockedView();
+            } else {
+                if(input === userPin) {
+                    document.getElementById('pin-modal').classList.add('hidden');
+                    enterLockedView();
+                } else { 
+                    alert("Incorrect PIN!"); 
+                    document.getElementById('pin-input').value = '';
+                }
+            }
         }
+        
         window.closePinModal = () => document.getElementById('pin-modal').classList.add('hidden');
+
+        function enterLockedView() {
+            isViewingLocked = true;
+            document.getElementById('locked-header-bar').classList.remove('hidden');
+            document.getElementById('locked-indicator').classList.add('hidden');
+            renderContacts();
+        }
+
         window.closeLockedChats = () => {
             isViewingLocked = false;
-            document.getElementById('back-to-main').classList.add('hidden');
+            document.getElementById('locked-header-bar').classList.add('hidden');
             renderContacts();
             closeChatMobile(); 
         }
+
+        // --- Add Chats inside Locked View ---
+        window.openAddLockModal = () => {
+            const list = document.getElementById('unlocked-contact-list');
+            list.innerHTML = '';
+            const unlockedUsers = allUsers.filter(u => !lockedContacts.includes(u.mobile));
+            
+            if(unlockedUsers.length === 0) {
+                list.innerHTML = `<p class="text-center text-[#8696a0] p-4">No available chats to lock.</p>`;
+            } else {
+                unlockedUsers.forEach(u => {
+                    const avatar = getAvatarUrl(u.name, u.avatarUrl);
+                    list.innerHTML += `
+                    <label class="flex items-center gap-4 p-3 hover:bg-[#111b21] cursor-pointer rounded-lg border-b border-[#222d34]">
+                        <input type="checkbox" value="${u.mobile}" class="lock-checkbox w-5 h-5 accent-[#00a884]">
+                        <img src="${avatar}" class="w-10 h-10 rounded-full object-cover">
+                        <span class="text-white font-medium">${u.name}</span>
+                    </label>`;
+                });
+            }
+            document.getElementById('add-lock-modal').classList.remove('hidden');
+        }
+        
+        window.closeAddLockModal = () => document.getElementById('add-lock-modal').classList.add('hidden');
+        
+        window.addSelectedToLock = () => {
+            const selected = Array.from(document.querySelectorAll('.lock-checkbox:checked')).map(cb => cb.value);
+            if(selected.length > 0) {
+                lockedContacts.push(...selected);
+                localStorage.setItem('locked_contacts', JSON.stringify(lockedContacts));
+                renderContacts();
+            }
+            closeAddLockModal();
+        }
+
         window.toggleLockCurrentChat = () => {
             closeAllMenus();
             if(!activeContactMobile) return;
             if(!userPin) {
-                userPin = prompt("Set a 4-digit PIN first to lock chats:");
-                if(userPin && userPin.length >= 4) localStorage.setItem('nexus_pin', userPin);
-                else return;
+                alert("Please set up a PIN from the 'Locked chats' menu first.");
+                return;
             }
             if(lockedContacts.includes(activeContactMobile)) {
                 lockedContacts = lockedContacts.filter(m => m !== activeContactMobile);
