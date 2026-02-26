@@ -3,35 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#111b21">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Nexus Messenger | Secure P2P Chat</title>
+    <title>Nexus Messenger | WhatsApp Theme</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 Premium Dark Glassmorphism Theme 🔥 */
+        /* 🔥 WhatsApp Dark Theme 🔥 */
+        :root {
+            --wa-bg: #111b21;
+            --wa-panel: #202c33;
+            --wa-green: #00a884;
+            --wa-green-hover: #029071;
+            --wa-text: #e9edef;
+            --wa-muted: #8696a0;
+            --wa-bubble-in: #202c33;
+            --wa-bubble-out: #005c4b;
+            --wa-border: #222d34;
+            --wa-blue-tick: #53bdeb;
+        }
+
         html, body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #020617; 
-            color: #f8fafc; 
+            background-color: var(--wa-bg); 
+            color: var(--wa-text); 
             overflow: hidden; 
             height: 100vh; 
             width: 100vw;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             position: fixed; 
-            top: 0;
-            left: 0;
-            touch-action: none;
+            top: 0; left: 0; touch-action: none;
         }
         
-        /* Dark Cubes Background */
+        /* WhatsApp Chat Background */
         .chat-bg {
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-            background-color: #0f172a;
+            background-color: #0b141a;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-repeat: repeat;
             background-blend-mode: overlay;
             opacity: 0.95;
         }
@@ -42,16 +53,16 @@
         }
         .msg-bubble { animation: popIn 0.2s ease-out forwards; }
 
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
         
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-panel { background: var(--wa-panel); border-right: 1px solid var(--wa-border); }
         
-        textarea, input { font-size: 16px !important; } 
+        textarea, input { font-size: 15px !important; } 
         
-        .contact-active { background: linear-gradient(to right, rgba(236, 72, 153, 0.15), transparent); border-left: 4px solid #ec4899; }
+        .contact-active { background-color: #2a3942; }
 
         audio { height: 40px; outline: none; border-radius: 20px; width: 100%; }
         audio::-webkit-media-controls-panel { background-color: rgba(255, 255, 255, 0.9); }
@@ -63,235 +74,251 @@
         .audio-slider {
             -webkit-appearance: none;
             background: rgba(255,255,255,0.2);
-            height: 4px;
-            border-radius: 5px;
-            outline: none;
+            height: 4px; border-radius: 5px; outline: none;
         }
         .audio-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #fff;
-            cursor: pointer;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #fff; cursor: pointer;
             box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
     </style>
 </head>
-<body class="flex selection:bg-pink-500/30">
+<body class="flex selection:bg-[#00a884]/30">
 
-    <!-- Sound Effects -->
     <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <audio id="ringtone-sound" src="https://assets.mixkit.co/active_storage/sfx/2803/2803-preview.mp3" preload="auto" loop></audio>
 
-    <!-- Fullscreen Image Lightbox -->
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md transition-opacity opacity-0" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-[#00a884] transition-colors z-50">
             <i class="fa-solid fa-xmark"></i>
         </button>
         <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl rounded-xl">
     </div>
 
-    <!-- Registration Modal -->
-    <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-lg transition-opacity">
-        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-500 to-purple-600"></div>
-            <div class="w-20 h-20 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-pink-500/30 transform rotate-3">
-                <i class="fa-solid fa-bolt-lightning text-3xl text-pink-400 -rotate-3"></i>
-            </div>
-            <h2 class="text-2xl font-black mb-2 text-white tracking-tight">Nexus Messenger</h2>
-            <p class="text-slate-400 text-sm mb-8 font-medium">Secure and unified private chat.</p>
+    <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#111b21] transition-opacity">
+        <div class="bg-[#202c33] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative">
+            <i class="fa-brands fa-whatsapp text-6xl text-[#00a884] mb-4 block"></i>
+            <h2 class="text-2xl font-bold mb-2 text-white">Nexus Messenger</h2>
+            <p class="text-[#8696a0] text-sm mb-8 font-medium">End-to-end encrypted messaging.</p>
             
             <form id="join-form" class="space-y-4">
-                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all font-bold text-base shadow-inner" placeholder="Your Name">
-                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-bold tracking-widest text-base shadow-inner" placeholder="Mobile Number (11 digits)">
+                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium" placeholder="Your Name">
+                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium tracking-widest" placeholder="Mobile Number (11 digits)">
                 
-                <button type="submit" id="join-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 text-sm mt-4">Connect Securely</button>
+                <button type="submit" id="join-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wide transition-colors mt-4">Agree & Continue</button>
             </form>
-            <div class="mt-6">
-                <a href="index.html" class="text-xs text-slate-500 hover:text-white font-medium underline transition-colors">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div id="group-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity">
+        <div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-[#222d34] flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white">New Group</h2>
+                <button onclick="closeGroupModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full hover:bg-[#111b21] flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 border-b border-[#222d34]">
+                <input type="text" id="group-name" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] font-medium" placeholder="Group Subject">
+            </div>
+            <div class="p-2 overflow-y-auto custom-scroll flex-grow" id="group-contact-list">
+                </div>
+            <div class="p-4 border-t border-[#222d34]">
+                <button onclick="createGroup()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg hover:bg-[#029071] transition-colors"><i class="fa-solid fa-check mr-2"></i> Create Group</button>
             </div>
         </div>
     </div>
 
-    <!-- PROFILE SETTINGS MODAL -->
-    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-opacity">
-        <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative">
-            <button onclick="closeSettings()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
+    <div id="pin-modal" class="hidden fixed inset-0 z-[160] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div class="bg-[#202c33] rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border border-[#222d34]">
+            <div class="w-16 h-16 bg-[#00a884]/20 text-[#00a884] rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-2" id="pin-title">Enter PIN</h2>
+            <p class="text-[#8696a0] text-sm mb-6 font-medium" id="pin-desc">Unlock your secure chats.</p>
+            <input type="password" id="pin-input" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-center text-white focus:outline-none focus:border-[#00a884] mb-6 text-2xl tracking-[0.5em] font-bold" maxlength="4" placeholder="••••">
+            <div class="flex gap-3">
+                <button onclick="closePinModal()" class="flex-1 bg-transparent text-white py-3 rounded-lg border border-[#222d34] hover:bg-[#111b21] font-medium transition-colors">Cancel</button>
+                <button onclick="verifyPin()" class="flex-1 bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg hover:bg-[#029071] transition-colors">Unlock</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-[#202c33] border border-[#222d34] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center relative">
+            <button onclick="closeSettings()" class="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-[#111b21] text-[#8696a0] hover:text-white flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h2 class="text-xl font-black mb-6 text-white uppercase tracking-wider">Profile Settings</h2>
+            <h2 class="text-xl font-bold mb-6 text-white">Profile</h2>
 
             <div class="relative w-32 h-32 mx-auto mb-6 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
-                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-[2rem] object-cover group-hover:opacity-60 transition-opacity bg-slate-800 shadow-lg border-2 border-white/10">
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] bg-black/50">
-                    <i class="fa-solid fa-camera text-3xl text-white"></i>
+                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-full object-cover group-hover:opacity-60 transition-opacity bg-[#111b21] shadow-lg border border-[#222d34]">
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full bg-black/50">
+                    <i class="fa-solid fa-camera text-2xl text-white"></i>
                 </div>
             </div>
             <input type="file" id="profile-pic-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
 
-            <div class="mb-6 text-left">
-                <label class="text-pink-400 text-xs font-bold uppercase tracking-widest mb-2 block ml-1">Display Name</label>
-                <div class="flex items-center bg-black/40 rounded-2xl border border-white/10 px-4 py-2 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 transition-all">
-                    <input type="text" id="settings-name-input" class="w-full bg-transparent p-2 text-white focus:outline-none text-base font-bold" placeholder="Enter your name">
-                    <i class="fa-solid fa-pen text-slate-500 text-sm"></i>
+            <div class="mb-6 text-left border-b border-[#00a884] pb-2">
+                <label class="text-[#00a884] text-xs font-bold mb-1 block">Your Name</label>
+                <div class="flex items-center justify-between">
+                    <input type="text" id="settings-name-input" class="w-full bg-transparent p-1 text-white focus:outline-none text-base font-medium" placeholder="Enter your name">
+                    <i class="fa-solid fa-pen text-[#8696a0] text-sm"></i>
                 </div>
             </div>
 
-            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30">
-                <i class="fa-solid fa-check"></i> Save Changes
+            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check"></i> Save
             </button>
         </div>
     </div>
 
-    <!-- Main App Container -->
-    <div id="app-container" class="hidden absolute top-0 left-0 w-full max-w-[1600px] mx-auto md:py-4 md:px-4" style="height: 100%;">
-        <div class="w-full h-full flex bg-slate-900/50 shadow-2xl md:rounded-[2rem] border border-white/5 overflow-hidden relative backdrop-blur-md">
+    <div id="app-container" class="hidden absolute top-0 left-0 w-full mx-auto md:py-0 md:px-0" style="height: 100%;">
+        <div class="w-full h-full flex bg-[#111b21] overflow-hidden relative">
             
-            <!-- LEFT SIDEBAR (Contacts) -->
-            <div id="sidebar" class="w-full md:w-[380px] lg:w-[420px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 absolute md:relative inset-0 md:inset-auto">
-                <!-- Top Header -->
-                <header class="p-4 bg-black/20 flex items-center justify-between shrink-0 border-b border-white/5" style="padding-top: max(1rem, env(safe-area-inset-top));">
+            <div id="sidebar" class="w-full md:w-[400px] flex flex-col border-r border-[#222d34] bg-[#111b21] z-20 flex-shrink-0 absolute md:relative inset-0 md:inset-auto">
+                <header class="p-3 bg-[#202c33] flex items-center justify-between shrink-0 h-[60px]" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
-                        <img id="my-avatar" src="" onclick="openSettings()" class="w-11 h-11 rounded-[1rem] object-cover cursor-pointer hover:opacity-80 transition-opacity border border-white/10 shadow-md bg-slate-800" title="Profile Settings">
-                        <div class="hidden md:block">
-                            <h2 id="my-name-display" class="font-bold text-white text-sm">My Profile</h2>
-                            <p class="text-[10px] text-pink-400 font-bold tracking-widest uppercase">Active Now</p>
-                        </div>
+                        <img id="my-avatar" src="" onclick="openSettings()" class="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity bg-[#111b21]" title="Profile Settings">
                     </div>
-                    <div class="flex items-center gap-2 text-slate-300">
-                        <a href="index.html" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-pink-600 hover:text-white transition-colors" title="Home">
-                            <i class="fa-solid fa-house text-sm"></i>
-                        </a>
-                        <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-pink-600 hover:text-white transition-colors" title="Settings">
-                            <i class="fa-solid fa-gear text-sm"></i>
-                        </button>
-                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition-colors" title="Logout">
-                            <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                        </button>
-                    </div>
-                </header>
-
-                <div class="p-3 bg-black/10 shrink-0">
-                    <div class="bg-black/30 rounded-2xl flex items-center px-4 py-3 border border-white/5 focus-within:border-pink-500/50 transition-colors shadow-inner">
-                        <i class="fa-solid fa-magnifying-glass text-slate-500 text-sm"></i>
-                        <input type="text" id="search-input" placeholder="Search contacts..." class="bg-transparent border-none outline-none text-white text-sm w-full ml-3 placeholder-slate-500 font-medium">
-                    </div>
-                </div>
-
-                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative" style="touch-action: pan-y;">
-                    <div class="text-center py-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-white/5 flex justify-between items-center px-6">
-                        <span>All Contacts</span>
-                        <i class="fa-solid fa-users text-pink-500/50"></i>
-                    </div>
-                    <div id="contacts-container" class="pb-6"></div>
-                </div>
-            </div>
-
-            <!-- RIGHT SIDEBAR (Chat Window) -->
-            <div id="chat-area" class="w-full hidden flex-col relative h-full bg-slate-950/50">
-                
-                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg backdrop-blur-sm border-l border-white/5">
-                    <div class="w-28 h-28 bg-gradient-to-br from-pink-500/10 to-purple-600/10 rounded-[2rem] flex items-center justify-center mb-6 border border-pink-500/20 shadow-xl transform rotate-3">
-                        <i class="fa-solid fa-bolt-lightning text-5xl text-pink-400 -rotate-3"></i>
-                    </div>
-                    <h2 class="text-3xl font-black text-white mb-3 tracking-tight">Nexus Chat Suite</h2>
-                    <p class="text-slate-400 text-sm max-w-sm text-center px-4 font-medium leading-relaxed">Select a contact to start an encrypted conversation. Experience seamless messaging.</p>
-                    <div class="mt-8 bg-black/40 border border-white/10 shadow-sm px-4 py-2 rounded-full text-xs text-slate-400 flex items-center gap-2 font-bold">
-                        <i class="fa-solid fa-shield-halved text-emerald-500"></i> P2P Encryption Active
-                    </div>
-                </div>
-
-                <!-- Chat Header -->
-                <header class="p-3 md:p-4 bg-black/20 flex items-center justify-between shrink-0 relative z-30 border-b border-white/10 shadow-md" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
-                    <div class="flex items-center gap-3">
-                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-slate-300 hover:bg-white/10 shrink-0 transition-colors bg-white/5 border border-white/10">
-                            <i class="fa-solid fa-arrow-left text-sm"></i>
-                        </button>
-                        <div class="flex items-center gap-3 cursor-pointer">
-                            <img id="active-chat-avatar" src="" class="w-11 h-11 rounded-[1rem] object-cover border border-white/10 shadow-sm bg-slate-800">
-                            <div class="flex flex-col justify-center">
-                                <h2 id="active-chat-name" class="font-bold text-white text-base leading-tight">Contact</h2>
-                                <p id="active-chat-status" class="text-[11px] text-pink-400 font-bold tracking-widest uppercase mt-0.5">...</p>
+                    <div class="flex items-center gap-4 text-[#aebac1]">
+                        <button onclick="openGroupModal()" title="New Group" class="hover:text-white transition-colors"><i class="fa-solid fa-users"></i></button>
+                        <button onclick="openSettings()" title="Settings" class="hover:text-white transition-colors"><i class="fa-solid fa-gear"></i></button>
+                        <div class="relative">
+                            <button onclick="toggleSidebarMenu(event)" class="px-2 hover:text-white transition-colors"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                            <div id="sidebar-dropdown" class="dropdown-menu absolute top-full right-0 mt-2 w-48 bg-[#233138] rounded-md shadow-xl py-2 z-50 border border-[#222d34]">
+                                <button onclick="openLockedChats()" class="w-full text-left px-5 py-2.5 text-sm text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
+                                    <i class="fa-solid fa-lock w-4 text-[#00a884]"></i> Locked chats
+                                </button>
+                                <button onclick="logoutPvtChat()" class="w-full text-left px-5 py-2.5 text-sm text-[#f15c6d] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
+                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Log out
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="flex gap-2 text-slate-300 relative pr-2">
-                        <button onclick="startCall('video')" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-pink-600 hover:text-white transition-all shadow-sm text-pink-400"><i class="fa-solid fa-video text-sm"></i></button>
-                        <button onclick="startCall('audio')" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-emerald-600 hover:text-white transition-all shadow-sm text-emerald-400"><i class="fa-solid fa-phone text-sm"></i></button>
+                </header>
+
+                <div class="p-2 border-b border-[#222d34] bg-[#111b21] shrink-0">
+                    <div class="bg-[#202c33] rounded-lg flex items-center px-4 py-1.5 focus-within:bg-[#111b21] border border-transparent focus-within:border-[#00a884]/50 transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-[#8696a0] text-sm"></i>
+                        <input type="text" id="search-input" placeholder="Search or start new chat" class="bg-transparent border-none outline-none text-white text-[15px] w-full ml-4 placeholder-[#8696a0] font-medium py-1">
+                    </div>
+                </div>
+
+                <div id="locked-indicator" class="hidden px-4 py-3 border-b border-[#222d34] flex items-center gap-4 cursor-pointer hover:bg-[#202c33] transition-colors" onclick="openLockedChats()">
+                    <div class="w-10 h-10 rounded-full bg-[#00a884]/10 text-[#00a884] flex items-center justify-center"><i class="fa-solid fa-lock"></i></div>
+                    <span class="text-white font-medium text-[16px]">Locked chats</span>
+                </div>
+                <div id="back-to-main" class="hidden px-4 py-3 bg-[#202c33] border-b border-[#222d34] flex items-center gap-4 cursor-pointer text-[#00a884] font-medium transition-colors hover:bg-[#182229]" onclick="closeLockedChats()">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Back to Main Chats</span>
+                </div>
+
+                <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
+                    <div id="contacts-container"></div>
+                </div>
+            </div>
+
+            <div id="chat-area" class="w-full hidden flex-col relative h-full bg-[#222d34]">
+                
+                <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#222d34] border-l border-[#222d34]">
+                    <i class="fa-brands fa-whatsapp text-[8rem] text-[#2c3943] mb-8"></i>
+                    <h2 class="text-3xl font-light text-white mb-4">Nexus Web</h2>
+                    <p class="text-[#8696a0] text-sm max-w-md text-center px-4 font-medium leading-relaxed">Send and receive messages securely.<br>End-to-end encrypted connection active.</p>
+                    <div class="absolute bottom-10 flex items-center gap-2 text-[#8696a0] text-xs font-medium">
+                        <i class="fa-solid fa-lock text-[#00a884]"></i> End-to-end encrypted
+                    </div>
+                </div>
+
+                <header class="p-2 md:p-3 bg-[#202c33] flex items-center justify-between shrink-0 h-[60px] relative z-30 border-l border-[#222d34]" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
+                    <div class="flex items-center gap-3">
+                        <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-[#aebac1] hover:bg-[#111b21] transition-colors shrink-0">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div class="flex items-center gap-3 cursor-pointer">
+                            <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-[#111b21]">
+                            <div class="flex flex-col justify-center">
+                                <h2 id="active-chat-name" class="font-medium text-white text-[16px] leading-tight">Contact</h2>
+                                <p id="active-chat-status" class="text-[12px] text-[#8696a0] mt-0.5">...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 text-[#aebac1] pr-2">
+                        <button onclick="startCall('video')" class="hover:text-white transition-colors" title="Video Call"><i class="fa-solid fa-video"></i></button>
+                        <button onclick="startCall('audio')" class="hover:text-white transition-colors" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
                         
-                        <div class="w-[1px] h-6 bg-white/10 mx-1 self-center hidden md:block"></div>
+                        <div class="w-[1px] h-5 bg-[#374045] mx-1 hidden md:block"></div>
                         
-                        <button onclick="toggleChatMenu(event)" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-sm"></i></button>
-                        
-                        <div id="chat-dropdown" class="dropdown-menu absolute top-14 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-xl py-2 w-48 z-50 overflow-hidden">
-                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-3 font-bold">
-                                <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear Chat
-                            </button>
+                        <div class="relative">
+                            <button onclick="toggleChatMenu(event)" class="px-2 hover:text-white transition-colors"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                            <div id="chat-dropdown" class="dropdown-menu absolute top-full right-0 mt-2 bg-[#233138] border border-[#222d34] rounded-md shadow-xl py-2 w-48 z-50 overflow-hidden">
+                                <button onclick="toggleLockCurrentChat()" id="lock-chat-btn" class="w-full text-left px-5 py-3 text-sm text-[#d1d7db] hover:bg-[#111b21] transition-colors font-medium">Lock chat</button>
+                                <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-[#f15c6d] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
+                                    <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear chat
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </header>
 
-                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-2 custom-scroll relative z-20" onclick="closeAllMenus()" style="touch-action: pan-y;">
-                    <div class="text-center my-4">
-                        <span class="bg-black/60 text-slate-300 text-[10px] px-4 py-1.5 rounded-full border border-white/10 uppercase tracking-widest font-bold backdrop-blur-md shadow-sm">
-                            <i class="fa-solid fa-shield-halved text-pink-400 mr-1"></i> End-to-end encrypted
+                <main id="messages-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-1 custom-scroll relative z-20" onclick="closeAllMenus()" style="touch-action: pan-y;">
+                    <div class="text-center my-3">
+                        <span class="bg-[#182229] text-[#ffd279] text-[11.5px] px-3 py-1.5 rounded-lg shadow-sm inline-block font-medium border border-[#222d34]">
+                            <i class="fa-solid fa-lock text-[10px] mr-1"></i> Messages are end-to-end encrypted.
                         </span>
                     </div>
                 </main>
 
-                <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 z-30 relative" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+                <footer class="bg-[#202c33] px-3 py-2 flex flex-col shrink-0 z-30 relative" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom));">
                     
-                    <div id="file-preview-container" class="hidden w-full px-1 mb-3">
-                        <div class="bg-slate-800/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-lg">
+                    <div id="file-preview-container" class="hidden w-full px-2 mb-2">
+                        <div class="bg-[#111b21] border border-[#222d34] rounded-xl p-3 flex items-center justify-between">
                             <div class="flex items-center gap-3 overflow-hidden">
-                                <div id="preview-icon-wrapper" class="w-12 h-12 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0 border border-pink-500/30 overflow-hidden relative">
+                                <div id="preview-icon-wrapper" class="w-12 h-12 rounded-lg bg-[#202c33] text-[#00a884] flex items-center justify-center shrink-0 border border-[#222d34] overflow-hidden relative">
                                     <i id="preview-icon" class="fa-solid fa-file text-xl"></i>
                                     <img id="preview-img" src="" class="hidden w-full h-full object-cover absolute inset-0">
                                 </div>
                                 <div class="overflow-hidden">
-                                    <p id="file-preview-name" class="text-sm font-bold text-white truncate w-48 md:w-72">filename</p>
-                                    <p id="file-preview-size" class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">0 MB</p>
+                                    <p id="file-preview-name" class="text-sm font-medium text-white truncate w-48 md:w-72">filename</p>
+                                    <p id="file-preview-size" class="text-[11px] text-[#8696a0] mt-0.5">0 MB</p>
                                 </div>
                             </div>
-                            <button type="button" onclick="clearFile()" class="text-slate-400 hover:text-red-400 w-10 h-10 flex items-center justify-center rounded-full transition-colors bg-white/5 border border-white/5 shadow-sm">
+                            <button type="button" onclick="clearFile()" class="text-[#8696a0] hover:text-[#f15c6d] w-10 h-10 flex items-center justify-center rounded-full transition-colors hover:bg-[#202c33]">
                                 <i class="fa-solid fa-xmark text-lg"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Recording UI -->
-                    <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-2xl p-2 mb-3 animate-pulse shadow-sm">
-                        <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
-                            <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording Audio...
+                    <div id="recording-ui" class="hidden flex items-center justify-between bg-[#111b21] rounded-lg p-2 mb-2 border border-[#f15c6d]/30">
+                        <div class="flex items-center gap-3 text-[#f15c6d] pl-4 font-bold text-sm animate-pulse">
+                            <i class="fa-solid fa-microphone-lines text-lg"></i> Recording...
                         </div>
-                        <div class="flex gap-2 pr-1">
-                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-xl bg-slate-800 border border-white/10 text-slate-300 hover:text-red-400 flex items-center justify-center transition-colors shadow-sm">
+                        <div class="flex gap-2">
+                            <button type="button" onclick="cancelRecording()" class="w-10 h-10 rounded-full text-[#8696a0] hover:text-[#f15c6d] hover:bg-[#202c33] flex items-center justify-center transition-colors">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
-                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white hover:opacity-90 flex items-center justify-center shadow-lg shadow-pink-500/30 transition-all">
+                            <button type="button" onclick="stopAndSendRecording()" class="w-10 h-10 rounded-full bg-[#00a884] text-[#111b21] hover:bg-[#029071] flex items-center justify-center transition-colors">
                                 <i class="fa-solid fa-paper-plane"></i>
                             </button>
                         </div>
                     </div>
 
-                    <form id="chat-form" class="flex items-end gap-2 w-full relative">
-                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-300 hover:text-pink-400 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all border border-white/10 mb-0.5 shadow-sm">
-                            <i class="fa-solid fa-paperclip text-lg"></i>
+                    <form id="chat-form" class="flex items-end gap-2 w-full relative min-h-[44px]">
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="w-10 h-10 shrink-0 text-[#8696a0] hover:text-white flex items-center justify-center transition-colors mb-0.5">
+                            <i class="fa-solid fa-paperclip text-xl"></i>
                         </button>
                         <input type="file" id="file-input" class="hidden">
 
-                        <div class="flex-grow bg-black/40 border border-white/10 rounded-3xl flex items-center px-4 py-1.5 transition-all focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 relative shadow-inner">
-                            <textarea id="msg-input" rows="1" placeholder="Type a message..."
-                                class="w-full bg-transparent py-2 text-white focus:outline-none resize-none max-h-32 custom-scroll text-[15px] placeholder-slate-500 font-medium" style="min-height: 40px;"></textarea>
+                        <div class="flex-grow bg-[#2a3942] rounded-lg flex items-center px-4 py-2 transition-all">
+                            <textarea id="msg-input" rows="1" placeholder="Type a message"
+                                class="w-full bg-transparent text-white focus:outline-none resize-none max-h-32 custom-scroll text-[15px] placeholder-[#8696a0] leading-snug" style="min-height: 24px; padding-top: 2px;"></textarea>
                         </div>
                         
-                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-12 h-12 shrink-0 bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-pink-500/30 transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-microphone text-lg"></i>
+                        <button type="button" id="mic-btn" onclick="startRecording()" class="w-10 h-10 shrink-0 text-[#8696a0] hover:text-white flex items-center justify-center transition-colors mb-0.5">
+                            <i class="fa-solid fa-microphone text-xl"></i>
                         </button>
                         
-                        <button type="submit" id="send-btn" class="hidden w-12 h-12 shrink-0 bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-pink-500/30 transition-all active:scale-95 mb-0.5">
-                            <i class="fa-solid fa-paper-plane text-lg ml-[-2px]"></i>
+                        <button type="submit" id="send-btn" class="hidden w-10 h-10 shrink-0 text-[#8696a0] hover:text-[#00a884] flex items-center justify-center transition-colors mb-0.5">
+                            <i class="fa-solid fa-paper-plane text-xl ml-1"></i>
                         </button>
                     </form>
                 </footer>
@@ -299,7 +326,6 @@
         </div>
     </div>
 
-    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL 🔥 -->
     <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex-col">
         <audio id="remote-audio" autoplay playsinline></audio>
         <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-0 bg-black"></video>
@@ -307,41 +333,37 @@
 
         <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-xl transition-opacity duration-500">
             <div class="relative mb-8">
-                <img id="call-avatar" src="" class="w-32 h-32 rounded-[2rem] object-cover z-10 relative border-4 border-pink-500 shadow-2xl shadow-pink-500/50">
-                <div class="absolute inset-0 border-4 border-pink-500 rounded-[2rem] animate-ping opacity-40 z-0"></div>
+                <img id="call-avatar" src="" class="w-32 h-32 rounded-full object-cover z-10 relative border-4 border-[#00a884] shadow-2xl">
+                <div class="absolute inset-0 border-4 border-[#00a884] rounded-full animate-ping opacity-40 z-0"></div>
             </div>
-            <h2 id="call-name" class="text-3xl font-black text-white mb-2 tracking-tight">Caller Name</h2>
-            <p id="call-status" class="text-pink-400 text-sm font-bold tracking-widest uppercase mb-12">Calling...</p>
+            <h2 id="call-name" class="text-3xl font-bold text-white mb-2">Caller Name</h2>
+            <p id="call-status" class="text-[#00a884] text-sm font-medium tracking-wide uppercase mb-12">Calling...</p>
         </div>
         
-        <!-- Call Controls -->
         <div class="absolute bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 z-30 w-full px-4">
-            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-600 text-white text-2xl hover:bg-emerald-500 hover:scale-110 transition-all shadow-lg shadow-emerald-600/40 flex items-center justify-center">
+            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-[#00a884] text-white text-2xl hover:scale-110 transition-all flex items-center justify-center">
                 <i class="fa-solid fa-phone"></i>
             </button>
 
-            <div id="in-call-controls" class="hidden flex items-center gap-3 bg-white/10 backdrop-blur-lg p-2.5 rounded-full border border-white/20 shadow-2xl">
-                <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-white/20 text-white text-lg hover:bg-white/30 transition-colors shadow-inner">
+            <div id="in-call-controls" class="hidden flex items-center gap-3 bg-white/10 backdrop-blur-lg p-2.5 rounded-full border border-white/20">
+                <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-white/20 text-white text-lg hover:bg-white/30 transition-colors">
                     <i class="fa-solid fa-microphone"></i>
                 </button>
-                <button id="cam-toggle-btn" onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-white/20 text-white text-lg hover:bg-white/30 transition-colors hidden shadow-inner">
+                <button id="cam-toggle-btn" onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-white/20 text-white text-lg hover:bg-white/30 transition-colors hidden">
                     <i class="fa-solid fa-video"></i>
                 </button>
-                
                 <div class="w-[1px] h-8 bg-white/20 mx-1"></div>
-                
-                <button id="hangup-btn" onclick="hangupCall()" class="w-14 h-14 rounded-full bg-red-600 text-white text-xl hover:bg-red-500 hover:scale-110 transition-all shadow-lg shadow-red-600/40 flex items-center justify-center">
+                <button id="hangup-btn" onclick="hangupCall()" class="w-14 h-14 rounded-full bg-[#f15c6d] text-white text-xl hover:scale-110 transition-all flex items-center justify-center">
                     <i class="fa-solid fa-phone-slash"></i>
                 </button>
             </div>
             
-            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-600 text-white text-2xl hover:bg-red-500 hover:scale-110 transition-all shadow-lg shadow-red-600/40 flex items-center justify-center">
+            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-[#f15c6d] text-white text-2xl hover:scale-110 transition-all flex items-center justify-center">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
     </div>
 
-    <!-- Firebase Logic & WebRTC Import -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -352,12 +374,9 @@
 
         function setRealViewportHeight() {
             let vh = window.innerHeight;
-            if (window.visualViewport) {
-                vh = window.visualViewport.height;
-            }
+            if (window.visualViewport) vh = window.visualViewport.height;
             document.body.style.height = vh + 'px';
             document.documentElement.style.height = vh + 'px';
-            
             const appContainer = document.getElementById('app-container');
             if (appContainer) appContainer.style.height = vh + 'px';
             const msgBox = document.getElementById('messages-box');
@@ -393,6 +412,11 @@
         let latestMessages = {}; 
         let chatListeners = {};  
 
+        // Lock Chat & Pin variables
+        let lockedContacts = JSON.parse(localStorage.getItem('locked_contacts') || '[]');
+        let userPin = localStorage.getItem('nexus_pin') || null;
+        let isViewingLocked = false;
+
         let currentChatUnsubscribe = null;
         let userStatusUnsubscribe = null;
         let activeTrackingInterval = null;
@@ -419,10 +443,7 @@
         const appContainer = document.getElementById('app-container');
         const contactsContainer = document.getElementById('contacts-container');
         const searchInput = document.getElementById('search-input');
-        const emptyState = document.getElementById('empty-chat-state');
         
-        const chatArea = document.getElementById('chat-area');
-        const sidebar = document.getElementById('sidebar');
         const msgBox = document.getElementById('messages-box');
         const chatForm = document.getElementById('chat-form');
         const msgInput = document.getElementById('msg-input');
@@ -434,7 +455,7 @@
         const previewImg = document.getElementById('preview-img');
 
         function getAvatarUrl(name, customUrl) {
-            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ec4899&color=fff&bold=true`;
+            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=8696a0&color=fff&bold=true`;
         }
         function formatTime(seconds) {
             if(!seconds || isNaN(seconds)) return "0:00";
@@ -445,6 +466,7 @@
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
 
+        // Lightbox
         window.openLightbox = (url, e) => {
             e.stopPropagation();
             const lightbox = document.getElementById('image-lightbox');
@@ -460,32 +482,112 @@
             setTimeout(() => lightbox.classList.add('hidden'), 300);
         };
 
-        window.toggleChatMenu = (e) => { e.stopPropagation(); document.getElementById('chat-dropdown').classList.toggle('show'); }
+        // Menus
+        window.toggleChatMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('chat-dropdown').classList.toggle('show'); }
+        window.toggleSidebarMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('sidebar-dropdown').classList.toggle('show'); }
         window.closeAllMenus = () => {
-            document.getElementById('chat-dropdown').classList.remove('show');
+            document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show'));
             document.querySelectorAll('.reaction-menu-popup').forEach(el => el.classList.add('hidden'));
         }
         document.body.addEventListener('click', closeAllMenus);
 
         window.logoutPvtChat = () => {
             if(confirm("Are you sure you want to log out?")) {
-                localStorage.clear();
-                location.reload();
+                localStorage.clear(); location.reload();
             }
         };
 
+        // --- NEW: Group Modal Logic ---
+        window.openGroupModal = () => {
+            closeAllMenus();
+            document.getElementById('group-modal').classList.remove('hidden');
+            renderGroupContacts();
+        }
+        window.closeGroupModal = () => document.getElementById('group-modal').classList.add('hidden');
+        window.renderGroupContacts = () => {
+            const list = document.getElementById('group-contact-list');
+            list.innerHTML = '';
+            allUsers.forEach(u => {
+                const avatar = getAvatarUrl(u.name, u.avatarUrl);
+                list.innerHTML += `
+                <label class="flex items-center gap-4 p-3 hover:bg-[#111b21] cursor-pointer rounded-lg transition-colors border-b border-[#222d34]">
+                    <input type="checkbox" value="${u.mobile}" class="group-checkbox w-5 h-5 accent-[#00a884] bg-transparent border border-[#8696a0]">
+                    <img src="${avatar}" class="w-10 h-10 rounded-full object-cover">
+                    <span class="text-white font-medium">${u.name}</span>
+                </label>`;
+            });
+        }
+        window.createGroup = () => {
+            const name = document.getElementById('group-name').value.trim();
+            const selected = Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb => cb.value);
+            if(!name || selected.length === 0) { alert("Enter group name and select at least 1 contact."); return; }
+            alert(`Group '${name}' created successfully with ${selected.length} members! (UI Logic complete, requires DB schema integration for messaging)`);
+            closeGroupModal();
+        }
+
+        // --- NEW: Locked Chats Logic ---
+        window.openLockedChats = () => {
+            closeAllMenus();
+            if(!userPin) {
+                userPin = prompt("Set a 4-digit PIN for Locked Chats:");
+                if(userPin && userPin.length >= 4) { localStorage.setItem('nexus_pin', userPin); }
+                else { alert("Invalid PIN. Cancelled."); return; }
+            }
+            document.getElementById('pin-input').value = "";
+            document.getElementById('pin-modal').classList.remove('hidden');
+            document.getElementById('pin-input').focus();
+        }
+        window.verifyPin = () => {
+            const input = document.getElementById('pin-input').value;
+            if(input === userPin) {
+                document.getElementById('pin-modal').classList.add('hidden');
+                isViewingLocked = true;
+                document.getElementById('back-to-main').classList.remove('hidden');
+                document.getElementById('locked-indicator').classList.add('hidden');
+                renderContacts();
+            } else { alert("Incorrect PIN!"); }
+        }
+        window.closePinModal = () => document.getElementById('pin-modal').classList.add('hidden');
+        window.closeLockedChats = () => {
+            isViewingLocked = false;
+            document.getElementById('back-to-main').classList.add('hidden');
+            renderContacts();
+            closeChatMobile(); 
+        }
+        window.toggleLockCurrentChat = () => {
+            closeAllMenus();
+            if(!activeContactMobile) return;
+            if(!userPin) {
+                userPin = prompt("Set a 4-digit PIN first to lock chats:");
+                if(userPin && userPin.length >= 4) localStorage.setItem('nexus_pin', userPin);
+                else return;
+            }
+            if(lockedContacts.includes(activeContactMobile)) {
+                lockedContacts = lockedContacts.filter(m => m !== activeContactMobile);
+                document.getElementById('lock-chat-btn').innerText = "Lock chat";
+                alert("Chat unlocked!");
+            } else {
+                lockedContacts.push(activeContactMobile);
+                document.getElementById('lock-chat-btn').innerText = "Unlock chat";
+                alert("Chat locked! It is now hidden in the Locked folder.");
+                closeChatMobile();
+            }
+            localStorage.setItem('locked_contacts', JSON.stringify(lockedContacts));
+            renderContacts();
+        }
+
+
+        // Profile Settings
         window.openSettings = () => {
             document.getElementById('settings-modal').classList.remove('hidden');
             document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl);
             document.getElementById('settings-name-input').value = myName;
             settingsSelectedFile = null;
         }
-
         window.closeSettings = () => {
             document.getElementById('settings-modal').classList.add('hidden');
             document.getElementById('profile-pic-input').value = '';
         }
-
         window.previewProfilePic = (event) => {
             const file = event.target.files[0];
             if(file && file.type.startsWith('image/')) {
@@ -496,19 +598,16 @@
                 reader.readAsDataURL(file);
             }
         }
-
         window.saveProfileSettings = async () => {
             const newName = document.getElementById('settings-name-input').value.trim();
             if(!newName) { alert("Name cannot be empty"); return; }
 
             const saveBtn = document.getElementById('save-settings-btn');
             const originalText = saveBtn.innerHTML;
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xl"></i> Saving...';
+            saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
             try {
                 let updatedAvatarUrl = myAvatarUrl;
-
                 if(settingsSelectedFile) {
                     const formData = new FormData();
                     formData.append('file', settingsSelectedFile);
@@ -518,28 +617,19 @@
                     if(uploadResult.secure_url) updatedAvatarUrl = uploadResult.secure_url;
                     else throw new Error("Cloudinary failed");
                 }
-
                 await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
                     name: newName, avatarUrl: updatedAvatarUrl
                 }, { merge: true });
 
-                myName = newName;
-                myAvatarUrl = updatedAvatarUrl;
-                localStorage.setItem('pvt_chat_name', newName);
-                localStorage.setItem('pvt_chat_avatar', updatedAvatarUrl);
+                myName = newName; myAvatarUrl = updatedAvatarUrl;
+                localStorage.setItem('pvt_chat_name', newName); localStorage.setItem('pvt_chat_avatar', updatedAvatarUrl);
                 document.getElementById('my-avatar').src = getAvatarUrl(newName, updatedAvatarUrl);
-                document.getElementById('my-name-display').innerText = newName;
                 
                 saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
-                setTimeout(() => {
-                    closeSettings();
-                    saveBtn.innerHTML = originalText;
-                    saveBtn.disabled = false;
-                }, 1000);
+                setTimeout(() => { closeSettings(); saveBtn.innerHTML = originalText; saveBtn.disabled = false; }, 1000);
             } catch(e) {
                 alert("Upload failed. Check connection.");
-                saveBtn.innerHTML = originalText;
-                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText; saveBtn.disabled = false;
             }
         }
 
@@ -565,8 +655,7 @@
 
             if (n && m.length === 11) {
                 const originalText = joinBtn.innerHTML;
-                joinBtn.disabled = true;
-                joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting...';
+                joinBtn.disabled = true; joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting...';
 
                 try {
                     await signInAnonymously(auth);
@@ -577,8 +666,7 @@
                         const existingName = userSnap.data().name;
                         if (existingName.toLowerCase() !== n.toLowerCase()) {
                             alert(`This number is registered to "${existingName}". Please use your correct name.`);
-                            joinBtn.disabled = false; joinBtn.innerHTML = originalText;
-                            return; 
+                            joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; 
                         }
                         if(userSnap.data().avatarUrl) {
                             myAvatarUrl = userSnap.data().avatarUrl;
@@ -587,23 +675,17 @@
                     } else {
                         await setDoc(userRef, { name: n, mobile: m, lastActive: Date.now(), typingTo: null, avatarUrl: '' });
                     }
-
                     myName = n; myMobile = m;
                     localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m);
 
                     joinModal.classList.add('hidden'); startApp();
-
-                } catch (err) {
-                    alert("Connection error!");
-                    joinBtn.disabled = false; joinBtn.innerHTML = originalText;
-                }
+                } catch (err) { alert("Connection error!"); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
             } else { alert("Please provide valid details."); }
         };
 
         function toggleInputButtons() {
             const hasText = msgInput.value.trim().length > 0;
             const hasFile = !!selectedFile;
-            
             if (hasText || hasFile) {
                 micBtn.classList.add('hidden'); sendBtn.classList.remove('hidden'); sendBtn.disabled = false;
             } else {
@@ -645,9 +727,9 @@
                     reader.readAsDataURL(file);
                 } else {
                     previewIcon.className = "fa-solid text-2xl";
-                    if(file.type.startsWith('video/')) previewIcon.classList.add("fa-video", "text-pink-500");
-                    else if(file.type.startsWith('audio/')) previewIcon.classList.add("fa-headphones", "text-emerald-500");
-                    else previewIcon.classList.add("fa-file", "text-slate-400");
+                    if(file.type.startsWith('video/')) previewIcon.classList.add("fa-video", "text-[#00a884]");
+                    else if(file.type.startsWith('audio/')) previewIcon.classList.add("fa-headphones", "text-[#53bdeb]");
+                    else previewIcon.classList.add("fa-file", "text-[#8696a0]");
                 }
                 document.getElementById('file-preview-container').classList.remove('hidden');
                 toggleInputButtons();
@@ -704,7 +786,6 @@
         async function startApp() {
             appContainer.classList.remove('hidden');
             appContainer.classList.add('flex');
-            
             document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
 
             try {
@@ -714,13 +795,11 @@
                 if(mySnap.exists()) {
                     const d = mySnap.data();
                     if(d.avatarUrl) {
-                        myAvatarUrl = d.avatarUrl;
-                        localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
+                        myAvatarUrl = d.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
                         document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
                     }
                     if(d.name && d.name !== myName) {
                         myName = d.name; localStorage.setItem('pvt_chat_name', myName);
-                        document.getElementById('my-name-display').innerText = myName;
                     }
                 }
 
@@ -733,10 +812,7 @@
                 activeTrackingInterval = setInterval(updateMyStatus, 60000);
                 listenForUsers();
                 
-                // Tell WebRTC to listen for calls
-                if(window.listenForIncomingCallsWebRTC) {
-                    window.listenForIncomingCallsWebRTC();
-                }
+                if(window.listenForIncomingCallsWebRTC) { window.listenForIncomingCallsWebRTC(); }
             } catch (err) {}
         }
 
@@ -774,30 +850,39 @@
 
         function renderContacts() {
             const term = searchInput.value.toLowerCase();
-            let filteredUsers = allUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
+            
+            // Handle display logic for locked chats
+            if(lockedContacts.length > 0 && !isViewingLocked) {
+                document.getElementById('locked-indicator').classList.remove('hidden');
+            } else {
+                document.getElementById('locked-indicator').classList.add('hidden');
+            }
 
-            filteredUsers.sort((a, b) => {
+            let displayUsers = allUsers.filter(u => isViewingLocked ? lockedContacts.includes(u.mobile) : !lockedContacts.includes(u.mobile));
+            displayUsers = displayUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
+
+            displayUsers.sort((a, b) => {
                 const timeA = latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0;
                 const timeB = latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0;
                 return timeB - timeA;
             });
 
             contactsContainer.innerHTML = '';
-            if (filteredUsers.length === 0) { contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-sm mt-10 p-6">No contacts found.</p>`; return; }
+            if (displayUsers.length === 0) { contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-sm mt-10 p-6">No chats found.</p>`; return; }
             
-            filteredUsers.forEach(user => {
+            displayUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
-                const activeClass = isActive ? 'contact-active bg-white/5' : 'hover:bg-white/5 border-l-4 border-transparent';
+                const activeClass = isActive ? 'contact-active' : 'hover:bg-[#202c33]';
                 
                 const latestMsg = latestMessages[user.mobile];
-                let msgPreview = "Tap to start chatting";
+                let msgPreview = "Tap to chat...";
                 let timeString = "";
                 let isUnread = false;
-                let previewClass = "text-slate-400";
+                let previewClass = "text-[#8696a0]";
 
                 if (latestMsg) {
                     const isMe = latestMsg.senderMobile === myMobile;
-                    let tickClass = latestMsg.read ? "text-cyan-400" : "text-slate-500";
+                    let tickClass = latestMsg.read ? "text-[#53bdeb]" : "text-[#8696a0]";
                     const prefix = isMe ? `<i class='fa-solid fa-check-double text-[11px] mr-1 ${tickClass}'></i> ` : "";
                     
                     if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
@@ -809,36 +894,33 @@
                     }
                     timeString = latestMsg.timeString || "";
                     const lastReadTime = parseInt(localStorage.getItem(`read_${user.mobile}`) || '0');
-                    if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-white font-semibold"; }
+                    if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-white font-medium"; }
                 }
 
-                let unreadBadge = isUnread ? `<span class="bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 shadow-[0_0_8px_rgba(236,72,153,0.8)]">New</span>` : ``;
+                let unreadBadge = isUnread ? `<span class="bg-[#00a884] text-[#111b21] text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2">New</span>` : ``;
                 
                 if(user.typingTo === myMobile) {
-                    msgPreview = "<span class='text-pink-400 font-medium animate-pulse text-xs'>typing...</span>";
+                    msgPreview = "<span class='text-[#00a884] font-medium text-xs'>typing...</span>";
                     previewClass = ""; unreadBadge = ""; 
                 }
 
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
-                const isOnline = (Date.now() - user.lastActive) < 120000;
-                const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-700';
-
+                
                 const div = document.createElement('div');
-                div.className = `flex items-center cursor-pointer transition-colors p-3 border-b border-white/5 ${activeClass}`;
+                div.className = `flex items-center cursor-pointer transition-colors p-3 border-b border-[#222d34] ${activeClass}`;
                 div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
                 
                 div.innerHTML = `
                     <div class="relative shrink-0 mr-4">
-                        <img src="${userAvatar}" class="w-12 h-12 rounded-[1rem] object-cover bg-slate-800 border border-white/10 shadow-sm">
-                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${dotColor} border-2 border-[#0f172a] rounded-full"></span>
+                        <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]">
                     </div>
                     <div class="flex-grow flex flex-col justify-center overflow-hidden">
                         <div class="flex justify-between items-center mb-0.5">
-                            <h3 class="text-[15px] font-bold text-slate-200 truncate pr-2">${user.name}</h3>
-                            <span class="text-[10px] ${isUnread ? 'text-pink-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
+                            <h3 class="text-[16px] text-white truncate pr-2">${user.name}</h3>
+                            <span class="text-[11px] ${isUnread ? 'text-[#00a884] font-medium' : 'text-[#8696a0]'} shrink-0">${timeString}</span>
                         </div>
                         <div class="flex justify-between items-center gap-2">
-                            <p class="text-xs ${previewClass} truncate w-full">${msgPreview}</p>
+                            <p class="text-[13px] ${previewClass} truncate w-full">${msgPreview}</p>
                             ${unreadBadge}
                         </div>
                     </div>
@@ -881,6 +963,9 @@
             document.getElementById('active-chat-avatar').src = contactAvatarUrl;
             document.getElementById('empty-chat-state').classList.add('hidden');
             
+            // Check lock status for dropdown button
+            document.getElementById('lock-chat-btn').innerText = lockedContacts.includes(contactMobile) ? "Unlock chat" : "Lock chat";
+            
             if (window.innerWidth < 768) {
                 if (!document.getElementById('sidebar').classList.contains('hidden')) history.pushState({ chatOpen: true }, "Chat", "#chat");
                 document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); 
@@ -900,11 +985,11 @@
                     if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
 
                     if(uData.typingTo === myMobile) {
-                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[11px] text-pink-400 font-bold tracking-widest uppercase animate-pulse';
+                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[12px] text-[#00a884] font-medium mt-0.5';
                     } else {
                         const isOnline = (Date.now() - uData.lastActive) < 120000;
-                        statusElem.innerText = isOnline ? 'Online' : 'Offline';
-                        statusElem.className = isOnline ? 'text-[11px] text-emerald-400 font-bold tracking-widest uppercase' : 'text-[11px] text-slate-500 font-bold tracking-widest uppercase';
+                        statusElem.innerText = isOnline ? 'online' : 'click here for contact info';
+                        statusElem.className = 'text-[12px] text-[#8696a0] mt-0.5';
                     }
                 }
             });
@@ -973,13 +1058,13 @@
                 });
 
                 msgInput.value = ''; clearFile();
-                msgInput.style.height = '40px'; toggleInputButtons();
+                msgInput.style.height = '24px'; toggleInputButtons();
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
             } catch (error) { alert("Message failed."); } 
-            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
+            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-1"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
-        // Custom Audio Player Dark Mode
+        // Custom Audio Player Styles for WA Theme
         window.toggleCustomAudio = (id, btn) => {
             const audio = document.getElementById(id);
             const icon = btn.querySelector('i');
@@ -991,12 +1076,8 @@
                         if(otherBtn) { otherBtn.querySelector('i').className = 'fa-solid fa-play'; }
                     }
                 });
-                audio.play();
-                icon.className = 'fa-solid fa-pause';
-            } else {
-                audio.pause();
-                icon.className = 'fa-solid fa-play';
-            }
+                audio.play(); icon.className = 'fa-solid fa-pause';
+            } else { audio.pause(); icon.className = 'fa-solid fa-play'; }
         };
         window.updateAudioProgress = (id, audio) => {
             const slider = document.getElementById('slider_'+id);
@@ -1028,13 +1109,13 @@
         function createMessageElement(docId, data, contactName) {
             const isMe = data.senderMobile === myMobile;
             
-            const bubbleClasses = isMe ? 'bg-gradient-to-br from-pink-600 to-purple-600 self-end rounded-tr-sm shadow-md' : 'bg-slate-800 border border-white/5 self-start rounded-tl-sm shadow-md';
-            const textColor = 'text-white';
+            const bubbleClasses = isMe ? 'bg-[#005c4b] self-end rounded-tr-none shadow-[0_1px_0.5px_rgba(11,20,26,.13)]' : 'bg-[#202c33] self-start rounded-tl-none shadow-[0_1px_0.5px_rgba(11,20,26,.13)]';
+            const textColor = 'text-[#e9edef]';
             
             const msgDiv = document.createElement('div');
             msgDiv.id = `msg-${docId}`;
-            const bottomMargin = data.reaction ? 'mb-6' : 'mb-2';
-            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[65%] ${bubbleClasses} p-2.5 md:p-3 rounded-2xl ${bottomMargin} relative cursor-pointer select-none group`;
+            const bottomMargin = data.reaction ? 'mb-6' : 'mb-1';
+            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[65%] ${bubbleClasses} px-2 pt-1.5 pb-1 rounded-xl ${bottomMargin} relative cursor-pointer select-none group`;
             msgDiv.onclick = (e) => toggleReactionMenu(docId, e);
             
             let content = '';
@@ -1044,69 +1125,72 @@
                     const audioId = `audio_pvt_${docId}`;
                     const avatarForAudio = isMe ? getAvatarUrl(myName, myAvatarUrl) : document.getElementById('active-chat-avatar').src;
                     
-                    const micColor = isMe ? 'text-white' : 'text-pink-400';
-                    const iconColor = isMe ? 'text-white hover:text-pink-200' : 'text-pink-400 hover:text-pink-300';
-                    const timeColor = isMe ? 'text-white/80' : 'text-slate-400';
+                    const micColor = isMe ? 'text-[#53bdeb]' : 'text-[#00a884]';
+                    const iconColor = 'text-[#8696a0] hover:text-[#d1d7db]';
+                    const timeColor = 'text-[#8696a0]';
+                    const sliderColor = isMe ? 'white' : '#00a884';
 
                     content = `
-                    <div class="flex items-center gap-3 w-56 md:w-64 pt-1 pb-1">
+                    <div class="flex items-center gap-3 w-56 md:w-64 pt-2 pb-2 pl-1">
                         <div class="relative shrink-0">
-                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-full object-cover shadow-sm border-2 ${isMe ? 'border-white/30' : 'border-slate-600'} bg-slate-700">
-                            <div class="absolute -bottom-1 -right-1 ${isMe ? 'bg-purple-700 border-white/20' : 'bg-slate-800 border-slate-600'} rounded-full p-1 border-2">
-                                <i class="fa-solid fa-microphone ${micColor} text-[9px]"></i>
+                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-full object-cover">
+                            <div class="absolute -bottom-1 -right-1 bg-transparent rounded-full p-1">
+                                <i class="fa-solid fa-microphone ${micColor} text-[14px]"></i>
                             </div>
                         </div>
                         <button id="btn_${audioId}" onclick="toggleCustomAudio('${audioId}', this); event.stopPropagation();" class="text-3xl ${iconColor} transition-colors w-8 text-left">
-                            <i class="fa-solid fa-play drop-shadow-sm"></i>
+                            <i class="fa-solid fa-play"></i>
                         </button>
                         <div class="flex flex-col flex-grow relative top-1">
-                            <input type="range" id="slider_${audioId}" min="0" max="100" value="0" class="audio-slider w-full" style="color: ${isMe ? 'white' : '#f472b6'}" oninput="seekAudio('${audioId}', this); event.stopPropagation();" onclick="event.stopPropagation();">
+                            <input type="range" id="slider_${audioId}" min="0" max="100" value="0" class="audio-slider w-full" style="background: rgba(134,150,160,0.3); color: ${sliderColor}" oninput="seekAudio('${audioId}', this); event.stopPropagation();" onclick="event.stopPropagation();">
                             <div class="flex justify-between items-center mt-1.5">
-                                <span id="time_${audioId}" class="text-[10px] font-bold ${timeColor}">0:00</span>
+                                <span id="time_${audioId}" class="text-[11px] ${timeColor}">0:00</span>
                             </div>
                         </div>
                         <audio id="${audioId}" src="${data.fileUrl}" preload="metadata" onloadedmetadata="initAudioDuration('${audioId}', this)" ontimeupdate="updateAudioProgress('${audioId}', this)" onended="audioEnded('${audioId}', this)"></audio>
                     </div>`;
                 } 
                 else if (data.fileType && data.fileType.startsWith('video/')) {
-                    content = `<video controls class="rounded-xl mb-2 max-h-64 w-full object-cover bg-black/40 border border-white/10"><source src="${data.fileUrl}"></video>`;
+                    content = `<video controls class="rounded-lg mb-1 mt-1 max-h-64 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
                 } else if (data.fileType && data.fileType.startsWith('image/')) {
-                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-2 max-h-64 w-full object-cover cursor-pointer border border-white/10" onclick="openLightbox('${data.fileUrl}', event)">`;
+                    content = `<img src="${data.fileUrl}" class="rounded-lg mb-1 mt-1 max-h-64 w-full object-cover cursor-pointer" onclick="openLightbox('${data.fileUrl}', event)">`;
                 } else {
                     const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
-                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="${isMe ? 'bg-white/10 hover:bg-white/20' : 'bg-slate-900/50 hover:bg-slate-900'} p-3 rounded-xl flex items-center gap-3 text-sm mb-2 transition-colors w-full border ${isMe ? 'border-white/10' : 'border-white/5'}">
-                        <i class="fa-solid fa-file-arrow-down text-2xl ${isMe ? 'text-white' : 'text-pink-400'} shrink-0"></i> 
-                        <span class="truncate font-semibold ${textColor}">${data.fileName}</span>
+                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-[#2a3942]/50 hover:bg-[#2a3942] p-3 rounded-lg flex items-center gap-3 text-sm mb-1 mt-1 transition-colors w-full border border-transparent">
+                        <i class="fa-solid fa-file-arrow-down text-2xl text-[#8696a0] shrink-0"></i> 
+                        <span class="truncate font-medium ${textColor}">${data.fileName}</span>
                     </a>`;
                 }
             }
             
-            let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 ${textColor} font-medium mt-1">${escapeHTML(data.text)}</p>` : '';
-            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-900 border border-white/10 rounded-full px-2 py-0.5 text-[11px] shadow-lg z-10 hover:bg-slate-800 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
+            let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-snug px-1 ${textColor} mt-1">${escapeHTML(data.text)}</p>` : '';
+            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-[#202c33] border border-[#222d34] rounded-full px-2 py-0.5 text-[12px] shadow-sm z-10 hover:bg-[#2a3942] transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
 
             let popupMenu = `
-                <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-12 bg-slate-900 border border-white/10 rounded-[1.5rem] flex items-center gap-2 px-3 py-1.5 shadow-xl z-[60] min-w-max">
+                <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-12 bg-[#233138] border border-[#222d34] rounded-full flex items-center gap-2 px-3 py-1.5 shadow-xl z-[60] min-w-max">
                     <button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 transition-all text-xl">👍</button>
                     <button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 transition-all text-xl">❤️</button>
                     <button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 transition-all text-xl">😂</button>
                     <button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 transition-all text-xl">😢</button>
-                    ${isMe ? `<div class="w-[1px] h-5 bg-white/20 mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-red-500 text-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    ${isMe ? `<div class="w-[1px] h-5 bg-[#374045] mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-[#f15c6d] text-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
                 </div>
             `;
 
-            let tickColor = data.read ? "text-cyan-400 drop-shadow-md" : "text-white/50";
+            let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]";
             let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[11px] ${tickColor} ml-1"></i>` : '';
-            let timeColor = isMe ? 'text-white/70' : 'text-slate-400';
+            let timeColor = 'text-[#8696a0]';
             
-            let timeMargin = (data.text || !data.fileUrl || (data.fileType && data.fileType.startsWith('audio/'))) ? "mt-1 float-right" : `absolute bottom-2 right-2 px-2 py-0.5 rounded-full backdrop-blur-sm ${isMe ? 'bg-black/30' : 'bg-black/50'}`;
+            let timeMargin = (data.text || !data.fileUrl || (data.fileType && data.fileType.startsWith('audio/'))) ? "mt-0.5 float-right inline-block pl-3" : `absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md backdrop-blur-sm bg-black/40`;
 
             msgDiv.innerHTML = `
                 ${popupMenu}
                 ${content}
-                ${finalHtmlText}
-                <div class="flex items-center justify-end px-1 ${timeMargin}">
-                    <span class="text-[10px] font-bold ${timeColor} drop-shadow-sm">${data.timeString}</span>
-                    ${ticksHtml}
+                <div class="relative">
+                    <span style="display:inline-block; max-width: calc(100% - 60px); vertical-align:top;">${finalHtmlText}</span>
+                    <div class="inline-flex items-center justify-end ${timeMargin} relative top-[2px]">
+                        <span class="text-[10.5px] ${timeColor}">${data.timeString}</span>
+                        ${ticksHtml}
+                    </div>
                 </div>
                 ${reactionBadge}
             `;
