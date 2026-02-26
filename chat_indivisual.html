@@ -271,7 +271,7 @@
                         <div class="relative">
                             <button onclick="toggleChatMenu(event)" class="px-2 hover:text-white transition-colors"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                             <div id="chat-dropdown" class="dropdown-menu absolute top-full right-0 mt-2 bg-[#233138] border border-[#222d34] rounded-md shadow-xl py-2 w-48 z-50 overflow-hidden">
-                                <button onclick="toggleLockCurrentChat()" id="lock-chat-btn" class="w-full text-left px-5 py-3 text-sm text-[#d1d7db] hover:bg-[#111b21] transition-colors font-medium">Lock chat</button>
+                                <button onclick="toggleLockCurrentChat(event)" id="lock-chat-btn" class="w-full text-left px-5 py-3 text-sm text-[#d1d7db] hover:bg-[#111b21] transition-colors font-medium">Lock chat</button>
                                 <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-[#f15c6d] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
                                     <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear chat
                                 </button>
@@ -505,6 +505,16 @@
         // Menus
         window.toggleChatMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('chat-dropdown').classList.toggle('show'); }
         window.toggleSidebarMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('sidebar-dropdown').classList.toggle('show'); }
+        
+        // --- NEW: Open specific Contact Menu directly from the list ---
+        window.toggleContactMenu = (mobile, e) => {
+            e.stopPropagation();
+            const menu = document.getElementById(`contact-menu-${mobile}`);
+            const isHidden = !menu.classList.contains('show');
+            closeAllMenus();
+            if(isHidden) menu.classList.add('show');
+        }
+
         window.closeAllMenus = () => {
             document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show'));
             document.querySelectorAll('.reaction-menu-popup').forEach(el => el.classList.add('hidden'));
@@ -545,7 +555,7 @@
             closeGroupModal();
         }
 
-        // --- NEW: Locked Chats Logic (Updated with Add function) ---
+        // --- NEW: Locked Chats Logic ---
         window.openLockedChats = () => {
             closeAllMenus();
             document.getElementById('pin-input').value = "";
@@ -601,7 +611,7 @@
             closeChatMobile(); 
         }
 
-        // --- Add Chats inside Locked View ---
+        // Add from inside locked view
         window.openAddLockModal = () => {
             const list = document.getElementById('unlocked-contact-list');
             list.innerHTML = '';
@@ -635,27 +645,41 @@
             closeAddLockModal();
         }
 
-        window.toggleLockCurrentChat = () => {
+        // Lock/Unlock from Sidebar Contact List Directly or inside chat
+        window.toggleLockContact = (mobile, e) => {
+            if(e) e.stopPropagation();
             closeAllMenus();
-            if(!activeContactMobile) return;
+            
             if(!userPin) {
-                alert("Please set up a PIN from the 'Locked chats' menu first.");
-                return;
+                userPin = prompt("Set a 4-digit PIN first to lock chats:");
+                if(userPin && userPin.length >= 4) {
+                    localStorage.setItem('nexus_pin', userPin);
+                } else { return; }
             }
-            if(lockedContacts.includes(activeContactMobile)) {
-                lockedContacts = lockedContacts.filter(m => m !== activeContactMobile);
-                document.getElementById('lock-chat-btn').innerText = "Lock chat";
-                alert("Chat unlocked!");
+
+            if(lockedContacts.includes(mobile)) {
+                lockedContacts = lockedContacts.filter(m => m !== mobile);
             } else {
-                lockedContacts.push(activeContactMobile);
-                document.getElementById('lock-chat-btn').innerText = "Unlock chat";
-                alert("Chat locked! It is now hidden in the Locked folder.");
-                closeChatMobile();
+                lockedContacts.push(mobile);
             }
             localStorage.setItem('locked_contacts', JSON.stringify(lockedContacts));
-            renderContacts();
+            
+            if (activeContactMobile === mobile) {
+                // If locking/unlocking the actively opened chat, close it to match the view state
+                if ((!isViewingLocked && lockedContacts.includes(mobile)) || 
+                    (isViewingLocked && !lockedContacts.includes(mobile))) {
+                    closeChatMobile(); 
+                } else {
+                    renderContacts();
+                }
+            } else {
+                renderContacts();
+            }
         }
-
+        
+        window.toggleLockCurrentChat = (e) => {
+            toggleLockContact(activeContactMobile, e);
+        }
 
         // Profile Settings
         window.openSettings = () => {
@@ -931,13 +955,14 @@
         function renderContacts() {
             const term = searchInput.value.toLowerCase();
             
-            // Handle display logic for locked chats
+            // Handle display logic for locked chats indicator
             if(lockedContacts.length > 0 && !isViewingLocked) {
                 document.getElementById('locked-indicator').classList.remove('hidden');
             } else {
                 document.getElementById('locked-indicator').classList.add('hidden');
             }
 
+            // Filter users properly based on Lock Status
             let displayUsers = allUsers.filter(u => isViewingLocked ? lockedContacts.includes(u.mobile) : !lockedContacts.includes(u.mobile));
             displayUsers = displayUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
 
@@ -987,14 +1012,13 @@
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
                 
                 const div = document.createElement('div');
-                div.className = `flex items-center cursor-pointer transition-colors p-3 border-b border-[#222d34] ${activeClass}`;
-                div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
+                div.className = `flex items-center cursor-pointer transition-colors p-3 border-b border-[#222d34] ${activeClass} group relative`;
                 
                 div.innerHTML = `
-                    <div class="relative shrink-0 mr-4">
+                    <div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
                         <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]">
                     </div>
-                    <div class="flex-grow flex flex-col justify-center overflow-hidden">
+                    <div class="flex-grow flex flex-col justify-center overflow-hidden" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
                         <div class="flex justify-between items-center mb-0.5">
                             <h3 class="text-[16px] text-white truncate pr-2">${user.name}</h3>
                             <span class="text-[11px] ${isUnread ? 'text-[#00a884] font-medium' : 'text-[#8696a0]'} shrink-0">${timeString}</span>
@@ -1002,6 +1026,18 @@
                         <div class="flex justify-between items-center gap-2">
                             <p class="text-[13px] ${previewClass} truncate w-full">${msgPreview}</p>
                             ${unreadBadge}
+                        </div>
+                    </div>
+
+                    <div class="shrink-0 relative ml-1">
+                        <button onclick="toggleContactMenu('${user.mobile}', event)" class="text-[#8696a0] hover:text-white px-2 py-3 transition-colors">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <div id="contact-menu-${user.mobile}" class="dropdown-menu absolute top-full right-0 mt-1 bg-[#233138] border border-[#222d34] rounded-md shadow-xl py-1 w-36 z-[60]">
+                            <button onclick="toggleLockContact('${user.mobile}', event)" class="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#111b21] transition-colors flex items-center">
+                                <i class="fa-solid ${isViewingLocked ? 'fa-unlock' : 'fa-lock'} text-[#00a884] w-5 text-center mr-1"></i> 
+                                ${isViewingLocked ? 'Unlock Chat' : 'Lock Chat'}
+                            </button>
                         </div>
                     </div>
                 `;
