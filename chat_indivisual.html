@@ -96,15 +96,15 @@
     <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-lg transition-opacity">
         <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-500 to-purple-600"></div>
-            <div class="w-20 h-20 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-pink-500/30 transform rotate-3">
-                <i class="fa-solid fa-bolt-lightning text-3xl text-pink-400 -rotate-3"></i>
+            <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-pink-500/30 transform rotate-3">
+                <i class="fa-solid fa-paper-plane text-3xl text-white -rotate-3"></i>
             </div>
             <h2 class="text-2xl font-black mb-2 text-white tracking-tight">Nexus Messenger</h2>
             <p class="text-slate-400 text-sm mb-8 font-medium">Secure and unified private chat.</p>
             
             <form id="join-form" class="space-y-4">
-                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all font-bold text-base shadow-inner" placeholder="Your Name">
-                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-bold tracking-widest text-base shadow-inner" placeholder="Mobile Number (11 digits)">
+                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 transition-all font-bold text-base shadow-inner" placeholder="Your Name">
+                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 transition-all font-bold tracking-widest text-base shadow-inner" placeholder="Mobile Number (11 digits)">
                 
                 <button type="submit" id="join-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 text-sm mt-4">Connect Securely</button>
             </form>
@@ -132,7 +132,7 @@
 
             <div class="mb-6 text-left">
                 <label class="text-pink-400 text-xs font-bold uppercase tracking-widest mb-2 block ml-1">Display Name</label>
-                <div class="flex items-center bg-black/40 rounded-2xl border border-white/10 px-4 py-2 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 transition-all">
+                <div class="flex items-center bg-black/40 rounded-2xl border border-white/10 px-4 py-2 focus-within:border-pink-500 transition-colors">
                     <input type="text" id="settings-name-input" class="w-full bg-transparent p-2 text-white focus:outline-none text-base font-bold" placeholder="Enter your name">
                     <i class="fa-solid fa-pen text-slate-500 text-sm"></i>
                 </div>
@@ -150,7 +150,6 @@
             
             <!-- LEFT SIDEBAR (Contacts) -->
             <div id="sidebar" class="w-full md:w-[380px] lg:w-[420px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 absolute md:relative inset-0 md:inset-auto">
-                <!-- Top Header -->
                 <header class="p-4 bg-black/20 flex items-center justify-between shrink-0 border-b border-white/5" style="padding-top: max(1rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
                         <img id="my-avatar" src="" onclick="openSettings()" class="w-11 h-11 rounded-[1rem] object-cover cursor-pointer hover:opacity-80 transition-opacity border border-white/10 shadow-md bg-slate-800" title="Profile Settings">
@@ -166,7 +165,7 @@
                         <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-pink-600 hover:text-white transition-colors" title="Settings">
                             <i class="fa-solid fa-gear text-sm"></i>
                         </button>
-                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition-colors" title="Logout">
+                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
                             <i class="fa-solid fa-right-from-bracket text-sm"></i>
                         </button>
                     </div>
@@ -197,21 +196,20 @@
                     </div>
                     <h2 class="text-3xl font-black text-white mb-3 tracking-tight">Nexus Chat Suite</h2>
                     <p class="text-slate-400 text-sm max-w-sm text-center px-4 font-medium leading-relaxed">Select a contact to start an encrypted conversation. Experience seamless messaging.</p>
-                    <div class="mt-8 bg-black/40 border border-white/10 shadow-sm px-4 py-2 rounded-full text-xs text-slate-400 flex items-center gap-2 font-bold">
+                    <div class="mt-8 bg-black/40 border border-white/5 px-4 py-2 rounded-full text-xs text-slate-400 flex items-center gap-2 font-bold">
                         <i class="fa-solid fa-shield-halved text-emerald-500"></i> P2P Encryption Active
                     </div>
                 </div>
 
-                <!-- Chat Header -->
                 <header class="p-3 md:p-4 bg-black/20 flex items-center justify-between shrink-0 relative z-30 border-b border-white/10 shadow-md" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
                         <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-slate-300 hover:bg-white/10 shrink-0 transition-colors bg-white/5 border border-white/10">
                             <i class="fa-solid fa-arrow-left text-sm"></i>
                         </button>
                         <div class="flex items-center gap-3 cursor-pointer">
-                            <img id="active-chat-avatar" src="" class="w-11 h-11 rounded-[1rem] object-cover border border-white/10 shadow-sm bg-slate-800">
+                            <img id="active-chat-avatar" src="" class="w-11 h-11 md:w-12 md:h-12 rounded-[1rem] object-cover border border-white/10 shadow-sm bg-slate-800">
                             <div class="flex flex-col justify-center">
-                                <h2 id="active-chat-name" class="font-bold text-white text-base leading-tight">Contact</h2>
+                                <h2 id="active-chat-name" class="font-bold text-white text-base leading-tight">Contact Name</h2>
                                 <p id="active-chat-status" class="text-[11px] text-pink-400 font-bold tracking-widest uppercase mt-0.5">...</p>
                             </div>
                         </div>
@@ -219,11 +217,7 @@
                     <div class="flex gap-2 text-slate-300 relative pr-2">
                         <button onclick="startCall('video')" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-pink-600 hover:text-white transition-all shadow-sm text-pink-400"><i class="fa-solid fa-video text-sm"></i></button>
                         <button onclick="startCall('audio')" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-emerald-600 hover:text-white transition-all shadow-sm text-emerald-400"><i class="fa-solid fa-phone text-sm"></i></button>
-                        
-                        <div class="w-[1px] h-6 bg-white/10 mx-1 self-center hidden md:block"></div>
-                        
                         <button onclick="toggleChatMenu(event)" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-sm"></i></button>
-                        
                         <div id="chat-dropdown" class="dropdown-menu absolute top-14 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-xl py-2 w-48 z-50 overflow-hidden">
                             <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-3 font-bold">
                                 <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear Chat
@@ -241,7 +235,6 @@
                 </main>
 
                 <footer class="p-3 md:p-4 glass-panel shrink-0 border-t border-white/5 z-30 relative" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
-                    
                     <div id="file-preview-container" class="hidden w-full px-1 mb-3">
                         <div class="bg-slate-800/80 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-lg">
                             <div class="flex items-center gap-3 overflow-hidden">
@@ -260,7 +253,6 @@
                         </div>
                     </div>
 
-                    <!-- Recording UI -->
                     <div id="recording-ui" class="hidden flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-2xl p-2 mb-3 animate-pulse shadow-sm">
                         <div class="flex items-center gap-3 text-red-400 pl-4 font-bold text-sm">
                             <i class="fa-solid fa-microphone-lines animate-bounce text-lg"></i> Recording Audio...
@@ -299,7 +291,7 @@
         </div>
     </div>
 
-    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL 🔥 -->
+    <!-- 🔥 CALL MODAL 🔥 -->
     <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex-col">
         <audio id="remote-audio" autoplay playsinline></audio>
         <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-0 bg-black"></video>
@@ -314,47 +306,93 @@
             <p id="call-status" class="text-pink-400 text-sm font-bold tracking-widest uppercase mb-12">Calling...</p>
         </div>
         
-        <!-- Call Controls -->
         <div class="absolute bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 z-30 w-full px-4">
             <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-600 text-white text-2xl hover:bg-emerald-500 hover:scale-110 transition-all shadow-lg shadow-emerald-600/40 flex items-center justify-center">
                 <i class="fa-solid fa-phone"></i>
             </button>
-
-            <div id="in-call-controls" class="hidden flex items-center gap-3 bg-white/10 backdrop-blur-lg p-2.5 rounded-full border border-white/20 shadow-2xl">
-                <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-white/20 text-white text-lg hover:bg-white/30 transition-colors shadow-inner">
+            <div id="in-call-controls" class="hidden flex items-center gap-3 bg-slate-900/80 backdrop-blur-lg p-2.5 rounded-full border border-white/10 shadow-2xl">
+                <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition-colors shadow-inner">
                     <i class="fa-solid fa-microphone"></i>
                 </button>
-                <button id="cam-toggle-btn" onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-white/20 text-white text-lg hover:bg-white/30 transition-colors hidden shadow-inner">
+                <button id="cam-toggle-btn" onclick="toggleCamera()" class="w-12 h-12 rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition-colors hidden shadow-inner">
                     <i class="fa-solid fa-video"></i>
                 </button>
-                
-                <div class="w-[1px] h-8 bg-white/20 mx-1"></div>
-                
+                <div class="w-[1px] h-8 bg-white/10 mx-1"></div>
                 <button id="hangup-btn" onclick="hangupCall()" class="w-14 h-14 rounded-full bg-red-600 text-white text-xl hover:bg-red-500 hover:scale-110 transition-all shadow-lg shadow-red-600/40 flex items-center justify-center">
                     <i class="fa-solid fa-phone-slash"></i>
                 </button>
             </div>
-            
-            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-600 text-white text-2xl hover:bg-red-500 hover:scale-110 transition-all shadow-lg shadow-red-600/40 flex items-center justify-center">
+            <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-600 text-white text-2xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-600/40 flex items-center justify-center">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
     </div>
 
-    <!-- Firebase Logic & WebRTC Import -->
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // 🔥 Import WebRTC Engine 🔥
-        import { setupWebRTC } from "./webrtc_core.js";
 
+        const appStartTime = Date.now();
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+        const SYNC_APP_ID = "rasel-mia-universal-sync";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let myName = localStorage.getItem('pvt_chat_name') || '';
+        let myMobile = localStorage.getItem('pvt_chat_mobile') || '';
+        let myAvatarUrl = localStorage.getItem('pvt_chat_avatar') || ''; 
+        let activeContactMobile = null;
+        let allUsers = [];
+        let latestMessages = {}; 
+        let chatListeners = {};  
+        let currentChatUnsubscribe = null;
+        let userStatusUnsubscribe = null;
+        let selectedFile = null;
+        let typingTimeout = null; 
+        let mediaRecorder, audioChunks = [], isRecording = false, settingsSelectedFile = null;
+        
+        // WebRTC Setup (Module error fixed - all code kept inline)
+        const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+        let pc = null, localStream = null, incomingCallData = null, currentCallId = null, remoteDescriptionSet = false, iceCandidateQueue = [];
+
+        // UI Helpers
+        function getAvatarUrl(name, customUrl) { return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ec4899&color=fff&bold=true`; }
+        function formatTime(seconds) { if(!seconds || isNaN(seconds)) return "0:00"; const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`; }
+
+        // 🔥 Service Worker & Background Notif Logic 🔥
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('firebase-messaging-sw2.js').catch(e => console.warn("SW not registered", e));
+        }
+
+        function triggerSystemNotification(title, body) {
+            // Check if permission is granted and tab is hidden
+            if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
+                if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(title, { body: body, icon: 'developer.jpg', vibrate: [200, 100, 200] });
+                    }).catch(e => {
+                        new Notification(title, { body: body, icon: 'developer.jpg' });
+                    });
+                } else {
+                    new Notification(title, { body: body, icon: 'developer.jpg' });
+                }
+            }
+        }
+
+        // Viewport Fix
         function setRealViewportHeight() {
             let vh = window.innerHeight;
-            if (window.visualViewport) {
-                vh = window.visualViewport.height;
-            }
+            if (window.visualViewport) vh = window.visualViewport.height;
             document.body.style.height = vh + 'px';
             document.documentElement.style.height = vh + 'px';
             
@@ -367,345 +405,18 @@
         if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealViewportHeight);
         setRealViewportHeight();
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
-            authDomain: "mywebtools-f8d53.firebaseapp.com",
-            projectId: "mywebtools-f8d53",
-            storageBucket: "mywebtools-f8d53.firebasestorage.app",
-            messagingSenderId: "979594414301",
-            appId: "1:979594414301:web:7048c995e56e331a85f334"
-        };
-        
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
-        const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
-        const SYNC_APP_ID = "rasel-mia-universal-sync";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let myName = localStorage.getItem('pvt_chat_name') || '';
-        let myMobile = localStorage.getItem('pvt_chat_mobile') || '';
-        let myAvatarUrl = localStorage.getItem('pvt_chat_avatar') || ''; 
-        
-        let activeContactMobile = null;
-        let allUsers = [];
-        let latestMessages = {}; 
-        let chatListeners = {};  
-
-        let currentChatUnsubscribe = null;
-        let userStatusUnsubscribe = null;
-        let activeTrackingInterval = null;
-        let selectedFile = null;
-        let typingTimeout = null; 
-
-        let mediaRecorder;
-        let audioChunks = [];
-        let isRecording = false;
-        let settingsSelectedFile = null;
-
-        const appStartTime = Date.now();
-
-        // 🔥 Initialize the External WebRTC Engine 🔥
-        setupWebRTC(
-            db, 
-            SYNC_APP_ID, 
-            () => myMobile, 
-            () => activeContactMobile, 
-            () => allUsers
-        );
-
-        const joinModal = document.getElementById('join-modal');
-        const appContainer = document.getElementById('app-container');
-        const contactsContainer = document.getElementById('contacts-container');
-        const searchInput = document.getElementById('search-input');
-        const emptyState = document.getElementById('empty-chat-state');
-        
-        const chatArea = document.getElementById('chat-area');
-        const sidebar = document.getElementById('sidebar');
-        const msgBox = document.getElementById('messages-box');
-        const chatForm = document.getElementById('chat-form');
-        const msgInput = document.getElementById('msg-input');
-        
-        const sendBtn = document.getElementById('send-btn');
-        const micBtn = document.getElementById('mic-btn');
-        const fileInput = document.getElementById('file-input');
-        const previewIcon = document.getElementById('preview-icon');
-        const previewImg = document.getElementById('preview-img');
-
-        function getAvatarUrl(name, customUrl) {
-            return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ec4899&color=fff&bold=true`;
-        }
-        function formatTime(seconds) {
-            if(!seconds || isNaN(seconds)) return "0:00";
-            const m = Math.floor(seconds / 60);
-            const s = Math.floor(seconds % 60);
-            return `${m}:${s < 10 ? '0' : ''}${s}`;
-        }
-
-        if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
-
-        window.openLightbox = (url, e) => {
-            e.stopPropagation();
-            const lightbox = document.getElementById('image-lightbox');
-            const img = document.getElementById('lightbox-img');
-            img.src = url;
-            lightbox.classList.remove('hidden');
-            setTimeout(() => { lightbox.classList.remove('opacity-0'); img.classList.remove('scale-95'); img.classList.add('scale-100'); }, 10);
-        };
-        window.closeLightbox = () => {
-            const lightbox = document.getElementById('image-lightbox');
-            const img = document.getElementById('lightbox-img');
-            lightbox.classList.add('opacity-0'); img.classList.remove('scale-100'); img.classList.add('scale-95');
-            setTimeout(() => lightbox.classList.add('hidden'), 300);
-        };
-
-        window.toggleChatMenu = (e) => { e.stopPropagation(); document.getElementById('chat-dropdown').classList.toggle('show'); }
-        window.closeAllMenus = () => {
-            document.getElementById('chat-dropdown').classList.remove('show');
-            document.querySelectorAll('.reaction-menu-popup').forEach(el => el.classList.add('hidden'));
-        }
-        document.body.addEventListener('click', closeAllMenus);
-
-        window.logoutPvtChat = () => {
-            if(confirm("Are you sure you want to log out?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        };
-
-        window.openSettings = () => {
-            document.getElementById('settings-modal').classList.remove('hidden');
-            document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl);
-            document.getElementById('settings-name-input').value = myName;
-            settingsSelectedFile = null;
-        }
-
-        window.closeSettings = () => {
-            document.getElementById('settings-modal').classList.add('hidden');
-            document.getElementById('profile-pic-input').value = '';
-        }
-
-        window.previewProfilePic = (event) => {
-            const file = event.target.files[0];
-            if(file && file.type.startsWith('image/')) {
-                if(file.size > 5 * 1024 * 1024) { alert("Max size 5MB allowed for profile picture"); return; }
-                settingsSelectedFile = file;
-                const reader = new FileReader();
-                reader.onload = (e) => document.getElementById('settings-avatar-preview').src = e.target.result;
-                reader.readAsDataURL(file);
-            }
-        }
-
-        window.saveProfileSettings = async () => {
-            const newName = document.getElementById('settings-name-input').value.trim();
-            if(!newName) { alert("Name cannot be empty"); return; }
-
-            const saveBtn = document.getElementById('save-settings-btn');
-            const originalText = saveBtn.innerHTML;
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xl"></i> Saving...';
-
-            try {
-                let updatedAvatarUrl = myAvatarUrl;
-
-                if(settingsSelectedFile) {
-                    const formData = new FormData();
-                    formData.append('file', settingsSelectedFile);
-                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                    const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                    const uploadResult = await response.json();
-                    if(uploadResult.secure_url) updatedAvatarUrl = uploadResult.secure_url;
-                    else throw new Error("Cloudinary failed");
-                }
-
-                await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
-                    name: newName, avatarUrl: updatedAvatarUrl
-                }, { merge: true });
-
-                myName = newName;
-                myAvatarUrl = updatedAvatarUrl;
-                localStorage.setItem('pvt_chat_name', newName);
-                localStorage.setItem('pvt_chat_avatar', updatedAvatarUrl);
-                document.getElementById('my-avatar').src = getAvatarUrl(newName, updatedAvatarUrl);
-                document.getElementById('my-name-display').innerText = newName;
-                
-                saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
-                setTimeout(() => {
-                    closeSettings();
-                    saveBtn.innerHTML = originalText;
-                    saveBtn.disabled = false;
-                }, 1000);
-            } catch(e) {
-                alert("Upload failed. Check connection.");
-                saveBtn.innerHTML = originalText;
-                saveBtn.disabled = false;
-            }
-        }
-
-        window.clearEntireChat = async () => {
-            closeAllMenus();
-            if(confirm("Delete entire chat history?")) {
-                try {
-                    const chatId = generateChatId(myMobile, activeContactMobile);
-                    const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
-                    const q = query(msgRef, limit(100)); 
-                    const querySnapshot = await getDocs(q);
-                    querySnapshot.forEach((document) => { deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, document.id)); });
-                    document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
-                } catch(e) {}
-            }
-        }
-
-        document.getElementById('join-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const n = document.getElementById('reg-name').value.trim();
-            const m = document.getElementById('reg-mobile').value.trim();
-            const joinBtn = document.getElementById('join-btn');
-
-            if (n && m.length === 11) {
-                const originalText = joinBtn.innerHTML;
-                joinBtn.disabled = true;
-                joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting...';
-
-                try {
-                    await signInAnonymously(auth);
-                    const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', m);
-                    const userSnap = await getDoc(userRef);
-
-                    if (userSnap.exists()) {
-                        const existingName = userSnap.data().name;
-                        if (existingName.toLowerCase() !== n.toLowerCase()) {
-                            alert(`This number is registered to "${existingName}". Please use your correct name.`);
-                            joinBtn.disabled = false; joinBtn.innerHTML = originalText;
-                            return; 
-                        }
-                        if(userSnap.data().avatarUrl) {
-                            myAvatarUrl = userSnap.data().avatarUrl;
-                            localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
-                        }
-                    } else {
-                        await setDoc(userRef, { name: n, mobile: m, lastActive: Date.now(), typingTo: null, avatarUrl: '' });
-                    }
-
-                    myName = n; myMobile = m;
-                    localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m);
-
-                    joinModal.classList.add('hidden'); startApp();
-
-                } catch (err) {
-                    alert("Connection error!");
-                    joinBtn.disabled = false; joinBtn.innerHTML = originalText;
-                }
-            } else { alert("Please provide valid details."); }
-        };
-
-        function toggleInputButtons() {
-            const hasText = msgInput.value.trim().length > 0;
-            const hasFile = !!selectedFile;
-            
-            if (hasText || hasFile) {
-                micBtn.classList.add('hidden'); sendBtn.classList.remove('hidden'); sendBtn.disabled = false;
-            } else {
-                micBtn.classList.remove('hidden'); sendBtn.classList.add('hidden');
-            }
-        }
-
-        msgInput.addEventListener('focus', () => { setTimeout(() => setRealViewportHeight(), 150); });
-        msgInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px';
-            toggleInputButtons();
-
-            if (activeContactMobile) {
-                setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: activeContactMobile }, { merge: true });
-                clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => {
-                    setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: null }, { merge: true });
-                }, 2000);
-            }
-        });
-
-        msgInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if(!sendBtn.disabled) chatForm.dispatchEvent(new Event('submit')); }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                if (file.size > 30 * 1024 * 1024) { alert("File size limit is 30MB!"); fileInput.value = ''; return; }
-                selectedFile = file;
-                document.getElementById('file-preview-name').innerText = file.name;
-                document.getElementById('file-preview-size').innerText = (file.size / 1024 / 1024).toFixed(2) + " MB";
-                
-                previewIcon.className = "hidden"; previewImg.classList.add("hidden");
-                if(file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => { previewImg.src = e.target.result; previewImg.classList.remove('hidden'); };
-                    reader.readAsDataURL(file);
-                } else {
-                    previewIcon.className = "fa-solid text-2xl";
-                    if(file.type.startsWith('video/')) previewIcon.classList.add("fa-video", "text-pink-500");
-                    else if(file.type.startsWith('audio/')) previewIcon.classList.add("fa-headphones", "text-emerald-500");
-                    else previewIcon.classList.add("fa-file", "text-slate-400");
-                }
-                document.getElementById('file-preview-container').classList.remove('hidden');
-                toggleInputButtons();
-            }
-        });
-
-        window.clearFile = () => {
-            selectedFile = null; fileInput.value = '';
-            document.getElementById('file-preview-container').classList.add('hidden');
-            previewImg.src = ''; toggleInputButtons();
-        };
-
-        window.startRecording = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                mediaRecorder.addEventListener("dataavailable", event => { audioChunks.push(event.data); });
-                mediaRecorder.start();
-                isRecording = true;
-                document.getElementById('recording-ui').classList.remove('hidden');
-                msgInput.parentElement.classList.add('hidden');
-                micBtn.classList.add('hidden'); 
-            } catch (err) { alert("Microphone permission denied."); }
-        }
-
-        window.cancelRecording = () => {
-            if(mediaRecorder && isRecording) { mediaRecorder.stop(); }
-            isRecording = false; audioChunks = [];
-            document.getElementById('recording-ui').classList.add('hidden');
-            msgInput.parentElement.classList.remove('hidden');
-            micBtn.classList.remove('hidden');
-            toggleInputButtons();
-        }
-
-        window.stopAndSendRecording = () => {
-            if(mediaRecorder && isRecording) {
-                mediaRecorder.addEventListener("stop", () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' }); 
-                    const audioFile = new File([audioBlob], `VoiceNote_${Date.now()}.mp3`, { type: 'audio/mp3' });
-                    selectedFile = audioFile; 
-                    chatForm.dispatchEvent(new Event('submit')); 
-                });
-                mediaRecorder.stop();
-            }
-            isRecording = false;
-            document.getElementById('recording-ui').classList.add('hidden');
-            msgInput.parentElement.classList.remove('hidden');
-            micBtn.classList.remove('hidden');
-        }
-
-        function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
+        if (myName && myMobile) startApp(); else document.getElementById('join-modal').classList.remove('hidden');
 
         async function startApp() {
-            appContainer.classList.remove('hidden');
-            appContainer.classList.add('flex');
-            
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('flex');
             document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
+
+            // Ask Notification Permission on Login
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
 
             try {
                 await signInAnonymously(auth);
@@ -713,407 +424,261 @@
                 const mySnap = await getDoc(myRef);
                 if(mySnap.exists()) {
                     const d = mySnap.data();
-                    if(d.avatarUrl) {
-                        myAvatarUrl = d.avatarUrl;
-                        localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
-                        document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
-                    }
-                    if(d.name && d.name !== myName) {
-                        myName = d.name; localStorage.setItem('pvt_chat_name', myName);
-                        document.getElementById('my-name-display').innerText = myName;
-                    }
+                    if(d.avatarUrl) { myAvatarUrl = d.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); }
+                    if(d.name && d.name !== myName) { myName = d.name; localStorage.setItem('pvt_chat_name', myName); }
                 }
-
-                const updateMyStatus = async () => {
-                    await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), {
-                        name: myName, mobile: myMobile, lastActive: Date.now()
-                    }, { merge: true });
-                };
-                updateMyStatus();
-                activeTrackingInterval = setInterval(updateMyStatus, 60000);
-                listenForUsers();
-                
-                // Tell WebRTC to listen for calls
-                if(window.listenForIncomingCallsWebRTC) {
-                    window.listenForIncomingCallsWebRTC();
-                }
+                const updateStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now() }, { merge: true }); };
+                updateStatus(); setInterval(updateStatus, 60000);
+                listenForUsers(); listenForIncomingCalls(); 
             } catch (err) {}
         }
 
-        function listenForUsers() {
-            const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
-            onSnapshot(usersRef, (snapshot) => {
-                allUsers = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); }
+        // 🔥 WebRTC & Calling Engine 🔥
+        function initializePeerConnection() {
+            if (pc) pc.close();
+            pc = new RTCPeerConnection(servers);
+            remoteDescriptionSet = false; iceCandidateQueue = [];
+            const rVid = document.getElementById('remote-video'), rAud = document.getElementById('remote-audio');
+            rVid.srcObject = new MediaStream(); rAud.srcObject = new MediaStream();
+            pc.ontrack = event => {
+                const trk = event.track;
+                if (trk.kind === 'video') { rVid.srcObject.addTrack(trk); rVid.classList.remove('hidden'); setTimeout(()=>rVid.play().catch(e=>{}),100); }
+                else if (trk.kind === 'audio') { rAud.srcObject.addTrack(trk); setTimeout(()=>rAud.play().catch(e=>{}),100); }
+            };
+            return pc;
+        }
+
+        async function processIceCandidate(candidateData) {
+            if (remoteDescriptionSet && pc) { await pc.addIceCandidate(new RTCIceCandidate(candidateData)).catch(e=>{}); }
+            else { iceCandidateQueue.push(candidateData); }
+        }
+
+        function listenForIncomingCalls() {
+            onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls'), (snap) => {
+                snap.docChanges().forEach(change => {
+                    const callData = change.doc.data();
+                    if (change.type === 'added' || change.type === 'modified') {
+                        if (callData.callee === myMobile && callData.status === 'calling') {
+                            incomingCallData = { id: change.doc.id, ...callData };
+                            const caller = allUsers.find(u => u.mobile === callData.caller);
+                            document.getElementById('call-modal').classList.remove('hidden');
+                            document.getElementById('call-modal').classList.add('flex');
+                            document.getElementById('call-name').innerText = "Incoming Call";
+                            document.getElementById('call-avatar').src = caller ? getAvatarUrl(caller.name, caller.avatarUrl) : getAvatarUrl("User", "");
+                            document.getElementById('call-status').innerText = callData.type === 'video' ? "Video Call Ringing..." : "Voice Call Ringing...";
+                            document.getElementById('answer-btn').classList.remove('hidden');
+                            document.getElementById('caller-hangup-btn').classList.add('hidden');
+                            document.getElementById('in-call-controls').classList.add('hidden');
+                            try { document.getElementById('ringtone-sound').play().catch(e=>{}); } catch(e){}
+                            
+                            // 🔥 Trigger Background Notification on Call
+                            triggerSystemNotification("Incoming Call", `Call from ${caller?.name || 'Contact'}`);
+                        }
+                        if (callData.status === 'ended' && (currentCallId === change.doc.id || (incomingCallData && incomingCallData.id === change.doc.id))) { resetCallUI(); }
+                    }
                 });
-                renderContacts();
             });
         }
 
+        window.startCall = async (type) => {
+            if(!activeContactMobile) return;
+            document.getElementById('call-modal').classList.remove('hidden');
+            document.getElementById('call-modal').classList.add('flex');
+            document.getElementById('call-name').innerText = document.getElementById('active-chat-name').innerText;
+            document.getElementById('call-avatar').src = document.getElementById('active-chat-avatar').src;
+            document.getElementById('call-status').innerText = "Calling...";
+            document.getElementById('caller-hangup-btn').classList.remove('hidden');
+            document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
+                if(type === 'video') { const lV = document.getElementById('local-video'); lV.srcObject = localStream; lV.classList.remove('hidden'); }
+                pc = initializePeerConnection();
+                localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+                currentCallId = "call_" + (myMobile < activeContactMobile ? myMobile+"_"+activeContactMobile : activeContactMobile+"_"+myMobile) + "_" + Date.now();
+                const callRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', currentCallId);
+                pc.onicecandidate = e => { if(e.candidate) addDoc(collection(callRef, 'offerCandidates'), e.candidate.toJSON()); };
+                const off = await pc.createOffer(); await pc.setLocalDescription(off);
+                await setDoc(callRef, { offer: { type: off.type, sdp: off.sdp }, caller: myMobile, callee: activeContactMobile, type, status: 'calling', timestamp: Date.now() });
+                pc.callUnsubscribe = onSnapshot(callRef, async (s) => {
+                    const d = s.data();
+                    if(pc && !remoteDescriptionSet && d?.answer) {
+                        await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+                        remoteDescriptionSet = true;
+                        document.getElementById('call-status').innerText = "Connected";
+                        document.getElementById('caller-hangup-btn').classList.add('hidden');
+                        document.getElementById('in-call-controls').classList.remove('hidden');
+                        if(type === 'video') { document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none'); document.getElementById('cam-toggle-btn').classList.remove('hidden'); }
+                        for(let c of iceCandidateQueue) await pc.addIceCandidate(new RTCIceCandidate(c)).catch(e=>{});
+                        iceCandidateQueue = [];
+                        onSnapshot(collection(callRef, 'answerCandidates'), snap => snap.docChanges().forEach(c => { if(c.type === 'added') processIceCandidate(c.doc.data()); }));
+                    }
+                });
+            } catch (err) { alert("Mic/Cam Error: Please grant permissions."); resetCallUI(); }
+        };
+
+        window.answerCall = async () => {
+            if(!incomingCallData) return;
+            document.getElementById('ringtone-sound').pause(); document.getElementById('ringtone-sound').currentTime = 0;
+            document.getElementById('call-status').innerText = "Connecting...";
+            document.getElementById('answer-btn').classList.add('hidden');
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: incomingCallData.type === 'video' });
+                if(incomingCallData.type === 'video') { const lV = document.getElementById('local-video'); lV.srcObject = localStream; lV.classList.remove('hidden'); }
+                pc = initializePeerConnection();
+                localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+                const callRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', incomingCallData.id);
+                pc.onicecandidate = e => { if(e.candidate) addDoc(collection(callRef, 'answerCandidates'), e.candidate.toJSON()); };
+                await pc.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+                remoteDescriptionSet = true;
+                const ans = await pc.createAnswer(); await pc.setLocalDescription(ans);
+                await updateDoc(callRef, { answer: { type: ans.type, sdp: ans.sdp }, status: 'answered' });
+                document.getElementById('call-status').innerText = "Connected";
+                document.getElementById('in-call-controls').classList.remove('hidden');
+                if(incomingCallData.type === 'video') { document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none'); document.getElementById('cam-toggle-btn').classList.remove('hidden'); }
+                onSnapshot(collection(callRef, 'offerCandidates'), snap => snap.docChanges().forEach(c => { if(c.type === 'added') processIceCandidate(c.doc.data()); }));
+            } catch(e) { alert("Connection failed."); resetCallUI(); }
+        };
+
+        window.hangupCall = async () => {
+            const id = currentCallId || (incomingCallData ? incomingCallData.id : null);
+            if(id) await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', id), { status: 'ended' }).catch(()=>{});
+            resetCallUI();
+        };
+
+        window.resetCallUI = () => {
+            document.getElementById('ringtone-sound').pause(); document.getElementById('ringtone-sound').currentTime = 0;
+            document.getElementById('call-modal').classList.remove('flex'); document.getElementById('call-modal').classList.add('hidden');
+            document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('local-video').classList.add('hidden'); document.getElementById('remote-video').classList.add('hidden');
+            if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+            if (pc) { if(pc.callUnsubscribe) pc.callUnsubscribe(); pc.close(); pc = null; }
+            incomingCallData = null; currentCallId = null; remoteDescriptionSet = false; iceCandidateQueue = [];
+            const rV = document.getElementById('remote-video'), rA = document.getElementById('remote-audio'), lV = document.getElementById('local-video');
+            if(rV) rV.srcObject = null; if(rA) rA.srcObject = null; if(lV) lV.srcObject = null;
+        };
+
+        // --- Common Chat Logic ---
+        function listenForUsers() {
+            onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users'), (snapshot) => {
+                allUsers = [];
+                snapshot.forEach(doc => { const data = doc.data(); if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); } });
+                renderContacts();
+            });
+        }
         function setupLastMessageListener(contactMobile) {
             if (chatListeners[contactMobile]) return; 
             const chatId = generateChatId(myMobile, contactMobile);
-            const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
-            const q = query(msgRef, orderBy('timestamp', 'desc'), limit(1));
-            
+            const q = query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'desc'), limit(1));
             chatListeners[contactMobile] = onSnapshot(q, (snapshot) => {
                 if (!snapshot.empty) {
                     const newLatest = snapshot.docs[0].data();
                     const oldLatest = latestMessages[contactMobile];
-                    
                     if (newLatest.senderMobile !== myMobile && (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && newLatest.timestamp > appStartTime) {
-                        try { document.getElementById('notification-sound').play(); } catch(e){}
+                        try { document.getElementById('notification-sound').play().catch(e=>{}); } catch(e){}
+                        
+                        // 🔥 Trigger Background Notification on Text Message
+                        const sender = allUsers.find(u => u.mobile === newLatest.senderMobile);
+                        triggerSystemNotification(`New Message from ${sender?.name || 'Contact'}`, newLatest.text || "Sent an attachment");
                     }
                     latestMessages[contactMobile] = newLatest;
                 } else { latestMessages[contactMobile] = null; }
                 renderContacts();
             });
         }
-
         function renderContacts() {
-            const term = searchInput.value.toLowerCase();
-            let filteredUsers = allUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
-
-            filteredUsers.sort((a, b) => {
-                const timeA = latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0;
-                const timeB = latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0;
-                return timeB - timeA;
-            });
-
-            contactsContainer.innerHTML = '';
-            if (filteredUsers.length === 0) { contactsContainer.innerHTML = `<p class="text-center text-slate-500 text-sm mt-10 p-6">No contacts found.</p>`; return; }
-            
-            filteredUsers.forEach(user => {
+            const container = document.getElementById('contacts-container');
+            const term = document.getElementById('search-input').value.toLowerCase();
+            let filtered = allUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
+            filtered.sort((a,b) => (latestMessages[b.mobile]?.timestamp || 0) - (latestMessages[a.mobile]?.timestamp || 0));
+            container.innerHTML = '';
+            if (filtered.length === 0) { container.innerHTML = `<p class="text-center text-slate-500 text-sm mt-10 p-6">No contacts found.</p>`; return; }
+            filtered.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
                 const activeClass = isActive ? 'contact-active bg-white/5' : 'hover:bg-white/5 border-l-4 border-transparent';
-                
-                const latestMsg = latestMessages[user.mobile];
-                let msgPreview = "Tap to start chatting";
-                let timeString = "";
-                let isUnread = false;
-                let previewClass = "text-slate-400";
-
-                if (latestMsg) {
-                    const isMe = latestMsg.senderMobile === myMobile;
-                    let tickClass = latestMsg.read ? "text-cyan-400" : "text-slate-500";
-                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[11px] mr-1 ${tickClass}'></i> ` : "";
-                    
-                    if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
-                    else if (latestMsg.fileUrl) {
-                        if (latestMsg.fileType?.startsWith('image/')) msgPreview = prefix + "<i class='fa-solid fa-camera mr-1'></i> Photo";
-                        else if (latestMsg.fileType?.startsWith('video/')) msgPreview = prefix + "<i class='fa-solid fa-video mr-1'></i> Video";
-                        else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "<i class='fa-solid fa-microphone mr-1'></i> Voice message";
-                        else msgPreview = prefix + "<i class='fa-solid fa-file mr-1'></i> Document";
-                    }
-                    timeString = latestMsg.timeString || "";
-                    const lastReadTime = parseInt(localStorage.getItem(`read_${user.mobile}`) || '0');
-                    if (!isMe && latestMsg.timestamp > lastReadTime && !latestMsg.read) { isUnread = true; previewClass = "text-white font-semibold"; }
+                const latest = latestMessages[user.mobile];
+                let preview = "Tap to start chatting", time = "", isUnread = false, previewClass = "text-slate-400";
+                if (latest) {
+                    const isMe = latest.senderMobile === myMobile;
+                    let tick = latest.read ? "text-cyan-400" : "text-slate-500";
+                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[11px] mr-1 ${tick}'></i> ` : "";
+                    if (latest.text) preview = prefix + escapeHTML(latest.text);
+                    else if (latest.fileUrl) preview = prefix + (latest.fileType?.startsWith('image/') ? "📷 Photo" : "📁 File");
+                    time = latest.timeString || "";
+                    if (!isMe && !latest.read) { isUnread = true; previewClass = "text-white font-semibold"; }
                 }
-
-                let unreadBadge = isUnread ? `<span class="bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 shadow-[0_0_8px_rgba(236,72,153,0.8)]">New</span>` : ``;
-                
-                if(user.typingTo === myMobile) {
-                    msgPreview = "<span class='text-pink-400 font-medium animate-pulse text-xs'>typing...</span>";
-                    previewClass = ""; unreadBadge = ""; 
-                }
-
-                const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
+                const avatar = getAvatarUrl(user.name, user.avatarUrl);
                 const isOnline = (Date.now() - user.lastActive) < 120000;
-                const dotColor = isOnline ? 'bg-emerald-500' : 'bg-slate-700';
-
+                const dot = isOnline ? 'bg-emerald-500' : 'bg-slate-700';
                 const div = document.createElement('div');
                 div.className = `flex items-center cursor-pointer transition-colors p-3 border-b border-white/5 ${activeClass}`;
-                div.onclick = () => openPrivateChat(user.name, user.mobile, userAvatar);
-                
-                div.innerHTML = `
-                    <div class="relative shrink-0 mr-4">
-                        <img src="${userAvatar}" class="w-12 h-12 rounded-[1rem] object-cover bg-slate-800 border border-white/10 shadow-sm">
-                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${dotColor} border-2 border-[#0f172a] rounded-full"></span>
-                    </div>
-                    <div class="flex-grow flex flex-col justify-center overflow-hidden">
-                        <div class="flex justify-between items-center mb-0.5">
-                            <h3 class="text-[15px] font-bold text-slate-200 truncate pr-2">${user.name}</h3>
-                            <span class="text-[10px] ${isUnread ? 'text-pink-400 font-bold' : 'text-slate-500'} shrink-0">${timeString}</span>
-                        </div>
-                        <div class="flex justify-between items-center gap-2">
-                            <p class="text-xs ${previewClass} truncate w-full">${msgPreview}</p>
-                            ${unreadBadge}
-                        </div>
-                    </div>
-                `;
-                contactsContainer.appendChild(div);
+                div.onclick = () => openPrivateChat(user.name, user.mobile, avatar);
+                div.innerHTML = `<div class="relative shrink-0 mr-4"><img src="${avatar}" class="w-12 h-12 rounded-[1rem] object-cover bg-slate-800 border border-white/10 shadow-sm"><span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${dot} border-2 border-[#0f172a] rounded-full"></span></div><div class="flex-grow flex flex-col justify-center overflow-hidden"><div class="flex justify-between items-center mb-0.5"><h3 class="text-[15px] font-bold text-white truncate pr-2">${user.name}</h3><span class="text-[10px] ${isUnread ? 'text-pink-400 font-bold' : 'text-slate-500'} shrink-0">${time}</span></div><div class="flex justify-between items-center gap-2"><p class="text-xs ${previewClass} truncate w-full">${preview}</p>${isUnread ? '<span class="bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-2">New</span>' : ''}</div></div>`;
+                container.appendChild(div);
             });
         }
-
-        searchInput.addEventListener('input', () => renderContacts());
-
-        window.addEventListener('popstate', (event) => {
-            if (activeContactMobile && window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
-                document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden');
-                activeContactMobile = null; renderContacts();
-                if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
-            }
-        });
-
-        function closeChatLogic() {
-            document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
-            if (window.innerWidth < 768) {
-                document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden');
-                if (window.location.hash === '#chat') history.replaceState(null, null, ' '); 
-            } else { document.getElementById('empty-chat-state').classList.remove('hidden'); }
-            activeContactMobile = null; renderContacts();
-            if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
-        }
-
-        window.closeChatMobile = () => { 
-            if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); 
-            else closeChatLogic(); 
-        };
-
-        window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
-            activeContactMobile = contactMobile;
-            localStorage.setItem(`read_${contactMobile}`, Date.now());
-            
-            document.getElementById('active-chat-name').innerText = contactName;
-            document.getElementById('active-chat-avatar').src = contactAvatarUrl;
+        function openPrivateChat(name, mobile, avatar) {
+            activeContactMobile = mobile; localStorage.setItem(`read_${mobile}`, Date.now());
+            document.getElementById('active-chat-name').innerText = name;
+            document.getElementById('active-chat-avatar').src = avatar;
             document.getElementById('empty-chat-state').classList.add('hidden');
-            
-            if (window.innerWidth < 768) {
-                if (!document.getElementById('sidebar').classList.contains('hidden')) history.pushState({ chatOpen: true }, "Chat", "#chat");
-                document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); 
-                document.getElementById('chat-area').classList.remove('hidden'); document.getElementById('chat-area').classList.add('flex'); 
-            } else { 
-                document.getElementById('chat-area').classList.remove('hidden'); document.getElementById('chat-area').classList.add('flex'); 
-            }
-
+            if (window.innerWidth < 768) { history.pushState({ chatOpen: true }, "Chat", "#chat"); document.getElementById('sidebar').classList.add('hidden'); document.getElementById('chat-area').classList.remove('hidden'); document.getElementById('chat-area').classList.add('flex'); }
+            else { document.getElementById('chat-area').classList.remove('hidden'); document.getElementById('chat-area').classList.add('flex'); }
             renderContacts();
             document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
-
-            if(userStatusUnsubscribe) userStatusUnsubscribe();
-            userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
-                const statusElem = document.getElementById('active-chat-status');
-                if(docSnap.exists()){
-                    const uData = docSnap.data();
-                    if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
-
-                    if(uData.typingTo === myMobile) {
-                        statusElem.innerText = 'typing...'; statusElem.className = 'text-[11px] text-pink-400 font-bold tracking-widest uppercase animate-pulse';
-                    } else {
-                        const isOnline = (Date.now() - uData.lastActive) < 120000;
-                        statusElem.innerText = isOnline ? 'Online' : 'Offline';
-                        statusElem.className = isOnline ? 'text-[11px] text-emerald-400 font-bold tracking-widest uppercase' : 'text-[11px] text-slate-500 font-bold tracking-widest uppercase';
-                    }
-                }
-            });
-
+            const q = query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, mobile)}`), orderBy('timestamp', 'asc'), limit(200));
             if (currentChatUnsubscribe) currentChatUnsubscribe();
-            const chatId = generateChatId(myMobile, contactMobile);
-            const msgRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`);
-            const q = query(msgRef, orderBy('timestamp', 'asc'), limit(200));
-
             currentChatUnsubscribe = onSnapshot(q, (snapshot) => {
                 snapshot.docChanges().forEach(change => {
-                    const mData = change.doc.data();
-                    if (!mData.read && mData.senderMobile !== myMobile) { updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true }); }
-                    
-                    if (change.type === "added") msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
-                    else if (change.type === "modified") {
-                        const oldNode = document.getElementById(`msg-${change.doc.id}`);
-                        if(oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData, contactName));
-                    } 
-                    else if (change.type === "removed") {
-                        const msgDiv = document.getElementById(`msg-${change.doc.id}`);
-                        if(msgDiv) msgDiv.remove();
-                    }
+                    const data = change.doc.data();
+                    if (!data.read && data.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, mobile)}`, change.doc.id), { read: true });
+                    if (change.type === "added") msgBox.appendChild(createMessageElement(change.doc.id, data));
+                    else if (change.type === "modified") { const old = document.getElementById(`msg-${change.doc.id}`); if(old) old.replaceWith(createMessageElement(change.doc.id, data)); }
+                    else if (change.type === "removed") { const m = document.getElementById(`msg-${change.doc.id}`); if(m) m.remove(); }
                 });
-                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); renderContacts();
-                setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
+                msgBox.scrollTop = msgBox.scrollHeight;
             });
-        };
-
-        window.toggleReactionMenu = (docId, e) => {
-            e.stopPropagation(); if(e.target.closest('button')) return; 
-            const menu = document.getElementById(`react-menu-${docId}`);
-            const isHidden = menu.classList.contains('hidden');
-            closeAllMenus();
-            if(isHidden) menu.classList.remove('hidden');
-        };
-        window.addReaction = async (docId, emoji, e) => { if(e) e.stopPropagation(); closeAllMenus(); try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: emoji }); } catch(e){} };
-        window.removeReaction = async (docId, e) => { if(e) e.stopPropagation(); try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: null }); } catch(e){} };
-        window.deleteMsg = async (docId, e) => { if(e) e.stopPropagation(); closeAllMenus(); if(confirm("Delete message for everyone?")) { try { await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId)); } catch(e){} } };
-
-        chatForm.onsubmit = async (e) => {
-            e.preventDefault();
-            const text = msgInput.value.trim();
-            if ((!text && !selectedFile) || !activeContactMobile) return;
-
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xl"></i>';
-            setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: null }, { merge: true });
-
-            try {
-                let fileUrl = null, fileName = null, fileType = null;
-                if (selectedFile) {
-                    const formData = new FormData();
-                    formData.append('file', selectedFile);
-                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                    const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                    const uploadResult = await response.json();
-                    if(uploadResult.secure_url) { fileUrl = uploadResult.secure_url; fileName = selectedFile.name; fileType = selectedFile.type || 'audio/mp3'; } 
-                    else throw new Error("Cloudinary failed");
-                }
-
-                await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`), {
-                    text: text, senderMobile: myMobile, timestamp: Date.now(),
-                    timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    fileUrl: fileUrl, fileName: fileName, fileType: fileType, reaction: null, read: false 
-                });
-
-                msgInput.value = ''; clearFile();
-                msgInput.style.height = '40px'; toggleInputButtons();
-                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
-            } catch (error) { alert("Message failed."); } 
-            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-xl ml-[-2px]"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
-        };
-
-        // Custom Audio Player Dark Mode
-        window.toggleCustomAudio = (id, btn) => {
-            const audio = document.getElementById(id);
-            const icon = btn.querySelector('i');
-            if (audio.paused) {
-                document.querySelectorAll('audio').forEach(a => {
-                    if(a.id !== id && a.id.startsWith('audio_pvt_')) {
-                        a.pause();
-                        const otherBtn = document.getElementById('btn_'+a.id);
-                        if(otherBtn) { otherBtn.querySelector('i').className = 'fa-solid fa-play'; }
-                    }
-                });
-                audio.play();
-                icon.className = 'fa-solid fa-pause';
-            } else {
-                audio.pause();
-                icon.className = 'fa-solid fa-play';
-            }
-        };
-        window.updateAudioProgress = (id, audio) => {
-            const slider = document.getElementById('slider_'+id);
-            const timeDisplay = document.getElementById('time_'+id);
-            if(audio.duration && slider) {
-                slider.value = (audio.currentTime / audio.duration) * 100;
-                timeDisplay.innerText = formatTime(audio.currentTime);
-            }
-        };
-        window.seekAudio = (id, slider) => {
-            const audio = document.getElementById(id);
-            if(audio.duration) audio.currentTime = (slider.value / 100) * audio.duration;
-        };
-        window.audioEnded = (id, audio) => {
-            const btn = document.getElementById('btn_'+id);
-            if(btn) btn.querySelector('i').className = 'fa-solid fa-play';
-            const slider = document.getElementById('slider_'+id);
-            if(slider) slider.value = 0;
-            const timeDisplay = document.getElementById('time_'+id);
-            if(timeDisplay) timeDisplay.innerText = formatTime(audio.duration || 0);
-        };
-        window.initAudioDuration = (id, audio) => {
-            const timeDisplay = document.getElementById('time_'+id);
-            if(timeDisplay) timeDisplay.innerText = formatTime(audio.duration);
-        };
-
-        function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
-
-        function createMessageElement(docId, data, contactName) {
-            const isMe = data.senderMobile === myMobile;
-            
-            const bubbleClasses = isMe ? 'bg-gradient-to-br from-pink-600 to-purple-600 self-end rounded-tr-sm shadow-md' : 'bg-slate-800 border border-white/5 self-start rounded-tl-sm shadow-md';
-            const textColor = 'text-white';
-            
-            const msgDiv = document.createElement('div');
-            msgDiv.id = `msg-${docId}`;
-            const bottomMargin = data.reaction ? 'mb-6' : 'mb-2';
-            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[65%] ${bubbleClasses} p-2.5 md:p-3 rounded-2xl ${bottomMargin} relative cursor-pointer select-none group`;
-            msgDiv.onclick = (e) => toggleReactionMenu(docId, e);
-            
-            let content = '';
-            
-            if (data.fileUrl) {
-                if (data.fileType && data.fileType.startsWith('audio/')) {
-                    const audioId = `audio_pvt_${docId}`;
-                    const avatarForAudio = isMe ? getAvatarUrl(myName, myAvatarUrl) : document.getElementById('active-chat-avatar').src;
-                    
-                    const micColor = isMe ? 'text-white' : 'text-pink-400';
-                    const iconColor = isMe ? 'text-white hover:text-pink-200' : 'text-pink-400 hover:text-pink-300';
-                    const timeColor = isMe ? 'text-white/80' : 'text-slate-400';
-
-                    content = `
-                    <div class="flex items-center gap-3 w-56 md:w-64 pt-1 pb-1">
-                        <div class="relative shrink-0">
-                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-full object-cover shadow-sm border-2 ${isMe ? 'border-white/30' : 'border-slate-600'} bg-slate-700">
-                            <div class="absolute -bottom-1 -right-1 ${isMe ? 'bg-purple-700 border-white/20' : 'bg-slate-800 border-slate-600'} rounded-full p-1 border-2">
-                                <i class="fa-solid fa-microphone ${micColor} text-[9px]"></i>
-                            </div>
-                        </div>
-                        <button id="btn_${audioId}" onclick="toggleCustomAudio('${audioId}', this); event.stopPropagation();" class="text-3xl ${iconColor} transition-colors w-8 text-left">
-                            <i class="fa-solid fa-play drop-shadow-sm"></i>
-                        </button>
-                        <div class="flex flex-col flex-grow relative top-1">
-                            <input type="range" id="slider_${audioId}" min="0" max="100" value="0" class="audio-slider w-full" style="color: ${isMe ? 'white' : '#f472b6'}" oninput="seekAudio('${audioId}', this); event.stopPropagation();" onclick="event.stopPropagation();">
-                            <div class="flex justify-between items-center mt-1.5">
-                                <span id="time_${audioId}" class="text-[10px] font-bold ${timeColor}">0:00</span>
-                            </div>
-                        </div>
-                        <audio id="${audioId}" src="${data.fileUrl}" preload="metadata" onloadedmetadata="initAudioDuration('${audioId}', this)" ontimeupdate="updateAudioProgress('${audioId}', this)" onended="audioEnded('${audioId}', this)"></audio>
-                    </div>`;
-                } 
-                else if (data.fileType && data.fileType.startsWith('video/')) {
-                    content = `<video controls class="rounded-xl mb-2 max-h-64 w-full object-cover bg-black/40 border border-white/10"><source src="${data.fileUrl}"></video>`;
-                } else if (data.fileType && data.fileType.startsWith('image/')) {
-                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-2 max-h-64 w-full object-cover cursor-pointer border border-white/10" onclick="openLightbox('${data.fileUrl}', event)">`;
-                } else {
-                    const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
-                    content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="${isMe ? 'bg-white/10 hover:bg-white/20' : 'bg-slate-900/50 hover:bg-slate-900'} p-3 rounded-xl flex items-center gap-3 text-sm mb-2 transition-colors w-full border ${isMe ? 'border-white/10' : 'border-white/5'}">
-                        <i class="fa-solid fa-file-arrow-down text-2xl ${isMe ? 'text-white' : 'text-pink-400'} shrink-0"></i> 
-                        <span class="truncate font-semibold ${textColor}">${data.fileName}</span>
-                    </a>`;
-                }
-            }
-            
-            let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 ${textColor} font-medium mt-1">${escapeHTML(data.text)}</p>` : '';
-            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-900 border border-white/10 rounded-full px-2 py-0.5 text-[11px] shadow-lg z-10 hover:bg-slate-800 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
-
-            let popupMenu = `
-                <div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-12 bg-slate-900 border border-white/10 rounded-[1.5rem] flex items-center gap-2 px-3 py-1.5 shadow-xl z-[60] min-w-max">
-                    <button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 transition-all text-xl">👍</button>
-                    <button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 transition-all text-xl">❤️</button>
-                    <button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 transition-all text-xl">😂</button>
-                    <button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 transition-all text-xl">😢</button>
-                    ${isMe ? `<div class="w-[1px] h-5 bg-white/20 mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-red-500 text-lg"><i class="fa-solid fa-trash"></i></button>` : ''}
-                </div>
-            `;
-
-            let tickColor = data.read ? "text-cyan-400 drop-shadow-md" : "text-white/50";
-            let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[11px] ${tickColor} ml-1"></i>` : '';
-            let timeColor = isMe ? 'text-white/70' : 'text-slate-400';
-            
-            let timeMargin = (data.text || !data.fileUrl || (data.fileType && data.fileType.startsWith('audio/'))) ? "mt-1 float-right" : `absolute bottom-2 right-2 px-2 py-0.5 rounded-full backdrop-blur-sm ${isMe ? 'bg-black/30' : 'bg-black/50'}`;
-
-            msgDiv.innerHTML = `
-                ${popupMenu}
-                ${content}
-                ${finalHtmlText}
-                <div class="flex items-center justify-end px-1 ${timeMargin}">
-                    <span class="text-[10px] font-bold ${timeColor} drop-shadow-sm">${data.timeString}</span>
-                    ${ticksHtml}
-                </div>
-                ${reactionBadge}
-            `;
-            return msgDiv;
         }
 
-        function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+        // Additional handlers for UI
+        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
+        window.openSettings = () => { document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('settings-name-input').value = myName; document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl); };
+        window.previewProfilePic = (e) => { const f = e.target.files[0]; if(f) { settingsSelectedFile = f; const r = new FileReader(); r.onload = (ev) => document.getElementById('settings-avatar-preview').src = ev.target.result; r.readAsDataURL(f); } };
+        window.saveProfileSettings = async () => {
+            const newName = document.getElementById('settings-name-input').value.trim();
+            if(!newName) return;
+            if(settingsSelectedFile) {
+                const fd = new FormData(); fd.append('file', settingsSelectedFile); fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: fd });
+                const data = await res.json(); if(data.secure_url) myAvatarUrl = data.secure_url;
+            }
+            await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: newName, avatarUrl: myAvatarUrl }, { merge: true });
+            myName = newName; localStorage.setItem('pvt_chat_name', newName); localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
+            document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); document.getElementById('my-name-display').innerText = myName;
+            closeSettings();
+        };
+
+        window.clearFile = () => { selectedFile = null; document.getElementById('file-preview-container').classList.add('hidden'); document.getElementById('send-btn').disabled = document.getElementById('msg-input').value.trim() === ''; };
+        window.toggleMic = () => { if(localStream) { const t = localStream.getAudioTracks()[0]; t.enabled = !t.enabled; const b = document.getElementById('mic-toggle-btn'); b.innerHTML = t.enabled ? '<i class="fa-solid fa-microphone"></i>' : '<i class="fa-solid fa-microphone-slash"></i>'; b.classList.toggle('text-red-500', !t.enabled); } };
+        window.toggleCamera = () => { if(localStream) { const t = localStream.getVideoTracks()[0]; t.enabled = !t.enabled; const b = document.getElementById('cam-toggle-btn'); b.innerHTML = t.enabled ? '<i class="fa-solid fa-video"></i>' : '<i class="fa-solid fa-video-slash"></i>'; b.classList.toggle('text-red-500', !t.enabled); } };
+
+        function createMessageElement(docId, data) {
+            const isMe = data.senderMobile === myMobile;
+            const bubble = isMe ? 'bg-gradient-to-br from-pink-600 to-purple-600 self-end rounded-tr-sm shadow-md' : 'bg-slate-800 border border-white/5 self-start rounded-tl-sm shadow-md';
+            const div = document.createElement('div');
+            div.id = `msg-${docId}`;
+            div.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[65%] ${bubble} p-3 rounded-2xl mb-2 relative cursor-pointer select-none group`;
+            div.onclick = (e) => toggleReactionMenu(docId, e);
+            let media = '';
+            if (data.fileUrl) {
+                if (data.fileType?.startsWith('image/')) media = `<img src="${data.fileUrl}" class="rounded-xl mb-1 max-h-64 w-full object-cover" onclick="openLightbox('${data.fileUrl}', event)">`;
+                else media = `<a href="${data.fileUrl}" target="_blank" class="bg-black/20 p-2 rounded-lg flex items-center gap-2 text-xs mb-1 border border-white/5"><i class="fa-solid fa-file text-pink-400"></i><span class="truncate text-white font-bold">${data.fileName}</span></a>`;
+            }
+            const tick = data.read ? "text-cyan-400" : "text-white/50";
+            div.innerHTML = `${media}${data.text ? `<p class="text-[15px] font-medium text-white">${escapeHTML(data.text)}</p>` : ''}<div class="flex items-center justify-end mt-1 opacity-60 text-[9px] font-bold text-white"><span>${data.timeString}</span>${isMe ? `<i class='fa-solid fa-check-double ${tick} ml-1'></i>` : ''}</div><div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe?'right-0':'left-0'} -top-12 bg-slate-900 border border-white/10 rounded-full flex gap-2 px-3 py-1 shadow-2xl z-[60]"><button onclick="addReaction('${docId}','👍',event)">👍</button><button onclick="addReaction('${docId}','❤️',event)">❤️</button><button onclick="deleteMsg('${docId}',event)" class="text-red-500 ml-1">🗑️</button></div>`;
+            return div;
+        }
+
+        function escapeHTML(s) { return s.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)); }
     </script>
 </body>
 </html>
