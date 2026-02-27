@@ -422,9 +422,10 @@
     </div>
 
     <script type="module">
+        // 🔥 Using Firebase V11 & enable Firestore Offline Persistence for True Instant Load 🔥
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         import { setupWebRTC } from "./webrtc_core.js";
 
@@ -457,7 +458,11 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        
+        // 🔥 Initialize Firestore with Offline Persistence enabled 🔥
+        const db = initializeFirestore(app, {
+            localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+        });
 
         let myName = localStorage.getItem('pvt_chat_name') || '';
         let myMobile = localStorage.getItem('pvt_chat_mobile') || '';
@@ -539,7 +544,6 @@
         );
 
         const joinModal = document.getElementById('join-modal');
-        const unlockModal = document.getElementById('unlock-modal');
         const appContainer = document.getElementById('app-container');
         const contactsContainer = document.getElementById('contacts-container');
         const searchInput = document.getElementById('search-input');
@@ -559,9 +563,9 @@
         }
 
         // --- AUTH FLOW ---
-        // 🔥 Now it bypasses login automatically if already logged in! 🔥
+        // 🔥 Auto bypass login if credentials exist in localStorage 🔥
         if (myName && myMobile && myPassword) {
-            startApp();
+            initOfflineAndOnline();
         } else {
             joinModal.classList.remove('hidden');
         }
@@ -595,7 +599,7 @@
                     
                     myName = n; myMobile = m; myPassword = p;
                     localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m); localStorage.setItem('pvt_chat_password', p);
-                    joinModal.classList.add('hidden'); startApp();
+                    joinModal.classList.add('hidden'); initOfflineAndOnline();
                 } catch (err) { alert("Connection error! " + err.message); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
             } else alert("Please fill all details correctly.");
         };
@@ -805,8 +809,9 @@
 
         function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
 
-        async function startApp() {
-            // 🔥 Request Notification Permission 🔥
+        // 🔥 Instant Offline Initialization Function 🔥
+        function initOfflineAndOnline() {
+            // Request Notification Permission
             if ("Notification" in window && Notification.permission === "default") {
                 Notification.requestPermission();
             }
@@ -814,25 +819,24 @@
             appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
             updateStatusUI();
 
-            // 🔥 Instant Load from Cache 🔥
+            // 1. Instant Load from Cache
             const cachedUsers = localStorage.getItem('cached_users');
             if (cachedUsers) allUsers = JSON.parse(cachedUsers);
             const cachedMsgs = localStorage.getItem('cached_latest_msgs');
             if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
             if(allUsers.length > 0) renderContacts();
 
-            try {
-                await signInAnonymously(auth);
-                const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile); const mySnap = await getDoc(myRef);
-                if(mySnap.exists()) {
-                    const d = mySnap.data();
-                    if(d.avatarUrl) { myAvatarUrl = d.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); }
-                    if(d.name && d.name !== myName) { myName = d.name; localStorage.setItem('pvt_chat_name', myName); }
-                }
+            // 2. Attach Listeners (Works completely offline due to Firebase localCache!)
+            listenForUsers();
+            if(window.listenForIncomingCallsWebRTC) window.listenForIncomingCallsWebRTC();
+
+            // 3. Background Sync & Auth Check (Does NOT block UI)
+            signInAnonymously(auth).then(() => {
                 const updateMyStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now(), statusVisible: isStatusVisible }, { merge: true }); };
-                updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); listenForUsers();
-                if(window.listenForIncomingCallsWebRTC) window.listenForIncomingCallsWebRTC();
-            } catch (err) {}
+                updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000);
+            }).catch(err => {
+                console.log("App is running in offline mode. Sync will resume when online.");
+            });
         }
 
         function listenForUsers() {
