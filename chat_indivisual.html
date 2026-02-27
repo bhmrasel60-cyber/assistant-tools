@@ -6,13 +6,13 @@
     <meta name="theme-color" content="#111b21">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Nexus Messenger | WhatsApp Theme</title>
+    <title>RasGram | Secure Messenger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 WhatsApp Dark Theme 🔥 */
+        /* 🔥 RasGram Dark Theme 🔥 */
         :root {
             --wa-bg: #111b21;
             --wa-panel: #202c33;
@@ -38,7 +38,7 @@
             top: 0; left: 0; touch-action: none;
         }
         
-        /* WhatsApp Chat Background */
+        /* Chat Background */
         .chat-bg {
             background-color: #0b141a;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
@@ -106,8 +106,10 @@
 
     <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#111b21] transition-opacity">
         <div class="bg-[#202c33] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative fade-in-anim border border-[#222d34]">
-            <i class="fa-brands fa-whatsapp text-6xl text-[#00a884] mb-4 block"></i>
-            <h2 class="text-2xl font-bold mb-2 text-white">Welcome to Nexus</h2>
+            <div class="w-20 h-20 bg-[#00a884]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#00a884]/30 shadow-lg shadow-[#00a884]/20">
+                <i class="fa-solid fa-paper-plane text-4xl text-[#00a884] pr-1"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Welcome to RasGram</h2>
             <p class="text-[#8696a0] text-sm mb-6 font-medium">Create your secure account.</p>
             
             <form id="join-form" class="space-y-4">
@@ -116,6 +118,20 @@
                 <input type="password" id="reg-password" required autocomplete="off" minlength="6" maxlength="6" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium tracking-widest text-center text-lg" placeholder="Create 6-digit Password">
                 
                 <button type="submit" id="join-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wide transition-colors mt-4">Create & Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="unlock-modal" class="hidden fixed inset-0 z-[105] flex items-center justify-center p-4 bg-[#111b21] transition-opacity">
+        <div class="bg-[#202c33] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative fade-in-anim border border-[#222d34]">
+            <img id="unlock-avatar" src="" class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-[#00a884] shadow-lg">
+            <h2 class="text-xl font-bold mb-2 text-white" id="unlock-name-display">Welcome Back</h2>
+            <p class="text-[#8696a0] text-sm mb-6 font-medium">Enter password to decrypt chats.</p>
+            
+            <form id="unlock-form" class="space-y-4">
+                <input type="password" id="unlock-password" required autocomplete="off" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-bold tracking-[0.5em] text-center text-2xl" placeholder="••••••">
+                <button type="submit" id="unlock-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wide transition-colors mt-4"><i class="fa-solid fa-lock-open mr-2"></i> Unlock</button>
+                <button type="button" onclick="logoutPvtChat()" class="text-sm text-[#f15c6d] hover:underline mt-4 inline-block">Log in as another user</button>
             </form>
         </div>
     </div>
@@ -201,7 +217,7 @@
                 <header class="p-3 bg-[#111b21] flex items-center justify-between shrink-0 h-[64px]" style="padding-top: max(0.75rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
                         <img id="my-avatar" src="" onclick="openSettings()" class="w-9 h-9 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity bg-[#202c33]" title="Profile Settings">
-                        <h1 class="text-white text-[22px] font-semibold tracking-wide">WhatsApp</h1>
+                        <h1 class="text-white text-[21px] font-bold tracking-wide cursor-default">Ras<span class="text-[#00a884]">Gram</span></h1>
                     </div>
                     <div class="flex items-center gap-4 text-[#aebac1] text-[18px]">
                         <button title="Camera" class="hover:text-white transition-colors"><i class="fa-solid fa-camera"></i></button>
@@ -260,8 +276,10 @@
             <div id="chat-area" class="w-full hidden flex-col relative h-full bg-[#222d34]">
                 
                 <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#222d34] border-l border-[#222d34] fade-in-anim">
-                    <i class="fa-brands fa-whatsapp text-[8rem] text-[#2c3943] mb-8"></i>
-                    <h2 class="text-4xl font-light text-white mb-4">Nexus Web</h2>
+                    <div class="w-32 h-32 bg-[#202c33] rounded-full flex items-center justify-center mb-8 shadow-xl">
+                        <i class="fa-solid fa-paper-plane text-[4.5rem] text-[#00a884] -ml-2 mt-2"></i>
+                    </div>
+                    <h2 class="text-4xl font-light text-white mb-4">RasGram Web</h2>
                     <p class="text-[#8696a0] text-[16px] max-w-md text-center px-4 font-medium leading-relaxed">Send and receive messages securely.<br>End-to-end encrypted connection active.</p>
                     <div class="absolute bottom-10 flex items-center gap-2 text-[#8696a0] text-sm font-medium">
                         <i class="fa-solid fa-lock text-[#00a884]"></i> End-to-end encrypted
@@ -521,6 +539,7 @@
         );
 
         const joinModal = document.getElementById('join-modal');
+        const unlockModal = document.getElementById('unlock-modal');
         const appContainer = document.getElementById('app-container');
         const contactsContainer = document.getElementById('contacts-container');
         const searchInput = document.getElementById('search-input');
@@ -835,7 +854,7 @@
                         // 🔥 Play Sound & Send Push Notification 🔥
                         try { document.getElementById('notification-sound').play(); } catch(e){} 
                         const u = allUsers.find(x => x.mobile === contactMobile);
-                        const pushName = u ? u.name : 'WhatsApp';
+                        const pushName = u ? u.name : 'RasGram';
                         const pushBody = newLatest.isCallLog ? "Missed Call" : (newLatest.text || "Sent an attachment");
                         sendPushNotification(pushName, pushBody);
                     }
