@@ -145,13 +145,21 @@
             background: #fff; cursor: pointer; box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
     </style>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
-      appId: "522b3136-c16d-4deb-8423-74dac3d6452e", // আপনার আইডি সেট করা আছে
+      appId: "522b3136-c16d-4deb-8423-74dac3d6452e", // এখানে আপনার App ID বসাবেন
+      safari_web_id: "আপনার_সাফারি_আইডি", // যদি থাকে
+      notifyButton: { enable: true },
     });
+    
+    // ইউজারের আইডি সেট করা যাতে তাকে নির্দিষ্ট করে মেসেজ পাঠানো যায়
+    const userId = localStorage.getItem("myId"); // আপনার বর্তমান আইডি
+    if (userId) {
+      OneSignal.login(userId);
+    }
   });
 </script>
 </head>
