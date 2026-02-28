@@ -1,225 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RasBook | Social Media</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap');
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f0f2f5; 
-            overflow-x: hidden;
-        }
-
-        .fb-blue { color: #1877f2; }
-        .bg-fb-blue { background-color: #1877f2; }
-        .hover-bg-fb:hover { background-color: #f2f2f2; }
-        
-        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #bcc0c4; border-radius: 10px; }
-        
-        .story-card {
-            min-width: 110px; height: 200px;
-            background-size: cover; background-position: center;
-            border-radius: 12px; position: relative; cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-        }
-        .story-card:hover { transform: scale(1.02); }
-
-        /* Login Background */
-        .login-bg { background-color: #f0f2f5; }
-    </style>
-</head>
-<body>
-
-    <div id="login-modal" class="fixed inset-0 z-[100] flex items-center justify-center login-bg">
-        <div class="flex flex-col md:flex-row items-center w-full max-w-5xl p-6">
-            <div class="md:w-1/2 mb-10 md:mb-0 md:pr-10 text-center md:text-left">
-                <h1 class="text-5xl md:text-6xl font-bold fb-blue mb-4">RasBook</h1>
-                <p class="text-2xl text-gray-700 leading-snug">Connect with friends and the world around you on RasBook.</p>
-            </div>
-            <div class="md:w-1/2 w-full max-w-md">
-                <div class="bg-white p-4 rounded-lg shadow-xl border border-gray-200">
-                    <form id="auth-form" class="space-y-4">
-                        <input type="text" id="reg-name" required class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-lg" placeholder="Full Name">
-                        <input type="tel" id="reg-mobile" required pattern="[0-9]{11}" class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-lg" placeholder="Mobile Number (11 digits)">
-                        <input type="password" id="reg-password" required minlength="6" maxlength="6" class="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-lg" placeholder="6-digit PIN Password">
-                        <button type="submit" id="auth-btn" class="w-full bg-fb-blue text-white font-bold text-xl py-3 rounded-md hover:bg-blue-600 transition-colors">Log In / Sign Up</button>
-                    </form>
-                    <div class="border-t border-gray-300 my-4"></div>
-                    <div class="text-center">
-                        <button class="bg-[#42b72a] hover:bg-[#36a420] text-white font-bold py-3 px-6 rounded-md text-lg transition-colors">Create new account</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="app-container" class="hidden flex-col h-screen overflow-hidden">
-        
-        <nav class="bg-white shadow-sm h-[56px] w-full fixed top-0 z-50 flex items-center justify-between px-4">
-            <div class="flex items-center gap-2 w-1/4">
-                <div class="w-10 h-10 rounded-full bg-fb-blue text-white flex items-center justify-center text-2xl font-bold cursor-pointer"><i class="fa-brands fa-facebook-f mt-1"></i></div>
-                <div class="hidden md:flex items-center bg-gray-100 rounded-full px-3 py-2 w-64">
-                    <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
-                    <input type="text" placeholder="Search RasBook" class="bg-transparent border-none outline-none ml-2 w-full text-sm">
-                </div>
-            </div>
-
-            <div class="hidden md:flex items-center justify-center gap-2 w-2/4 h-full">
-                <button class="w-24 h-full flex items-center justify-center border-b-4 border-blue-500 text-blue-500 text-2xl hover-bg-fb transition-colors"><i class="fa-solid fa-house"></i></button>
-                <button class="w-24 h-full flex items-center justify-center border-b-4 border-transparent text-gray-500 hover:bg-gray-100 rounded-lg my-1 text-2xl transition-colors"><i class="fa-solid fa-user-group"></i></button>
-                <button class="w-24 h-full flex items-center justify-center border-b-4 border-transparent text-gray-500 hover:bg-gray-100 rounded-lg my-1 text-2xl transition-colors"><i class="fa-solid fa-video"></i></button>
-                <button class="w-24 h-full flex items-center justify-center border-b-4 border-transparent text-gray-500 hover:bg-gray-100 rounded-lg my-1 text-2xl transition-colors"><i class="fa-solid fa-shop"></i></button>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 w-1/4">
-                <button class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl transition-colors"><i class="fa-solid fa-bars"></i></button>
-                <button class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl transition-colors"><i class="fa-brands fa-facebook-messenger"></i></button>
-                <button class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl transition-colors"><i class="fa-solid fa-bell"></i></button>
-                <img id="nav-avatar" src="" class="w-10 h-10 rounded-full cursor-pointer border border-gray-200 object-cover" onclick="logoutApp()" title="Click to Logout">
-            </div>
-        </nav>
-
-        <div class="flex justify-between w-full h-full pt-[56px] overflow-hidden">
-            
-            <div class="hidden lg:flex flex-col w-[360px] p-4 overflow-y-auto custom-scroll hover-scroll gap-2">
-                <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
-                    <img id="sidebar-avatar" src="" class="w-9 h-9 rounded-full object-cover">
-                    <span id="sidebar-name" class="font-semibold text-[15px]">User Name</span>
-                </div>
-                <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
-                    <i class="fa-solid fa-user-group text-blue-500 text-2xl w-8 text-center"></i><span class="font-semibold text-[15px]">Friends</span>
-                </div>
-                <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
-                    <i class="fa-solid fa-clock-rotate-left text-blue-500 text-2xl w-8 text-center"></i><span class="font-semibold text-[15px]">Memories</span>
-                </div>
-                <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
-                    <i class="fa-solid fa-bookmark text-purple-500 text-2xl w-8 text-center"></i><span class="font-semibold text-[15px]">Saved</span>
-                </div>
-                <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
-                    <i class="fa-solid fa-users text-blue-500 text-2xl w-8 text-center"></i><span class="font-semibold text-[15px]">Groups</span>
-                </div>
-                <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
-                    <i class="fa-solid fa-video text-blue-500 text-2xl w-8 text-center"></i><span class="font-semibold text-[15px]">Video</span>
-                </div>
-                <div class="border-b border-gray-300 my-2"></div>
-            </div>
-
-            <div class="w-full lg:w-[680px] flex-shrink-0 mx-auto overflow-y-auto custom-scroll p-4 pb-20">
-                
-                <div class="flex gap-2 overflow-x-auto custom-scroll pb-2 mb-4">
-                    <div class="story-card flex-shrink-0 flex flex-col justify-between overflow-hidden bg-white border border-gray-200">
-                        <img id="story-my-avatar" src="" class="w-full h-32 object-cover transition-transform hover:scale-105">
-                        <div class="relative flex flex-col items-center justify-end h-full pb-2">
-                            <div class="absolute -top-5 w-10 h-10 bg-fb-blue rounded-full border-4 border-white flex items-center justify-center text-white text-xl"><i class="fa-solid fa-plus"></i></div>
-                            <span class="text-[13px] font-semibold mt-5">Create story</span>
-                        </div>
-                    </div>
-                    <div class="story-card flex-shrink-0 p-3" style="background-image: url('https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=300&q=80');">
-                        <div class="w-10 h-10 rounded-full border-4 border-blue-500 overflow-hidden"><img src="https://ui-avatars.com/api/?name=Fahim&background=random" class="w-full h-full object-cover"></div>
-                        <span class="absolute bottom-2 left-3 text-white font-semibold text-sm drop-shadow-md">Fahim</span>
-                    </div>
-                    <div class="story-card flex-shrink-0 p-3" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80');">
-                        <div class="w-10 h-10 rounded-full border-4 border-blue-500 overflow-hidden"><img src="https://ui-avatars.com/api/?name=Samirul&background=random" class="w-full h-full object-cover"></div>
-                        <span class="absolute bottom-2 left-3 text-white font-semibold text-sm drop-shadow-md">Samirul</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
-                    <div class="flex gap-2 mb-3">
-                        <img id="create-post-avatar" src="" class="w-10 h-10 rounded-full object-cover">
-                        <div class="bg-gray-100 hover:bg-gray-200 cursor-pointer rounded-full flex-grow px-4 flex items-center transition-colors" onclick="openPostModal()">
-                            <span class="text-gray-500 text-[17px]">What's on your mind, <span id="mind-name"></span>?</span>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-200 mb-3"></div>
-                    <div class="flex justify-between items-center px-2">
-                        <button onclick="openPostModal()" class="flex-1 flex items-center justify-center gap-2 hover:bg-gray-100 py-2 rounded-lg font-semibold text-gray-600 transition-colors">
-                            <i class="fa-solid fa-video text-red-500 text-xl"></i> Live video
-                        </button>
-                        <button onclick="openPostModal()" class="flex-1 flex items-center justify-center gap-2 hover:bg-gray-100 py-2 rounded-lg font-semibold text-gray-600 transition-colors">
-                            <i class="fa-solid fa-images text-green-500 text-xl"></i> Photo/video
-                        </button>
-                        <button onclick="openPostModal()" class="hidden md:flex flex-1 items-center justify-center gap-2 hover:bg-gray-100 py-2 rounded-lg font-semibold text-gray-600 transition-colors">
-                            <i class="fa-regular fa-face-smile text-yellow-500 text-xl"></i> Feeling/activity
-                        </button>
-                    </div>
-                </div>
-
-                <div id="posts-container" class="flex flex-col gap-4">
-                    <div class="text-center text-gray-500 mt-10"><i class="fa-solid fa-spinner fa-spin text-2xl"></i> Loading feed...</div>
-                </div>
-
-            </div>
-
-            <div class="hidden lg:flex flex-col w-[360px] p-4 overflow-y-auto custom-scroll">
-                <div class="flex justify-between items-center mb-4 px-2">
-                    <h3 class="font-semibold text-gray-500 text-[17px]">Contacts</h3>
-                    <div class="flex gap-4 text-gray-500">
-                        <i class="fa-solid fa-video cursor-pointer hover:bg-gray-200 p-2 rounded-full"></i>
-                        <i class="fa-solid fa-magnifying-glass cursor-pointer hover:bg-gray-200 p-2 rounded-full"></i>
-                        <i class="fa-solid fa-ellipsis cursor-pointer hover:bg-gray-200 p-2 rounded-full"></i>
-                    </div>
-                </div>
-                <div id="contacts-list" class="flex flex-col gap-1">
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="create-post-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-white/50 backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-[500px] border border-gray-300 flex flex-col relative animate-[popIn_0.2s_ease-out]">
-            <div class="flex justify-between items-center p-4 border-b border-gray-200">
-                <div class="w-8"></div>
-                <h2 class="text-xl font-bold">Create post</h2>
-                <button onclick="closePostModal()" class="w-9 h-9 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            
-            <form id="post-form" class="flex flex-col p-4">
-                <div class="flex items-center gap-3 mb-4">
-                    <img id="modal-avatar" src="" class="w-10 h-10 rounded-full object-cover">
-                    <div>
-                        <h3 id="modal-name" class="font-semibold text-[15px]">Name</h3>
-                        <div class="bg-gray-200 px-2 py-0.5 rounded-md text-[12px] font-semibold flex items-center gap-1 w-max cursor-pointer">
-                            <i class="fa-solid fa-user-group text-[10px]"></i> Friends <i class="fa-solid fa-caret-down"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <textarea id="post-text" rows="4" class="w-full text-xl outline-none resize-none placeholder-gray-500 mb-2" placeholder="What's on your mind?"></textarea>
-                
-                <div id="image-preview-container" class="hidden relative mb-4">
-                    <img id="post-image-preview" src="" class="w-full rounded-lg border border-gray-200 object-cover max-h-64">
-                    <button type="button" onclick="removePostImage()" class="absolute top-2 right-2 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-
-                <div class="border border-gray-300 rounded-lg p-3 flex justify-between items-center mb-4 shadow-sm cursor-pointer hover:bg-gray-50" onclick="document.getElementById('post-image-input').click()">
-                    <span class="font-semibold">Add to your post</span>
-                    <div class="flex gap-4 text-2xl">
-                        <i class="fa-solid fa-images text-green-500"></i>
-                        <i class="fa-solid fa-user-tag text-blue-500"></i>
-                        <i class="fa-regular fa-face-smile text-yellow-500"></i>
-                        <i class="fa-solid fa-location-dot text-red-500"></i>
-                    </div>
-                </div>
-                <input type="file" id="post-image-input" accept="image/*" class="hidden">
-
-                <button type="submit" id="post-submit-btn" class="w-full bg-fb-blue text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Post</button>
-            </form>
-        </div>
-    </div>
-
-    <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, onSnapshot, query, orderBy, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -234,7 +13,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const SYNC_APP_ID = "rasel-fb-clone-app"; // New collection path for FB clone
+        const SYNC_APP_ID = "rasel-fb-clone-app"; 
 
         // Cloudinary for Image Uploads
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
@@ -269,7 +48,8 @@
                 const hashedPass = hashPassword(p);
                 try {
                     await signInAnonymously(auth);
-                    const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'users', m);
+                    // FIXED: Added 'data' to make the path even
+                    const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'users', m);
                     const userSnap = await getDoc(userRef);
                     
                     if (userSnap.exists()) {
@@ -305,11 +85,11 @@
 
             await signInAnonymously(auth);
             
-            // Active Status Update
-            setInterval(() => updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'users', myMobile), { lastActive: Date.now() }).catch(()=>{}), 60000);
+            // Active Status Update (FIXED Path)
+            setInterval(() => updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'users', myMobile), { lastActive: Date.now() }).catch(()=>{}), 60000);
 
-            // Listen to Users (for Right Sidebar Contacts)
-            onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'users'), (snap) => {
+            // Listen to Users (FIXED Path)
+            onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'users'), (snap) => {
                 allUsers = [];
                 const contactsList = document.getElementById('contacts-list');
                 contactsList.innerHTML = '';
@@ -330,7 +110,7 @@
                 });
             });
 
-            // Listen to Posts (Realtime Feed)
+            // Listen to Posts
             listenToPosts();
         }
 
@@ -385,7 +165,8 @@
             };
 
             try {
-                await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'posts'), newPost);
+                // FIXED Path
+                await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts'), newPost);
                 closePostModal();
             } catch(e) { alert("Failed to post"); }
             finally { btn.disabled = false; btn.innerHTML = ogText; }
@@ -403,7 +184,8 @@
         }
 
         function listenToPosts() {
-            onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'posts'), orderBy('timestamp', 'desc')), (snap) => {
+            // FIXED Path
+            onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts'), orderBy('timestamp', 'desc')), (snap) => {
                 const container = document.getElementById('posts-container');
                 container.innerHTML = '';
                 
@@ -420,7 +202,6 @@
                     let commentsHtml = '';
                     if(post.comments && post.comments.length > 0) {
                         commentsHtml = `<div class="mt-3 border-t border-gray-200 pt-3 space-y-2">`;
-                        // Show max 3 comments
                         post.comments.slice(-3).forEach(c => {
                             commentsHtml += `
                                 <div class="flex gap-2">
@@ -493,7 +274,8 @@
 
         // === Actions Logic ===
         window.toggleLike = async (postId, currentlyLiked) => {
-            const postRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'posts', postId);
+            // FIXED Path
+            const postRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts', postId);
             if(currentlyLiked) {
                 await updateDoc(postRef, { likes: arrayRemove(myMobile) });
             } else {
@@ -511,15 +293,14 @@
             const text = input.value.trim();
             if(!text) return;
 
-            input.value = ''; // clear instantly for good UX
+            input.value = ''; 
             const newComment = {
                 name: myName, mobile: myMobile, text: text, timestamp: Date.now()
             };
 
-            const postRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'posts', postId);
+            // FIXED Path
+            const postRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts', postId);
             await updateDoc(postRef, { comments: arrayUnion(newComment) });
         };
 
     </script>
-</body>
-</html>
